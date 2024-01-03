@@ -2134,7 +2134,7 @@ int mame_validitychecks(void)
 					for (j = 0;j < STR_TOTAL;j++)
 					{
 						if (inp->name == inptport_default_strings[j]) break;
-						else if (!my_stricmp(inp->name,inptport_default_strings[j]))
+						else if (!my_strcasecmp(inp->name,inptport_default_strings[j]))
 						{
 							printf("%s: %s must use DEF_STR( %s )\n",drivers[i]->source_file,drivers[i]->name,inp->name);
 							error = 1;
@@ -2165,7 +2165,7 @@ int mame_validitychecks(void)
 						}
 					}
 
-					if (!my_stricmp(inp->name,"table"))
+					if (!my_strcasecmp(inp->name,"table"))
 					{
 						printf("%s: %s must use DEF_STR( Cocktail ), not %s\n",drivers[i]->source_file,drivers[i]->name,inp->name);
 						error = 1;

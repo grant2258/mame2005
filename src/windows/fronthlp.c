@@ -168,7 +168,7 @@ int strwildcmp(const char *sp1, const char *sp2)
 		if (s2[i] == '?' && s1[i] != '?') s2[i] = s1[i];
 	}
 
-	return stricmp(s1, s2);
+	return strcasecmp(s1, s2);
 }
 
 
@@ -434,7 +434,7 @@ void romident(const char* name,int enter_dirs)
 	else
 	{
 		unsigned l = strlen(name);
-		if (l>=4 && stricmp(name+l-4,".zip")==0)
+		if (l>=4 && strcasecmp(name+l-4,".zip")==0)
 			identify_zip(name);
 		else
 			identify_file(name);
@@ -636,7 +636,7 @@ int frontend_help (const char *gamename)
 		case LIST_ROMS: /* game roms list or */
 		case LIST_SAMPLES: /* game samples list */
 			j = 0;
-			while (drivers[j] && (stricmp(gamename,drivers[j]->name) != 0))
+			while (drivers[j] && (strcasecmp(gamename,drivers[j]->name) != 0))
 				j++;
 			if (drivers[j] == 0)
 			{

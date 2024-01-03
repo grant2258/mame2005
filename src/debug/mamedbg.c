@@ -4647,7 +4647,7 @@ static void cmd_trace_to_file( void )
 
 	filename = get_file_name( &cmd, &length );
 
-	if( !my_stricmp( filename, "OFF" ) )
+	if( !my_strcasecmp( filename, "OFF" ) )
 	{
 		trace_done();
 	}

@@ -186,6 +186,7 @@ enum
 	
 	/* refresh rate */
 	UI_refresh_rate,
+	UI_generate_xml_dat,
 
 	UI_last_mame_entry
 };

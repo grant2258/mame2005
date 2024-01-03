@@ -54,7 +54,7 @@
 #include "vidhrdw/generic.h"
 #include "cpu/i8039/i8039.h"
 
-
+mame_timer *schaser_effect_555_timer;
 /* gmissile and m4 need the RAM mirror */
 
 static ADDRESS_MAP_START( c8080bw_cpu_map, ADDRESS_SPACE_PROGRAM, 8 )

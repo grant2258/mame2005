@@ -249,7 +249,13 @@ struct GameOptions
 
 	int		min_width;		/* minimum width for the display */
 	int		min_height;		/* minimum height for the display */
-#endif /* MESS */
+	#endif /* MESS */
+
+	#ifdef __LIBRETRO__
+	char *romset_filename_noext;
+	unsigned tate_mode;
+	int      frameskip;
+	#endif /* MESS */
 };
 
 
