@@ -603,9 +603,12 @@ ifdef X86_ASM_68000
 SOURCES_C += $(CORE_DIR)/cpu/m68000/asmintf.c $(CORE_DIR)/cpu/m68000/68000.c
 ASMDEFS += -DA68K0
 else
-SOURCES_C += $(CORE_DIR)/cpu/m68000/m68kops.c $(CORE_DIR)/cpu/m68000/m68kopac.c \
-				 $(CORE_DIR)/cpu/m68000/m68kopdm.c $(CORE_DIR)/cpu/m68000/m68kopnz.c \
-$(CORE_DIR)/cpu/m68000/m68kcpu.c $(CORE_DIR)/cpu/m68000/m68kmame.c
+M68000_GENERATED_OBJS = \
+$(CORE_DIR)/cpu/m68000/m68kops.o $(CORE_DIR)/cpu/m68000/m68kopac.o \
+$(CORE_DIR)/cpu/m68000/m68kopdm.o $(CORE_DIR)/cpu/m68000/m68kopnz.o
+SOURCES_C += $(CORE_DIR)/cpu/m68000/m68kcpu.c $(CORE_DIR)/cpu/m68000/m68kmame.c \
+$(CORE_DIR)/cpu/m68000/m68kops.o $(CORE_DIR)/cpu/m68000/m68kopac.o \
+$(CORE_DIR)/cpu/m68000/m68kopdm.o $(CORE_DIR)/cpu/m68000/m68kopnz.o
 endif
 else
 CPUDEFS += -DHAS_M68000=0

@@ -655,6 +655,22 @@ ifeq ($(SPLIT_UP_LINK), 1)
 else
 	$(LD) $(LDFLAGS) $(LINKOUT)$@ $(OBJECTS) $(LIBS)
 endif
+
+# compile generated C files for the 68000 emulator
+$(M68000_GENERATED_OBJS): $(CORE_DIR)/cpu/m68000/m68kmake$(EXE)
+	@echo Compiling $(subst .o,.c,$@)...
+	$(CC) $(CFLAGS) $(CFLAGSPEDANTIC) -c $*.c -o $@
+
+# additional rule, because m68kcpu.c includes the generated m68kops.h :-/
+$(CORE_DIR)/cpu/m68000/m68kcpu.o: $(CORE_DIR)/cpu/m68000/m68kmake
+
+# generate C source files for the 68000 emulator
+$(CORE_DIR)/cpu/m68000/m68kmake$(EXE): src/cpu/m68000/m68kmake.o
+	@echo M68K make $<...
+	$(CC) $(CFLAGS) $(CFLAGSPEDANTIC) -o $(CORE_DIR)/cpu/m68000/m68kmake $<
+	@echo Generating M68K source files...
+	$(CORE_DIR)/cpu/m68000/m68kmake$(EXE) $(CORE_DIR)/cpu/m68000 src/cpu/m68000/m68k_in.c
+
 endif
 
 CFLAGS += $(PLATCFLAGS) $(CDEFS)
@@ -670,6 +686,13 @@ $(OBJ)/%.a:
 
 
 clean:
+	rm -f $(CORE_DIR)/cpu/m68000/m68kmake.o
+	rm -f $(CORE_DIR)/cpu/m68000/m68kmake
+	rm -f $(CORE_DIR)/cpu/m68000/m68kops.h
+	rm -f $(CORE_DIR)/cpu/m68000/m68kops.c
+	rm -f $(CORE_DIR)/cpu/m68000/m68kopac.c 
+	rm -f $(CORE_DIR)/cpu/m68000/m68kopdm.c
+	rm -f $(CORE_DIR)/cpu/m68000/m68kopnz.c
 ifeq ($(SPLIT_UP_LINK), 1)
 	# Use a temporary file to hold the list of objects, as it can exceed windows shell command limits
 	$(file >$@.in,$(OBJECTS))
