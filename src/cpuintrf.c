@@ -1039,7 +1039,7 @@ const char *activecpu_get_info_string(UINT32 state)
 	union cpuinfo info;
 
 	VERIFY_ACTIVECPU(0, activecpu_get_info_string);
-	info.s = NULL;
+	info.s = cpuintrf_temp_str();
 	(*cpu[activecpu].intf.get_info)(state, &info);
 	return info.s;
 }
@@ -1269,7 +1269,7 @@ const char *cpunum_get_info_string(int cpunum, UINT32 state)
 
 	VERIFY_CPUNUM(0, cpunum_get_info_string);
 	cpuintrf_push_context(cpunum);
-	info.s = NULL;
+	info.s = cpuintrf_temp_str();
 	(*cpu[cpunum].intf.get_info)(state, &info);
 	cpuintrf_pop_context();
 	return info.s;
@@ -1487,7 +1487,7 @@ const char *cputype_get_info_string(int cputype, UINT32 state)
 	union cpuinfo info;
 
 	VERIFY_CPUTYPE(0, cputype_get_info_string);
-	info.s = NULL;
+	info.s = cpuintrf_temp_str();
 	(*cpuintrf[cputype].get_info)(state, &info);
 	return info.s;
 }
@@ -1589,12 +1589,12 @@ void dummy_get_info(UINT32 state, union cpuinfo *info)
 		case CPUINFO_PTR_WINDOW_LAYOUT:					info->p = default_win_layout;			break;
 
 		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case CPUINFO_STR_NAME:							strcpy(info->s = cpuintrf_temp_str(), ""); break;
-		case CPUINFO_STR_CORE_FAMILY:					strcpy(info->s = cpuintrf_temp_str(), "no CPU"); break;
-		case CPUINFO_STR_CORE_VERSION:					strcpy(info->s = cpuintrf_temp_str(), "0.0"); break;
-		case CPUINFO_STR_CORE_FILE:						strcpy(info->s = cpuintrf_temp_str(), __FILE__); break;
-		case CPUINFO_STR_CORE_CREDITS:					strcpy(info->s = cpuintrf_temp_str(), "The MAME team");	break;
+		case CPUINFO_STR_NAME:							strcpy(info->s, "");					break;
+		case CPUINFO_STR_CORE_FAMILY:					strcpy(info->s, "no CPU");				break;
+		case CPUINFO_STR_CORE_VERSION:					strcpy(info->s, "0.0");					break;
+		case CPUINFO_STR_CORE_FILE:						strcpy(info->s, __FILE__);				break;
+		case CPUINFO_STR_CORE_CREDITS:					strcpy(info->s, "The MAME team");		break;
 
-		case CPUINFO_STR_FLAGS:							strcpy(info->s = cpuintrf_temp_str(), "--"); break;
+		case CPUINFO_STR_FLAGS:							strcpy(info->s, "--");					break;
 	}
 }
