@@ -4,13 +4,13 @@
 #include "osdepend.h"
 #include "input.h"
 
-#define controls 32
+#define controls 31
 #define joycodes 4 * controls
 #define keycodes RETROK_LAST
 extern const struct OSCodeInfo retroKeys[];
 
-int retroKeyState[keycodes+joycodes]; 
-int retroJsState[joycodes];
+INT32 retroKeyState[keycodes+joycodes]; 
+INT32 retroJsState[joycodes];
 const struct OSCodeInfo *osd_get_code_list(void)
 {
     return retroKeys;
@@ -28,7 +28,7 @@ INT32 osd_get_code_value(os_code_t code)
 
 
 
-int osd_readkey_unicode(int flush)
+INT32 osd_readkey_unicode(INT32flush)
 {
     // TODO
     return 0;
@@ -69,22 +69,21 @@ int osd_readkey_unicode(int flush)
   {"J" #INDEX "R3",         ((INDEX - 1) * controls) + RETRO_DEVICE_ID_JOYPAD_R3     + RETROK_LAST, JOYCODE_##INDEX##_BUTTON10}, \
   {"J" #INDEX " Start",     ((INDEX - 1) * controls) + RETRO_DEVICE_ID_JOYPAD_START  + RETROK_LAST, JOYCODE_##INDEX##_START}, \
   {"J" #INDEX "Select",     ((INDEX - 1) * controls) + RETRO_DEVICE_ID_JOYPAD_SELECT + RETROK_LAST, JOYCODE_##INDEX##_SELECT}, \
-  {"J" #INDEX " AXIS 0 X-", ((INDEX - 1) * controls) + 16                            + RETROK_LAST, JOYCODE_##INDEX##_LEFT}, \
-  {"J" #INDEX " AXIS 0 X+", ((INDEX - 1) * controls) + 17                            + RETROK_LAST, JOYCODE_##INDEX##_RIGHT}, \
-  {"J" #INDEX " AXIS 1 Y-", ((INDEX - 1) * controls) + 18                            + RETROK_LAST, JOYCODE_##INDEX##_UP}, \
-  {"J" #INDEX " AXIS 1 Y+", ((INDEX - 1) * controls) + 19                            + RETROK_LAST, JOYCODE_##INDEX##_DOWN}, \
-  {"J" #INDEX " AXIS 2 X-", ((INDEX - 1) * controls) + 20                            + RETROK_LAST, CODE_OTHER_DIGITAL}, \
-  {"J" #INDEX " AXIS 2 X+", ((INDEX - 1) * controls) + 21                            + RETROK_LAST, CODE_OTHER_DIGITAL}, \
-  {"J" #INDEX " AXIS 3 Y-", ((INDEX - 1) * controls) + 22                            + RETROK_LAST, CODE_OTHER_DIGITAL}, \
-  {"J" #INDEX " AXIS 3 Y+", ((INDEX - 1) * controls) + 23                            + RETROK_LAST, CODE_OTHER_DIGITAL}, \
-  {"J" #INDEX " X 0 AXIS" , ((INDEX - 1) * controls) + 24                            + RETROK_LAST, JOYCODE_##INDEX##_ANALOG_X}, \
-  {"J" #INDEX " Y 1 AXIS" , ((INDEX - 1) * controls) + 25                            + RETROK_LAST, JOYCODE_##INDEX##_ANALOG_Y}, \
-  {"J" #INDEX " X 2 AXIS" , ((INDEX - 1) * controls) + 26                            + RETROK_LAST, JOYCODE_##INDEX##_ANALOG_Z}, \
-  {"J" #INDEX " Y 3 AXIS" , ((INDEX - 1) * controls) + 27                            + RETROK_LAST, CODE_OTHER_ANALOG_ABSOLUTE}, \ 
-  {"J" #INDEX " L AXIS"   , ((INDEX - 1) * controls) + 28                            + RETROK_LAST, JOYCODE_##INDEX##_ANALOG_PEDAL1}, \
-  {"J" #INDEX " R AXIS"   , ((INDEX - 1) * controls) + 29                            + RETROK_LAST, JOYCODE_##INDEX##_ANALOG_PEDAL2}, \ 
-  {"GUN" #INDEX " X"      , ((INDEX - 1) * controls) + 30                            + RETROK_LAST, GUNCODE_##INDEX##_ANALOG_X}, \
-  {"GUN" #INDEX " Y"      , ((INDEX - 1) * controls) + 31                            + RETROK_LAST, GUNCODE_##INDEX##_ANALOG_Y} 
+  {"J" #INDEX "D_AXIS0 X-", ((INDEX - 1) * controls) + 16                            + RETROK_LAST, JOYCODE_##INDEX##_LEFT}, \
+  {"J" #INDEX "D_AXIS0 X+", ((INDEX - 1) * controls) + 17                            + RETROK_LAST, JOYCODE_##INDEX##_RIGHT}, \
+  {"J" #INDEX "D_AXIS1 Y-", ((INDEX - 1) * controls) + 18                            + RETROK_LAST, JOYCODE_##INDEX##_UP}, \
+  {"J" #INDEX "D_AXIS1 Y+", ((INDEX - 1) * controls) + 19                            + RETROK_LAST, JOYCODE_##INDEX##_DOWN}, \
+  {"J" #INDEX "D_AXIS2 X-", ((INDEX - 1) * controls) + 20                            + RETROK_LAST, CODE_OTHER_DIGITAL}, \
+  {"J" #INDEX "D_AXIS2 X+", ((INDEX - 1) * controls) + 21                            + RETROK_LAST, CODE_OTHER_DIGITAL}, \
+  {"J" #INDEX "D_AXIS3 Y-", ((INDEX - 1) * controls) + 22                            + RETROK_LAST, CODE_OTHER_DIGITAL}, \
+  {"J" #INDEX "D_AXIS3 Y+", ((INDEX - 1) * controls) + 23                            + RETROK_LAST, CODE_OTHER_DIGITAL}, \
+  {"J" #INDEX "LSX" , ((INDEX - 1) * controls) + 24                                  + RETROK_LAST, JOYCODE_##INDEX##_ANALOG_X}, \
+  {"J" #INDEX "LSY ", ((INDEX - 1) * controls) + 25                                  + RETROK_LAST, JOYCODE_##INDEX##_ANALOG_Y}, \
+  {"J" #INDEX "RSY" , ((INDEX - 1) * controls) + 26                                  + RETROK_LAST, JOYCODE_##INDEX##_ANALOG_Z}, \
+  {"J" #INDEX "A_AXIS_L"   , ((INDEX - 1) * controls) + 27                           + RETROK_LAST, JOYCODE_##INDEX##_ANALOG_PEDAL1}, \
+  {"J" #INDEX "A_AXIS R"   , ((INDEX - 1) * controls) + 28                           + RETROK_LAST, JOYCODE_##INDEX##_ANALOG_PEDAL2}, \
+  {"GUN" #INDEX "GUN_X"    , ((INDEX - 1) * controls) + 29                           + RETROK_LAST, GUNCODE_##INDEX##_ANALOG_X}, \
+  {"GUN" #INDEX "GUN_Y"      , ((INDEX - 1) * controls) + 30                           + RETROK_LAST, GUNCODE_##INDEX##_ANALOG_Y} 
 
 
 const struct OSCodeInfo retroKeys[] =
@@ -188,42 +187,28 @@ const struct OSCodeInfo retroKeys[] =
     {0, 0, 0}
 };
 
-
-int convert_analog_scale(int input, int trigger_deadzone)
+INT32 convert_analog_scale(INT32 result)
 {
-  static const int TRIGGER_MAX = 0x8000;
-  int neg_test=0;
-  float scale;
-  int ;
+ /* fix up properly when I have time work bells are calling 
+  * returning zero passed controls back to didgital so dont do it for now
+  * ie dont set a deadzone that returns zero else you wont auto center
+  * works for now other things ned more attention*/
+  bool direction = result < 0;
+  INT32 deadzone = (INT32) (32767 * 0.01 ); 
 
-  trigger_deadzone = (32678 /100) * trigger_deadzone;
+  if (result == -32768) return 0 /*off screen out of range*/;
+  
+  if (direction)
+    result = -result;
 
-  if (input < 0) { input =abs(input); neg_test=1; }
-  scale = ((float)TRIGGER_MAX/(float)(TRIGGER_MAX - trigger_deadzone));
+  if (result < deadzone )            /* if in the deadzone, return 0 */
+    result = 0;
 
-  if ( input > 0 && input > trigger_deadzone )
-  {
-    // Re-scale analog range
-    float scaled = (input - trigger_deadzone)*scale;
-    input = (int)round(scaled);
-
-    if (input > +32767) 
-    {
-     input = +32767;
-    }
-    input = input / 327.67;
-  }
-  else
-  {
-    // do not return 0 analog  
-    input = 0;
-  }
-
-  if (neg_test) input =-abs(input);
-  if (input == 0 && !neg_test) return 3;
-  else if (input == 0 && neg_test) return -3;
-  else  return (int) input * 655.35;
+  else                                // otherwise, scale
+    result = (result - deadzone) *  ( (float) 65536 / (float) (32767 - deadzone));
+  return direction ? -result : result;
 }
+
 
 // These calibration functions should never actually be used (as long as needs_calibration returns 0 anyway).
 int osd_joystick_needs_calibration(void) { return 0; }

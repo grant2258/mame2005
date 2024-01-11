@@ -21,7 +21,12 @@
 #define MAX_TOKEN_LEN		64
 
 /* max time between key presses */
-#define RECORD_TIME			(CLOCKS_PER_SEC*2/3)
+/* Windows out of spec workaround */
+#if defined WIN32 || (defined _WIN64) || (defined _WINDOWS)
+#define RECORD_TIME (CLOCKS_PER_SEC*2/3) /* max time between key press */
+#else
+#define RECORD_TIME (CLOCKS_PER_SEC/8) /* max time between key press */
+#endif
 
 
 

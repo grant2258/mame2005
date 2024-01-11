@@ -17,8 +17,8 @@ static float f_flicker = 1.5f;
 static float f_intensity= 1.5f;
 
 
-extern int retroKeyState[];
-extern int retroJsState[];
+extern INT32 retroKeyState[];
+extern INT32 retroJsState[];
 
 int16_t prev_pointer_x;
 int16_t prev_pointer_y;
@@ -42,8 +42,7 @@ unsigned rstick_to_btns = 0;
 unsigned option_tate_mode = 0;
 int  pressure_check =  655.36 * 45;
 int gun;
-int16_t             analogjoy[4][8]= {0};
-#define analog_deadzone 30
+int32_t             analogjoy[4][8]= {0};
 
 // Wrapper to build MAME on 3DS. It doesn't have stricmp.
 #ifdef _3DS
@@ -55,7 +54,7 @@ int stricmp(const char *string1, const char *string2)
 
 void mame_frame(void);
 void mame_done(void);
-int convert_analog_scale(int input, int trigger_deadzone);
+int convert_analog_scale(int input);
 
 #if defined(__CELLOS_LV2__) || defined(GEKKO) || defined(_XBOX)
 unsigned activate_dcs_speedhack = 1;
@@ -349,14 +348,14 @@ void retro_run (void)
    {
       unsigned int offset = (i * 32);
 
-      analogjoy[i][0] = input_cb(i, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT,  RETRO_DEVICE_ID_ANALOG_X);
-      analogjoy[i][1] = input_cb(i, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT,  RETRO_DEVICE_ID_ANALOG_Y);
-      analogjoy[i][2] = input_cb(i, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_RIGHT, RETRO_DEVICE_ID_ANALOG_X);
-      analogjoy[i][3] = input_cb(i, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_RIGHT, RETRO_DEVICE_ID_ANALOG_Y);
-      analogjoy[i][4] = -abs(input_cb( i, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_BUTTON, RETRO_DEVICE_ID_JOYPAD_L2));
-      analogjoy[i][5] = -abs(input_cb( i, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_BUTTON, RETRO_DEVICE_ID_JOYPAD_R2));
-      analogjoy[i][6] = input_cb(i, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_SCREEN_X);
-      analogjoy[i][7] = input_cb(i, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_SCREEN_Y);
+      analogjoy[i][0] = convert_analog_scale(input_cb(i, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT,  RETRO_DEVICE_ID_ANALOG_X));
+      analogjoy[i][1] = convert_analog_scale(input_cb(i, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT,  RETRO_DEVICE_ID_ANALOG_Y));
+      analogjoy[i][2] = convert_analog_scale(input_cb(i, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_RIGHT, RETRO_DEVICE_ID_ANALOG_X));
+      analogjoy[i][3] = convert_analog_scale(input_cb(i, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_RIGHT, RETRO_DEVICE_ID_ANALOG_Y));
+      analogjoy[i][4] = convert_analog_scale(-abs(input_cb( i, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_BUTTON, RETRO_DEVICE_ID_JOYPAD_L2)));
+      analogjoy[i][5] = convert_analog_scale(-abs(input_cb( i, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_BUTTON, RETRO_DEVICE_ID_JOYPAD_R2)));
+      analogjoy[i][6] = convert_analog_scale(input_cb(i, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_SCREEN_X));
+      analogjoy[i][7] = convert_analog_scale(input_cb(i, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_SCREEN_Y));
 
       retroJsState[ RETRO_DEVICE_ID_JOYPAD_B + offset] = input_cb(i, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B);
       retroJsState[ RETRO_DEVICE_ID_JOYPAD_Y + offset] = input_cb(i, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_Y);
@@ -386,51 +385,41 @@ void retro_run (void)
       retroJsState[ 22 + offset] = 0;
       retroJsState[ 23 + offset] = 0;
 
-      if (convert_analog_scale(analogjoy[i][0], analog_deadzone) < -pressure_check)
+      if (analogjoy[i][0] < -pressure_check) // d left
         retroJsState[ 16 + offset] = 1;
 
-      if (convert_analog_scale(analogjoy[i][0], analog_deadzone) >  pressure_check)
-        retroJsState[ 17 + offset] = 1;
+      if (analogjoy[i][0] >  pressure_check)
+        retroJsState[ 17 + offset] = 1; //d right
 
-      if (convert_analog_scale(analogjoy[i][1], analog_deadzone) < -pressure_check)
+      if (analogjoy[i][1] < -pressure_check) // d up
         retroJsState[ 18 + offset] = 1;
 
-      if (convert_analog_scale(analogjoy[i][1], analog_deadzone) >  pressure_check)
+      if (analogjoy[i][1] >  pressure_check) // d down
         retroJsState[ 19 + offset] = 1;
 
-      if (convert_analog_scale(analogjoy[i][2], analog_deadzone) < -pressure_check)
+      if (analogjoy[i][2] < -pressure_check) //same as above for r stick 
         retroJsState[ 20 + offset] = 1;
 
-      if (convert_analog_scale(analogjoy[i][2], analog_deadzone) >  pressure_check)
+      if (analogjoy[i][2] >  pressure_check)
         retroJsState[ 21 + offset] = 1;
 
-      if (convert_analog_scale(analogjoy[i][3], analog_deadzone) < -pressure_check)
+      if (analogjoy[i][3] < -pressure_check)
         retroJsState[ 22 + offset] = 1;
 
-      if (convert_analog_scale(analogjoy[i][3], analog_deadzone) >  pressure_check)
+      if (analogjoy[i][3] >  pressure_check)
         retroJsState[ 23 + offset] = 1;
 
-/* change convert analog scale to this when libretro function below when setting analog deadzone is in mainline)
-   dont forget to never return 0
-      val = analogjoy[i][0];
-      val = (INT64)(val - bottom) * (INT64)(ANALOG_VALUE_MAX - ANALOG_VALUE_MIN) / (INT64)(top - bottom) + ANALOG_VALUE_MIN;
-      if (val < ANALOG_VALUE_MIN) val = ANALOG_VALUE_MIN;
-      if (val > ANALOG_VALUE_MAX) val = ANALOG_VALUE_MAX;
-      retroJsState[ 24 + offset] = val;
-*/
-
-      retroJsState[ 24 + offset] = convert_analog_scale(analogjoy[i][0], analog_deadzone);
-      retroJsState[ 25 + offset] = convert_analog_scale(analogjoy[i][1], analog_deadzone);
-      retroJsState[ 26 + offset] = convert_analog_scale(analogjoy[i][2], analog_deadzone);
-      retroJsState[ 27 + offset] = convert_analog_scale(analogjoy[i][3], analog_deadzone);
-      retroJsState[ 28 + offset] = convert_analog_scale(analogjoy[i][4], 0);
-      retroJsState[ 29 + offset] = convert_analog_scale(analogjoy[i][5], 0);
+      retroJsState[ 24 + offset] = analogjoy[i][0]; //analog_x
+      retroJsState[ 25 + offset] = analogjoy[i][1];//analog_y
+      retroJsState[ 26 + offset] = analogjoy[i][2];//analog_z
+      retroJsState[ 27 + offset] = analogjoy[i][4];//l2
+      retroJsState[ 28 + offset] = analogjoy[i][5];//r2
+      retroJsState[ 29 + offset] = 0;
       retroJsState[ 30 + offset] = 0;
-      retroJsState[ 31 + offset] = 0;
       if (gun)
       {
-         retroJsState[ 30 + offset] = 2 * analogjoy[i][6];
-         retroJsState[ 31 + offset] = 2 * analogjoy[i][7];
+         retroJsState[ 29 + offset] = 2 * analogjoy[i][6]; //gunx
+         retroJsState[ 30 + offset] = 2 * analogjoy[i][7];//gun y
       }
    }
    mame_frame();
