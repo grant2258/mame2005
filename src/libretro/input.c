@@ -1,22 +1,16 @@
 #include <stdio.h>
-
 #include "libretro.h"
 #include "osdepend.h"
 #include "input.h"
-
-#define controls 31
-#define joycodes 4 * controls
-#define keycodes RETROK_LAST
-extern const struct OSCodeInfo retroKeys[];
+#include "mame2005.h"
 
 INT32 retroKeyState[keycodes+joycodes]; 
 INT32 retroJsState[joycodes];
+
 const struct OSCodeInfo *osd_get_code_list(void)
 {
     return retroKeys;
 }
-
-
 
 INT32 osd_get_code_value(os_code_t code)
 {
@@ -25,8 +19,6 @@ INT32 osd_get_code_value(os_code_t code)
   else
     return retroJsState[code - RETROK_LAST];
 }
-
-
 
 INT32 osd_readkey_unicode(INT32flush)
 {
@@ -53,37 +45,38 @@ INT32 osd_readkey_unicode(INT32flush)
 #define EMITX(KEY) {(char*)#KEY, RETROK_##KEY, CODE_OTHER_DIGITAL}
 
 #define EMIT_RETRO_PAD(INDEX) \
-  {"J" #INDEX "Hat Left",   ((INDEX - 1) * controls) + RETRO_DEVICE_ID_JOYPAD_LEFT   + RETROK_LAST, CODE_OTHER_DIGITAL}, \
-  {"J" #INDEX "Hat Right",  ((INDEX - 1) * controls) + RETRO_DEVICE_ID_JOYPAD_RIGHT  + RETROK_LAST, CODE_OTHER_DIGITAL}, \
-  {"J" #INDEX "Hat Up",     ((INDEX - 1) * controls) + RETRO_DEVICE_ID_JOYPAD_UP     + RETROK_LAST, CODE_OTHER_DIGITAL}, \
-  {"J" #INDEX "Hat Down",   ((INDEX - 1) * controls) + RETRO_DEVICE_ID_JOYPAD_DOWN   + RETROK_LAST, CODE_OTHER_DIGITAL}, \
-  {"J" #INDEX "B",          ((INDEX - 1) * controls) + RETRO_DEVICE_ID_JOYPAD_B      + RETROK_LAST, JOYCODE_##INDEX##_BUTTON1}, \
-  {"J" #INDEX "A",          ((INDEX - 1) * controls) + RETRO_DEVICE_ID_JOYPAD_A      + RETROK_LAST, JOYCODE_##INDEX##_BUTTON2}, \
-  {"J" #INDEX "Y",          ((INDEX - 1) * controls) + RETRO_DEVICE_ID_JOYPAD_Y      + RETROK_LAST, JOYCODE_##INDEX##_BUTTON3}, \
-  {"J" #INDEX "X",          ((INDEX - 1) * controls) + RETRO_DEVICE_ID_JOYPAD_X      + RETROK_LAST, JOYCODE_##INDEX##_BUTTON4}, \
-  {"J" #INDEX "L",          ((INDEX - 1) * controls) + RETRO_DEVICE_ID_JOYPAD_L      + RETROK_LAST, JOYCODE_##INDEX##_BUTTON5}, \
-  {"J" #INDEX "R",          ((INDEX - 1) * controls) + RETRO_DEVICE_ID_JOYPAD_R      + RETROK_LAST, JOYCODE_##INDEX##_BUTTON6}, \
-  {"J" #INDEX "L2",         ((INDEX - 1) * controls) + RETRO_DEVICE_ID_JOYPAD_L2     + RETROK_LAST, JOYCODE_##INDEX##_BUTTON7}, \
-  {"J" #INDEX "R2",         ((INDEX - 1) * controls) + RETRO_DEVICE_ID_JOYPAD_R2     + RETROK_LAST, JOYCODE_##INDEX##_BUTTON8}, \
-  {"J" #INDEX "L3",         ((INDEX - 1) * controls) + RETRO_DEVICE_ID_JOYPAD_L3     + RETROK_LAST, JOYCODE_##INDEX##_BUTTON9}, \
-  {"J" #INDEX "R3",         ((INDEX - 1) * controls) + RETRO_DEVICE_ID_JOYPAD_R3     + RETROK_LAST, JOYCODE_##INDEX##_BUTTON10}, \
-  {"J" #INDEX " Start",     ((INDEX - 1) * controls) + RETRO_DEVICE_ID_JOYPAD_START  + RETROK_LAST, JOYCODE_##INDEX##_START}, \
-  {"J" #INDEX "Select",     ((INDEX - 1) * controls) + RETRO_DEVICE_ID_JOYPAD_SELECT + RETROK_LAST, JOYCODE_##INDEX##_SELECT}, \
-  {"J" #INDEX "D_AXIS0 X-", ((INDEX - 1) * controls) + 16                            + RETROK_LAST, JOYCODE_##INDEX##_LEFT}, \
-  {"J" #INDEX "D_AXIS0 X+", ((INDEX - 1) * controls) + 17                            + RETROK_LAST, JOYCODE_##INDEX##_RIGHT}, \
-  {"J" #INDEX "D_AXIS1 Y-", ((INDEX - 1) * controls) + 18                            + RETROK_LAST, JOYCODE_##INDEX##_UP}, \
-  {"J" #INDEX "D_AXIS1 Y+", ((INDEX - 1) * controls) + 19                            + RETROK_LAST, JOYCODE_##INDEX##_DOWN}, \
-  {"J" #INDEX "D_AXIS2 X-", ((INDEX - 1) * controls) + 20                            + RETROK_LAST, CODE_OTHER_DIGITAL}, \
-  {"J" #INDEX "D_AXIS2 X+", ((INDEX - 1) * controls) + 21                            + RETROK_LAST, CODE_OTHER_DIGITAL}, \
-  {"J" #INDEX "D_AXIS3 Y-", ((INDEX - 1) * controls) + 22                            + RETROK_LAST, CODE_OTHER_DIGITAL}, \
-  {"J" #INDEX "D_AXIS3 Y+", ((INDEX - 1) * controls) + 23                            + RETROK_LAST, CODE_OTHER_DIGITAL}, \
-  {"J" #INDEX "LSX" , ((INDEX - 1) * controls) + 24                                  + RETROK_LAST, JOYCODE_##INDEX##_ANALOG_X}, \
-  {"J" #INDEX "LSY ", ((INDEX - 1) * controls) + 25                                  + RETROK_LAST, JOYCODE_##INDEX##_ANALOG_Y}, \
-  {"J" #INDEX "RSY" , ((INDEX - 1) * controls) + 26                                  + RETROK_LAST, JOYCODE_##INDEX##_ANALOG_Z}, \
-  {"J" #INDEX "A_AXIS_L"   , ((INDEX - 1) * controls) + 27                           + RETROK_LAST, JOYCODE_##INDEX##_ANALOG_PEDAL1}, \
-  {"J" #INDEX "A_AXIS R"   , ((INDEX - 1) * controls) + 28                           + RETROK_LAST, JOYCODE_##INDEX##_ANALOG_PEDAL2}, \
-  {"GUN" #INDEX "GUN_X"    , ((INDEX - 1) * controls) + 29                           + RETROK_LAST, GUNCODE_##INDEX##_ANALOG_X}, \
-  {"GUN" #INDEX "GUN_Y"      , ((INDEX - 1) * controls) + 30                           + RETROK_LAST, GUNCODE_##INDEX##_ANALOG_Y} 
+  {"J" #INDEX "Hat Left",   ((INDEX - 1) * controls) + RETRO_DEVICE_ID_JOYPAD_LEFT   + RETROK_LAST, CODE_OTHER_DIGITAL},              \
+  {"J" #INDEX "Hat Right",  ((INDEX - 1) * controls) + RETRO_DEVICE_ID_JOYPAD_RIGHT  + RETROK_LAST, CODE_OTHER_DIGITAL},              \
+  {"J" #INDEX "Hat Up",     ((INDEX - 1) * controls) + RETRO_DEVICE_ID_JOYPAD_UP     + RETROK_LAST, CODE_OTHER_DIGITAL},              \
+  {"J" #INDEX "Hat Down",   ((INDEX - 1) * controls) + RETRO_DEVICE_ID_JOYPAD_DOWN   + RETROK_LAST, CODE_OTHER_DIGITAL},              \
+  {"J" #INDEX "B",          ((INDEX - 1) * controls) + RETRO_DEVICE_ID_JOYPAD_B      + RETROK_LAST, JOYCODE_##INDEX##_BUTTON1},       \
+  {"J" #INDEX "A",          ((INDEX - 1) * controls) + RETRO_DEVICE_ID_JOYPAD_A      + RETROK_LAST, JOYCODE_##INDEX##_BUTTON2},       \
+  {"J" #INDEX "Y",          ((INDEX - 1) * controls) + RETRO_DEVICE_ID_JOYPAD_Y      + RETROK_LAST, JOYCODE_##INDEX##_BUTTON3},       \
+  {"J" #INDEX "X",          ((INDEX - 1) * controls) + RETRO_DEVICE_ID_JOYPAD_X      + RETROK_LAST, JOYCODE_##INDEX##_BUTTON4},       \
+  {"J" #INDEX "L",          ((INDEX - 1) * controls) + RETRO_DEVICE_ID_JOYPAD_L      + RETROK_LAST, JOYCODE_##INDEX##_BUTTON5},       \
+  {"J" #INDEX "R",          ((INDEX - 1) * controls) + RETRO_DEVICE_ID_JOYPAD_R      + RETROK_LAST, JOYCODE_##INDEX##_BUTTON6},       \
+  {"J" #INDEX "L2",         ((INDEX - 1) * controls) + RETRO_DEVICE_ID_JOYPAD_L2     + RETROK_LAST, JOYCODE_##INDEX##_BUTTON7},       \
+  {"J" #INDEX "R2",         ((INDEX - 1) * controls) + RETRO_DEVICE_ID_JOYPAD_R2     + RETROK_LAST, JOYCODE_##INDEX##_BUTTON8},       \
+  {"J" #INDEX "L3",         ((INDEX - 1) * controls) + RETRO_DEVICE_ID_JOYPAD_L3     + RETROK_LAST, JOYCODE_##INDEX##_BUTTON9},       \
+  {"J" #INDEX "R3",         ((INDEX - 1) * controls) + RETRO_DEVICE_ID_JOYPAD_R3     + RETROK_LAST, JOYCODE_##INDEX##_BUTTON10},      \
+  {"J" #INDEX "Start",      ((INDEX - 1) * controls) + RETRO_DEVICE_ID_JOYPAD_START  + RETROK_LAST, JOYCODE_##INDEX##_START},         \
+  {"J" #INDEX "Select",     ((INDEX - 1) * controls) + RETRO_DEVICE_ID_JOYPAD_SELECT + RETROK_LAST, JOYCODE_##INDEX##_SELECT},        \
+  {"J" #INDEX "A_LSX",      ((INDEX - 1) * controls) + 16                            + RETROK_LAST, JOYCODE_##INDEX##_ANALOG_X},      \
+  {"J" #INDEX "D_LSX X-",   ((INDEX - 1) * controls) + 17                            + RETROK_LAST, JOYCODE_##INDEX##_LEFT},          \
+  {"J" #INDEX "D_LSX X+",   ((INDEX - 1) * controls) + 18                            + RETROK_LAST, JOYCODE_##INDEX##_RIGHT},         \
+  {"J" #INDEX "LSY ",       ((INDEX - 1) * controls) + 19                            + RETROK_LAST, JOYCODE_##INDEX##_ANALOG_Y},      \
+  {"J" #INDEX "D_LSY Y-",   ((INDEX - 1) * controls) + 20                            + RETROK_LAST, JOYCODE_##INDEX##_UP},            \
+  {"J" #INDEX "D_LSY Y+",   ((INDEX - 1) * controls) + 21                            + RETROK_LAST, JOYCODE_##INDEX##_DOWN},          \
+  {"J" #INDEX "A_RSX" ,     ((INDEX - 1) * controls) + 22                            + RETROK_LAST, JOYCODE_##INDEX##_ANALOG_Z},      \
+  {"J" #INDEX "D_RSX X-",   ((INDEX - 1) * controls) + 23                            + RETROK_LAST, CODE_OTHER_DIGITAL},              \
+  {"J" #INDEX "D_RSX X+",   ((INDEX - 1) * controls) + 24                            + RETROK_LAST, CODE_OTHER_DIGITAL},              \
+  {"J" #INDEX "A_RSY" ,     ((INDEX - 1) * controls) + 25                            + RETROK_LAST, CODE_OTHER_ANALOG_ABSOLUTE},      \
+  {"J" #INDEX "D_RSX Y-",   ((INDEX - 1) * controls) + 26                            + RETROK_LAST, CODE_OTHER_DIGITAL},              \
+  {"J" #INDEX "D_RSX Y+",   ((INDEX - 1) * controls) + 27                            + RETROK_LAST, CODE_OTHER_DIGITAL},              \
+  {"J" #INDEX "A_L",        ((INDEX - 1) * controls) + 28                            + RETROK_LAST, JOYCODE_##INDEX##_ANALOG_PEDAL1}, \
+  {"J" #INDEX "A_ R",       ((INDEX - 1) * controls) + 29                            + RETROK_LAST, JOYCODE_##INDEX##_ANALOG_PEDAL2}, \
+  {"GUN" #INDEX "GUN_X",    ((INDEX - 1) * controls) + 30                            + RETROK_LAST, GUNCODE_##INDEX##_ANALOG_X},      \
+  {"GUN" #INDEX "GUN_Y",    ((INDEX - 1) * controls) + 31                            + RETROK_LAST, GUNCODE_##INDEX##_ANALOG_Y} 
 
 
 const struct OSCodeInfo retroKeys[] =
@@ -189,10 +182,6 @@ const struct OSCodeInfo retroKeys[] =
 
 INT32 convert_analog_scale(INT32 result)
 {
- /* fix up properly when I have time work bells are calling 
-  * returning zero passed controls back to didgital so dont do it for now
-  * ie dont set a deadzone that returns zero else you wont auto center
-  * works for now other things ned more attention*/
   bool direction = result < 0;
   INT32 deadzone = (INT32) (32767 * 0.01 ); 
 
@@ -201,14 +190,12 @@ INT32 convert_analog_scale(INT32 result)
   if (direction)
     result = -result;
 
-  if (result < deadzone )            /* if in the deadzone, return 0 */
+  if (result < deadzone )
     result = 0;
-
   else                                // otherwise, scale
     result = (result - deadzone) *  ( (float) 65536 / (float) (32767 - deadzone));
   return direction ? -result : result;
 }
-
 
 // These calibration functions should never actually be used (as long as needs_calibration returns 0 anyway).
 int osd_joystick_needs_calibration(void) { return 0; }

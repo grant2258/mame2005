@@ -1,29 +1,19 @@
 #include <stdint.h>
-
 #include <libretro.h>
-
 #include "mame.h"
 #include "driver.h"
 #include "state.h"
 #include "log.h"
-
+#include "mame2005.h"
 
 static int driverIndex; //< Index of mame game loaded
-
-extern const struct OSCodeInfo retroKeys[];
 
 static float f_beam = 2;
 static float f_flicker = 1.5f;
 static float f_intensity= 1.5f;
 
-
-extern INT32 retroKeyState[];
-extern INT32 retroJsState[];
-
 int16_t prev_pointer_x;
 int16_t prev_pointer_y;
-
-extern struct osd_create_params videoConfig;
 
 unsigned retroColorMode;
 int16_t XsoundBuffer[2048];
@@ -88,6 +78,7 @@ void retro_set_environment(retro_environment_t cb)
       { "mame2005-cheats", "Cheats(restart required); disabled|enabled" },
       { "mame2005-option_tate_mode", "vertical rotation Mode; on|off" },
       { "mame2005-gun", "use light gun interface; disabled|enabled" },
+      { "mame2005-validitychecks", "skip validity checks tests; enabled|disabled" },
       { NULL, NULL },
    };
    environ_cb = cb;
@@ -254,6 +245,19 @@ static void update_variables(void)
    else
       gun = 0;
 
+   var.value = NULL;
+   var.key = "mame2005-validitychecks";
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) || var.value)
+   {
+      if(strcmp(var.value, "enabled") == 0)
+         options.skip_validitychecks = 1;
+      else
+         options.skip_validitychecks = 0;
+   }
+   else
+    options.skip_validitychecks = 1;
+
    ledintf.set_led_state = NULL;
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_LED_INTERFACE, &ledintf))
@@ -346,16 +350,7 @@ void retro_run (void)
 
    for (i = 0; i < 4; i ++)
    {
-      unsigned int offset = (i * 32);
-
-      analogjoy[i][0] = convert_analog_scale(input_cb(i, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT,  RETRO_DEVICE_ID_ANALOG_X));
-      analogjoy[i][1] = convert_analog_scale(input_cb(i, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT,  RETRO_DEVICE_ID_ANALOG_Y));
-      analogjoy[i][2] = convert_analog_scale(input_cb(i, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_RIGHT, RETRO_DEVICE_ID_ANALOG_X));
-      analogjoy[i][3] = convert_analog_scale(input_cb(i, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_RIGHT, RETRO_DEVICE_ID_ANALOG_Y));
-      analogjoy[i][4] = convert_analog_scale(-abs(input_cb( i, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_BUTTON, RETRO_DEVICE_ID_JOYPAD_L2)));
-      analogjoy[i][5] = convert_analog_scale(-abs(input_cb( i, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_BUTTON, RETRO_DEVICE_ID_JOYPAD_R2)));
-      analogjoy[i][6] = convert_analog_scale(input_cb(i, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_SCREEN_X));
-      analogjoy[i][7] = convert_analog_scale(input_cb(i, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_SCREEN_Y));
+      unsigned int offset = (i * controls);
 
       retroJsState[ RETRO_DEVICE_ID_JOYPAD_B + offset] = input_cb(i, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B);
       retroJsState[ RETRO_DEVICE_ID_JOYPAD_Y + offset] = input_cb(i, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_Y);
@@ -367,64 +362,33 @@ void retro_run (void)
       retroJsState[ RETRO_DEVICE_ID_JOYPAD_RIGHT + offset] = input_cb(i, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT);
       retroJsState[ RETRO_DEVICE_ID_JOYPAD_A + offset] = input_cb(i, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A);
       retroJsState[ RETRO_DEVICE_ID_JOYPAD_X + offset] = input_cb(i, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_X);
-
       retroJsState[ RETRO_DEVICE_ID_JOYPAD_L + offset] = input_cb(i, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L);
       retroJsState[ RETRO_DEVICE_ID_JOYPAD_R + offset] = input_cb(i, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R);
       retroJsState[ RETRO_DEVICE_ID_JOYPAD_L2 + offset] = input_cb(i, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L2);
       retroJsState[ RETRO_DEVICE_ID_JOYPAD_R2 + offset] = input_cb(i, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R2);
       retroJsState[ RETRO_DEVICE_ID_JOYPAD_L3 + offset] = input_cb(i, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L3);
       retroJsState[ RETRO_DEVICE_ID_JOYPAD_R3 + offset] = input_cb(i, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R3);
-
-
-      retroJsState[ 16 + offset] = 0;
-      retroJsState[ 17 + offset] = 0;
-      retroJsState[ 18 + offset] = 0;
-      retroJsState[ 19 + offset] = 0;
-      retroJsState[ 20 + offset] = 0;
-      retroJsState[ 21 + offset] = 0;
-      retroJsState[ 22 + offset] = 0;
-      retroJsState[ 23 + offset] = 0;
-
-      if (analogjoy[i][0] < -pressure_check) // d left
-        retroJsState[ 16 + offset] = 1;
-
-      if (analogjoy[i][0] >  pressure_check)
-        retroJsState[ 17 + offset] = 1; //d right
-
-      if (analogjoy[i][1] < -pressure_check) // d up
-        retroJsState[ 18 + offset] = 1;
-
-      if (analogjoy[i][1] >  pressure_check) // d down
-        retroJsState[ 19 + offset] = 1;
-
-      if (analogjoy[i][2] < -pressure_check) //same as above for r stick 
-        retroJsState[ 20 + offset] = 1;
-
-      if (analogjoy[i][2] >  pressure_check)
-        retroJsState[ 21 + offset] = 1;
-
-      if (analogjoy[i][3] < -pressure_check)
-        retroJsState[ 22 + offset] = 1;
-
-      if (analogjoy[i][3] >  pressure_check)
-        retroJsState[ 23 + offset] = 1;
-
-      retroJsState[ 24 + offset] = analogjoy[i][0]; //analog_x
-      retroJsState[ 25 + offset] = analogjoy[i][1];//analog_y
-      retroJsState[ 26 + offset] = analogjoy[i][2];//analog_z
-      retroJsState[ 27 + offset] = analogjoy[i][4];//l2
-      retroJsState[ 28 + offset] = analogjoy[i][5];//r2
-      retroJsState[ 29 + offset] = 0;
-      retroJsState[ 30 + offset] = 0;
+      retroJsState[ 16 + offset] = convert_analog_scale(input_cb(i, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT,  RETRO_DEVICE_ID_ANALOG_X));
+      (retroJsState[ 16 + offset] < -pressure_check) ? (retroJsState[ 17 + offset] = 1):  (retroJsState[ 17 + offset]= 0);
+      (retroJsState[ 16 + offset] >  pressure_check) ? (retroJsState[ 18 + offset] = 1) : (retroJsState[ 18 + offset]= 0);
+      retroJsState[ 19 + offset] = convert_analog_scale(input_cb(i, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT,  RETRO_DEVICE_ID_ANALOG_Y));
+      (retroJsState[ 19 + offset] < -pressure_check) ? (retroJsState[ 20 + offset] = 1):  (retroJsState[ 20 + offset]= 0);
+      (retroJsState[ 19 + offset] >  pressure_check) ? (retroJsState[ 21 + offset] = 1) : (retroJsState[ 21 + offset]= 0);
+      retroJsState[ 22 + offset] = convert_analog_scale(input_cb(i, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_RIGHT, RETRO_DEVICE_ID_ANALOG_X));
+      (retroJsState[ 22 + offset] < -pressure_check) ? (retroJsState[ 23 + offset] = 1):  (retroJsState[ 23 + offset]= 0);
+      (retroJsState[ 22 + offset] >  pressure_check) ? (retroJsState[ 24 + offset] = 1) : (retroJsState[ 24 + offset]= 0);
+ 	  retroJsState[ 25 + offset] = convert_analog_scale(input_cb(i, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_RIGHT, RETRO_DEVICE_ID_ANALOG_Y));
+      (retroJsState[ 25 + offset] < -pressure_check) ? (retroJsState[ 26 + offset] = 1):  (retroJsState[ 26 + offset]= 0);
+      (retroJsState[ 25 + offset] >  pressure_check) ? (retroJsState[ 27 + offset] = 1) : (retroJsState[ 27 + offset]= 0);
+      retroJsState[ 28 + offset] = convert_analog_scale(-abs(input_cb( i, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_BUTTON, RETRO_DEVICE_ID_JOYPAD_L2)));
+      retroJsState[ 29 + offset] = convert_analog_scale(-abs(input_cb( i, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_BUTTON, RETRO_DEVICE_ID_JOYPAD_R2)));
       if (gun)
       {
-         retroJsState[ 29 + offset] = 2 * analogjoy[i][6]; //gunx
-         retroJsState[ 30 + offset] = 2 * analogjoy[i][7];//gun y
+         retroJsState[ 30 + offset] = 2 * analogjoy[i][6]; //gunx
+         retroJsState[ 31 + offset] = 2 * analogjoy[i][7];//gun y
       }
    }
    mame_frame();
-
-
 }
 
 
@@ -432,7 +396,6 @@ bool retro_load_game(const struct retro_game_info *game)
 {
    if (!game)
    {
-	   printf("game false \n");
       return false;
    }
     // Find game index
@@ -499,8 +462,6 @@ bool retro_load_game(const struct retro_game_info *game)
         // Set all options before starting the game
        // options.vector_resolution_multiplier = 2;
 
-
-
         options.beam = (int)(f_beam * 0x00010000);
         if (options.beam < 0x00010000)
           options.beam = 0x00010000;
@@ -518,7 +479,6 @@ bool retro_load_game(const struct retro_game_info *game)
 
         options.frameskip = frameskip;
         options.gui_host =1; // stops mame asking for a keypress
-        options.skip_validitychecks =1; // will hang check dont change
 
         options.use_samples =1;
         environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc);
@@ -543,10 +503,7 @@ void retro_unload_game(void)
 
 size_t retro_serialize_size(void)
 {
-   // extern size_t state_get_dump_size(void);
-
-    //return state_get_dump_size();
-return false;
+   return false;
 }
 
 bool retro_serialize(void *data, size_t size)
@@ -557,7 +514,6 @@ bool retro_serialize(void *data, size_t size)
 
 bool retro_unserialize(const void * data, size_t size)
 {
-
 	return false;
 }
 

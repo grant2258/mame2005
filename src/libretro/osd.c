@@ -24,7 +24,7 @@
 FILE *logfile;
 static int errorlog=0; 
 static int erroroslog=0;
-
+static char log_buffer[2048];
 extern char* systemDir;
 extern char* saveDir;
 extern char* romDir;
@@ -401,44 +401,34 @@ Miscellaneous
 void osd_pause(int paused) {}
 int osd_display_loading_rom_message(const char *name, struct rom_load_data *romdata) { return 0; }
 
-__attribute__ ((noreturn)) void CLIB_DECL osd_die(const char *text, ...) 
-{
-  va_list args;
-  va_start (args, text);
-  logerror(text, args);
-  printf(  text, args);
- va_end (args);
- mame_done();
-}
-
-static void vlogerror(const char *text, va_list arg)
-{
-
-char buffer[2048];
-
-  if (errorlog || erroroslog )
-    _vsnprintf(buffer, sizeof(buffer) / sizeof(buffer[0]), text, arg);
-
-  if (errorlog && logfile)
-    if(buffer[0]) // dont print nulls 
-      fprintf(logfile,"%s", buffer);
-
-  if (erroroslog)
-  {
-    if(buffer[0]) // dont print nulls 
-      printf("DEBUG:%s\n",buffer);
-   
-    
-  }
-}
-
 void CLIB_DECL logerror(const char *text,...)
 {
-  va_list arg;
-
-  /* standard vfprintf stuff here */
-  va_start(arg, text);
-  vlogerror(text, arg);
-  va_end(arg);
+  if (erroroslog)
+  {
+     va_list arg;
+  	 va_start(arg,text);
+	 vsprintf(log_buffer,text,arg);
+	 va_end(arg);
+	 printf("(LOGERROR) %s",log_buffer);
+   }
 }
 
+void CLIB_DECL osd_die(const char *text,...)
+{
+	va_list arg;
+	va_start(arg,text);
+	vsprintf(log_buffer,text,arg);
+	va_end(arg);
+	printf("(OSD_DIE) %s",log_buffer);
+	exit(0);
+}
+
+void CLIB_DECL fatalerror(const char *text,...)
+{
+	va_list arg;
+	va_start(arg,text);
+	vsprintf(log_buffer,text,arg);
+	va_end(arg);
+	printf("(OSD_DIE) %s",log_buffer);
+	exit(0);
+}

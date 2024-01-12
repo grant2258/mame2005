@@ -98,7 +98,7 @@ ifeq ($(platform), unix)
    TARGET = $(TARGET_NAME)_libretro.so
    fpic = -fPIC
    CFLAGS += $(fpic)
-   LDFLAGS += $(fpic) -shared -Wl,--version-script=link.T
+   LDFLAGS += $(fpic) -shared -Wl,--no-undefined  -Wl,--version-script=link.T
 
 else ifeq ($(platform), linux-portable)
    TARGET = $(TARGET_NAME)_libretro.so
@@ -612,7 +612,7 @@ CFLAGS += $(INCFLAGS) $(INCFLAGS_PLATFORM)
 # combine the various definitions to one
 CDEFS = $(DEFS) $(COREDEFS) $(CPUDEFS) $(SOUNDDEFS) $(ASMDEFS) $(DBGDEFS)
 
-OBJECTS := $(SOURCES_C:.c=.o)
+OBJECTS := $(sort $(SOURCES_C:.c=.o) )
 
 OBJOUT   = -o
 LINKOUT  = -o

@@ -832,11 +832,13 @@ static struct GfxDecodeInfo gfxdecodeinfo[] =
 static MACHINE_DRIVER_START( segas32 )
 
 	/* basic machine hardware */
-	MDRV_CPU_ADD(V60, 16000000/10)
+						
+					  
+	MDRV_CPU_ADD(V60, 16107950)
 	MDRV_CPU_PROGRAM_MAP(segas32_readmem,segas32_writemem)
 	MDRV_CPU_VBLANK_INT(segas32_interrupt,2)
-
-	MDRV_CPU_ADD_TAG("sound", Z80, 8000000)	// verified on real PCB
+                                   
+	MDRV_CPU_ADD_TAG("sound", Z80, 8053975)	// verified on real PCB
 	MDRV_CPU_PROGRAM_MAP(sound_readmem_32, sound_writemem_32)
 	MDRV_CPU_IO_MAP(sound_readport_32, sound_writeport_32)
 
@@ -859,12 +861,12 @@ static MACHINE_DRIVER_START( segas32 )
 	/* sound hardware */
 	MDRV_SPEAKER_STANDARD_STEREO("left", "right")
 
-	MDRV_SOUND_ADD(YM3438, 8000000)
+	MDRV_SOUND_ADD(YM3438, 8053975)
 	MDRV_SOUND_CONFIG(sys32_ym3438_interface)
 	MDRV_SOUND_ROUTE(0, "left", 0.40)
 	MDRV_SOUND_ROUTE(1, "right", 0.40)
 
-	MDRV_SOUND_ADD(YM3438, 8000000)
+	MDRV_SOUND_ADD(YM3438, 8053975)
 	MDRV_SOUND_ROUTE(0, "left", 0.40)
 	MDRV_SOUND_ROUTE(1, "right", 0.40)
 

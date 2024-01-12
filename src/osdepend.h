@@ -352,6 +352,21 @@ void CLIB_DECL logerror(const char *text,...)
 void CLIB_DECL logerror(const char *text,...);
 #endif
 
+
+#ifdef __GNUC__
+void CLIB_DECL osd_die(const char *text,...)
+      __attribute__ ((format (printf, 1, 2)));
+#else
+void CLIB_DECL osd_die(const char *text,...);
+#endif
+
+#ifdef __GNUC__
+void CLIB_DECL fatalerror(const char *text,...)
+      __attribute__ ((format (printf, 1, 2)));
+#else
+void CLIB_DECL fatalerror(const char *text,...);
+#endif
+
 #ifdef __cplusplus
 }
 #endif

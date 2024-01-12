@@ -70,12 +70,12 @@ enum {
 	V60_Res6,
 	V60_Res7,
 	V60_Res8,
-	V60_TCB,
 	V60_REGMAX
 };
 
 extern const char *v60_reg_names[];
 void v60_dasm_init(void);
+void v60_stall(void);
 
 #if HAS_V60
 void v60_get_info(UINT32 state, union cpuinfo *info);

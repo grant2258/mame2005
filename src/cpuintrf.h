@@ -177,9 +177,9 @@ enum
 	CPU_TMS7000,
 	CPU_TMS7000_EXL,
 #endif
+	CPU_MB86233,
     CPU_COUNT
 };
-
 
 
 /*************************************

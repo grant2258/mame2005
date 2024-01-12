@@ -6,6 +6,7 @@
 #include "state.h"
 #include "machine/random.h"
 #include <math.h>
+#include "cpu/mb86233/mb86233.h"
 
 enum {FIFO_SIZE = 256};
 enum {MAT_STACK_SIZE = 32};
@@ -19,13 +20,13 @@ static int model1_swa;
 static int fifoin_cbcount;
 static void (*fifoin_cb)(void);
 
-static int fifoout_rpos, fifoout_wpos;
+static INT32 fifoout_rpos, fifoout_wpos;
 static UINT32 fifoout_data[FIFO_SIZE];
 
 static UINT32 list_length;
 
 static float cmat[12], mat_stack[MAT_STACK_SIZE][12], mat_vector[21][12];
-static int mat_stack_pos;
+static INT32 mat_stack_pos;
 static float acc;
 
 static float tgp_vf_xmin, tgp_vf_xmax, tgp_vf_zmin, tgp_vf_zmax, tgp_vf_ygnd, tgp_vf_yflr, tgp_vf_yjmp;
@@ -33,13 +34,13 @@ static float tgp_vr_circx, tgp_vr_circy, tgp_vr_circrad, tgp_vr_cbox[12];
 static int tgp_vr_select;
 static UINT16 ram_adr, ram_latch[2], ram_scanadr;
 static UINT32 *ram_data;
+static float tgp_vr_base[4];
 
 static UINT32 fifoout_pop(void)
 {
 	UINT32 v;
 	if(fifoout_wpos == fifoout_rpos) {
-		logerror("TGP FIFOOUT underflow (%x)\n", activecpu_get_pc());
-		exit(0);
+		fatalerror("TGP FIFOOUT underflow (%x)", activecpu_get_pc());
 	}
 	v = fifoout_data[fifoout_rpos++];
 	if(fifoout_rpos == FIFO_SIZE)
@@ -177,7 +178,8 @@ static void fdiv(void)
 {
 	float a = fifoin_pop_f();
 	float b = fifoin_pop_f();
-	float r = !b ? 1e39 : a/b;
+//  float r = !b ? 1e39 : a/b;
+	float r = !b ? 0 : a * (1/b);
 	logerror("TGP fdiv %f/%f=%f (%x)\n", a, b, r, activecpu_get_pc());
 	fifoout_push_f(r);
 	next_fn();
@@ -285,6 +287,15 @@ static void f11(void)
 	float g = fifoin_pop_f();
 	float h = fifoin_pop_f();
 	float i = fifoin_pop_f();
+	(void)a;
+	(void)b;
+	(void)c;
+	(void)d;
+	(void)e;
+	(void)f;
+	(void)g;
+	(void)h;
+	(void)i;
 	logerror("TGP f11 %f, %f, %f, %f, %f, %f, %f, %f, %f (%x)\n", a, b, c, d, e, f, g, h, i, activecpu_get_pc());
 	fifoout_push_f(0);
 	fifoout_push_f(0);
@@ -297,7 +308,7 @@ static void normalize(void)
 	float a = fifoin_pop_f();
 	float b = fifoin_pop_f();
 	float c = fifoin_pop_f();
-	float n = sqrt(a*a+b*b+c*c);
+	float n = (a*a+b*b+c*c) / sqrt(a*a+b*b+c*c);
 	logerror("TGP normalize %f, %f, %f (%x)\n", a, b, c, activecpu_get_pc());
 	fifoout_push_f(a/n);
 	fifoout_push_f(b/n);
@@ -324,26 +335,10 @@ static void track_select(void)
 
 static void f14(void)
 {
-	float a = fifoin_pop_f();
-	float b = fifoin_pop_f();
-	float c = fifoin_pop_f();
-	float d = fifoin_pop_f();
-	int r = 0;
-	logerror("TGP f14 %f, %f, %f, %f (%x)\n", a, b, c, d, activecpu_get_pc());
-	//	fprintf(stderr, "TGP f14 %f, %f, %f, %f (%x)\n", a, b, c, d, activecpu_get_pc());
-
-	switch(activecpu_get_pc()) {
-	case 0xc7eea: r=1; break; // stars
-	case 0xc7f19: r=2; break; // stars too, ties?
-	case 0xcac91: r=3; break; // visee???
-	case 0xc2ad0: r=4; break;
-	}
-
-	if(r == 4) {
-		cmat[9] += mame_rand();
-		cmat[10] += mame_rand();
-		cmat[11] += mame_rand();
-	}
+	tgp_vr_base[0] = fifoin_pop_f();
+	tgp_vr_base[1] = fifoin_pop_f();
+	tgp_vr_base[2] = fifoin_pop_f();
+	tgp_vr_base[3] = fifoin_pop_f();
 
 	next_fn();
 }
@@ -351,7 +346,6 @@ static void f14(void)
 static void f15_swa(void)
 {
 	logerror("TGP f15_swa (%x)\n", activecpu_get_pc());
-	//	fprintf(stderr, "TGP f15_swa (%x)\n", activecpu_get_pc());
 
 	next_fn();
 }
@@ -406,16 +400,6 @@ static void matrix_trans(void)
 	float b = fifoin_pop_f();
 	float c = fifoin_pop_f();
 
-	logerror("TGP matrix_trans (%f, %f, %f) (%x)\n", a, b, c, activecpu_get_pc());
-	if(0 && activecpu_get_pc() == 0xfeeaa5)
-		//		fprintf(stderr, "TGP matrix_trans (%f, %f, %f) (%x)\n", a, b, c, activecpu_get_pc());
-		a = 0;
-
-	if(activecpu_get_pc() == 0x22f59) {
-		next_fn();
-		return;
-	}
-
 	cmat[ 9] += cmat[0]*a+cmat[3]*b+cmat[6]*c;
 	cmat[10] += cmat[1]*a+cmat[4]*b+cmat[7]*c;
 	cmat[11] += cmat[2]*a+cmat[5]*b+cmat[8]*c;
@@ -443,9 +427,9 @@ static void matrix_scale(void)
 static void matrix_rotx(void)
 {
 	INT16 a = fifoin_pop();
-	double s = tsin(a);
-	double c = tcos(a);
-	double t1, t2;
+	float s = tsin(a);
+	float c = tcos(a);
+	float t1, t2;
 	logerror("TGP matrix_rotx %d (%x)\n", a, activecpu_get_pc());
 	t1 = cmat[3];
 	t2 = cmat[6];
@@ -465,9 +449,9 @@ static void matrix_rotx(void)
 static void matrix_roty(void)
 {
 	INT16 a = fifoin_pop();
-	double s = tsin(a);
-	double c = tcos(a);
-	double t1, t2;
+	float s = tsin(a);
+	float c = tcos(a);
+	float t1, t2;
 
 	logerror("TGP matrix_roty %d (%x)\n", a, activecpu_get_pc());
 	t1 = cmat[6];
@@ -488,9 +472,9 @@ static void matrix_roty(void)
 static void matrix_rotz(void)
 {
 	INT16 a = fifoin_pop();
-	double s = tsin(a);
-	double c = tcos(a);
-	double t1, t2;
+	float s = tsin(a);
+	float c = tcos(a);
+	float t1, t2;
 
 	logerror("TGP matrix_rotz %d (%x)\n", a, activecpu_get_pc());
 	t1 = cmat[0];
@@ -508,22 +492,27 @@ static void matrix_rotz(void)
 	next_fn();
 }
 
-static void f24(void)
+static void track_read_quad(void)
 {
+	const UINT32 *tgp_data = (const UINT32 *)memory_region(REGION_USER2);
 	UINT32 a = fifoin_pop();
-	logerror("TGP f24 %d (%x)\n", a, activecpu_get_pc());
-	fifoout_push_f(1);
-	fifoout_push_f(0);
-	fifoout_push_f(0);
-	fifoout_push_f(0);
-	fifoout_push_f(1);
-	fifoout_push_f(0);
-	fifoout_push_f(0);
-	fifoout_push_f(0);
-	fifoout_push_f(1);
-	fifoout_push_f(0);
-	fifoout_push_f(0);
-	fifoout_push_f(0);
+	int offd;
+
+	logerror("TGP track_read_quad %d (%x)\n", a, activecpu_get_pc());
+
+	offd = tgp_data[0x20+tgp_vr_select] + 16*a;
+	fifoout_push(tgp_data[offd]);
+	fifoout_push(tgp_data[offd+1]);
+	fifoout_push(tgp_data[offd+2]);
+	fifoout_push(tgp_data[offd+3]);
+	fifoout_push(tgp_data[offd+4]);
+	fifoout_push(tgp_data[offd+5]);
+	fifoout_push(tgp_data[offd+6]);
+	fifoout_push(tgp_data[offd+7]);
+	fifoout_push(tgp_data[offd+8]);
+	fifoout_push(tgp_data[offd+9]);
+	fifoout_push(tgp_data[offd+10]);
+	fifoout_push(tgp_data[offd+11]);
 	next_fn();
 }
 
@@ -536,6 +525,13 @@ static void f24_swa(void)
 	float e = fifoin_pop_f();
 	float f = fifoin_pop_f();
 	UINT32 g = fifoin_pop();
+	(void)a;
+	(void)b;
+	(void)c;
+	(void)d;
+	(void)e;
+	(void)f;
+	(void)g;
 	logerror("TGP f24_swa %f, %f, %f, %f, %f, %f, %x (%x)\n", a, b, c, d, e, f, g, activecpu_get_pc());
 	fifoout_push_f(0);
 	next_fn();
@@ -547,6 +543,7 @@ static void transform_point(void)
 	float y = fifoin_pop_f();
 	float z = fifoin_pop_f();
 	logerror("TGP transform_point %f, %f, %f (%x)\n", x, y, z, activecpu_get_pc());
+
 	fifoout_push_f(cmat[0]*x+cmat[3]*y+cmat[6]*z+cmat[9]);
 	fifoout_push_f(cmat[1]*x+cmat[4]*y+cmat[7]*z+cmat[10]);
 	fifoout_push_f(cmat[2]*x+cmat[5]*y+cmat[8]*z+cmat[11]);
@@ -600,7 +597,7 @@ static void distance3(void)
 	a -= d;
 	b -= e;
 	c -= f;
-	fifoout_push_f(sqrt(a*a+b*b+c*c));
+	fifoout_push_f((a*a+b*b+c*c)/sqrt(a*a+b*b+c*c));
 	next_fn();
 }
 
@@ -672,8 +669,11 @@ static void f42(void)
 	float a = fifoin_pop_f();
 	float b = fifoin_pop_f();
 	float c = fifoin_pop_f();
+	(void)a;
+	(void)b;
+	(void)c;
 	logerror("TGP f42 %f, %f, %f (%x)\n", a, b, c, activecpu_get_pc());
-	//	fifoout_push_f((mame_rand() % 1000) - 500);
+	//  fifoout_push_f((mame_rand(Machine) % 1000) - 500);
 	fifoout_push_f(0);
 	fifoout_push_f(0);
 	fifoout_push_f(0);
@@ -692,8 +692,11 @@ static void xyz2rqf(void)
 	float b = fifoin_pop_f();
 	float c = fifoin_pop_f();
 	float norm;
+	(void)a;
+	(void)b;
+	(void)c;
 	logerror("TGP xyz2rqf %f, %f, %f (%x)\n", a, b, c, activecpu_get_pc());
-	fifoout_push_f(sqrt(a*a+b*b+c*c));
+	fifoout_push_f((a*a+b*b+c*c)/sqrt(a*a+b*b+c*c));
 	norm = sqrt(a*a+c*c);
 	if(!c) {
 		if(a>=0)
@@ -729,6 +732,12 @@ static void f43(void)
 	float d = fifoin_pop_f();
 	float e = fifoin_pop_f();
 	float f = fifoin_pop_f();
+	(void)a;
+	(void)b;
+	(void)c;
+	(void)d;
+	(void)e;
+	(void)f;
 	logerror("TGP f43 %f, %f, %f, %f, %f, %f (%x)\n", a, b, c, d, e, f, activecpu_get_pc());
 	fifoout_push_f(0);
 	fifoout_push_f(0);
@@ -742,6 +751,9 @@ static void f43_swa(void)
 	float a = fifoin_pop_f();
 	int b = fifoin_pop();
 	int c = fifoin_pop();
+	(void)a;
+	(void)b;
+	(void)c;
 	logerror("TGP f43_swa %f, %d, %d (%x)\n", a, b, c, activecpu_get_pc());
 	fifoout_push_f(0);
 	fifoout_push_f(0);
@@ -752,6 +764,7 @@ static void f43_swa(void)
 static void f44(void)
 {
 	float a = fifoin_pop_f();
+	(void)a;
 	logerror("TGP f44 %f (%x)\n", a, activecpu_get_pc());
 	fifoout_push_f(0);
 	fifoout_push_f(0);
@@ -812,6 +825,7 @@ static void matrix_sdir(void)
 static void f45(void)
 {
 	float a = fifoin_pop_f();
+	(void)a;
 	logerror("TGP f45 %f (%x)\n", a, activecpu_get_pc());
 	fifoout_push_f(0);
 	next_fn();
@@ -819,11 +833,16 @@ static void f45(void)
 
 static void vlength(void)
 {
-	float a = fifoin_pop_f();
-	float b = fifoin_pop_f();
-	float c = fifoin_pop_f();
+	float a = fifoin_pop_f() - tgp_vr_base[0];
+	float b = fifoin_pop_f() - tgp_vr_base[1];
+	float c = fifoin_pop_f() - tgp_vr_base[2];
 	logerror("TGP vlength %f, %f, %f (%x)\n", a, b, c, activecpu_get_pc());
-	fifoout_push_f(sqrt(a*a+b*b+c*c));
+
+	a = (a*a+b*b+c*c);
+	b = 1/sqrt(a);
+	c = a * b;
+	c -= tgp_vr_base[3];
+	fifoout_push_f(c);
 	next_fn();
 }
 
@@ -838,11 +857,16 @@ static void f47(void)
 	next_fn();
 }
 
-static void f48(void)
+static void track_read_info(void)
 {
-    INT16 a = fifoin_pop();
-	logerror("TGP f48 %d (%x)\n", a, activecpu_get_pc());
-	fifoout_push(1000+a);
+	const UINT32 *tgp_data = (const UINT32 *)memory_region(REGION_USER2);
+    UINT16 a = fifoin_pop();
+	int offd;
+
+	logerror("TGP track_read_info %d (%x)\n", a, activecpu_get_pc());
+
+	offd = tgp_data[0x20+tgp_vr_select] + 16*a;
+	fifoout_push(tgp_data[offd+15]);
 	next_fn();
 }
 
@@ -881,6 +905,9 @@ static void colbox_test(void)
 	float a = fifoin_pop_f();
 	float b = fifoin_pop_f();
 	float c = fifoin_pop_f();
+	(void)a;
+	(void)b;
+	(void)c;
 	logerror("TGP colbox_test %f, %f, %f (%x)\n", a, b, c, activecpu_get_pc());
 
 	// #### Wrong, need to check with the tgp_vr_cbox coordinates
@@ -897,6 +924,12 @@ static void f49_swa(void)
 	float d = fifoin_pop_f();
 	float e = fifoin_pop_f();
 	float f = fifoin_pop_f();
+	(void)a;
+	(void)b;
+	(void)c;
+	(void)d;
+	(void)e;
+	(void)f;
 	logerror("TGP f49_swa %f, %f, %f, %f, %f, %f (%x)\n", a, b, c, d, e, f, activecpu_get_pc());
 	next_fn();
 }
@@ -907,6 +940,10 @@ static void f50_swa(void)
 	float b = fifoin_pop_f();
 	float c = fifoin_pop_f();
 	float d = fifoin_pop_f();
+	(void)a;
+	(void)b;
+	(void)c;
+	(void)d;
 	logerror("TGP f50_swa %f, %f, %f, %f (%x)\n", a, b, c, d, activecpu_get_pc());
 	fifoout_push_f(d);
 	next_fn();
@@ -925,6 +962,7 @@ static void matrix_rdir(void)
 	float c = fifoin_pop_f();
 	float norm = sqrt(a*a+c*c);
 	float t1, t2;
+	(void)b;
 
 	logerror("TGP matrix_rdir %f, %f, %f (%x)\n", a, b, c, activecpu_get_pc());
 
@@ -951,6 +989,21 @@ static void matrix_rdir(void)
 	next_fn();
 }
 
+// A+(B-A)*t1 + (C-A)*t2 = P
+static void tri_calc_pq(float ax, float ay, float bx, float by, float cx, float cy, float px, float py, float *t1, float *t2)
+{
+	float d;
+	bx -= ax;
+	cx -= ax;
+	px -= ax;
+	by -= ay;
+	cy -= ay;
+	py -= ay;
+	d = bx*cy-by*cx;
+	*t1 = (px*cy-py*cx)/d;
+	*t2 = (bx*py-by*px)/d;
+}
+
 static void track_lookup(void)
 {
 	const UINT32 *tgp_data = (const UINT32 *)memory_region(REGION_USER2);
@@ -960,8 +1013,8 @@ static void track_lookup(void)
 	float d = fifoin_pop_f();
 	int offi, offd, len;
 	float dist;
-	int offe=0, pt=0, i;
-	unsigned int behaviour;
+	int i;
+	unsigned int behaviour, entry;
 	float height;
 
 	logerror("TGP track_lookup %f, 0x%x, %f, %f (%x)\n", a, b, c, d, activecpu_get_pc());
@@ -972,38 +1025,39 @@ static void track_lookup(void)
 	len = tgp_data[offi++];
 
 	dist = -1;
-	if(len>20)
-		len = 0;
+
+	behaviour = 0;
+	height = 0.0;
+	entry = 0;
 
 	for(i=0; i<len; i++) {
 		int j;
-		int posd = offd + tgp_data[offi++]*0x10;
+		int bpos = tgp_data[offi++];
+		int posd = offd + bpos*0x10;
 		const float *pts = (const float *)(tgp_data+posd);
-		for(j=0; j<5; j++) {
-			float dx = c-pts[3*j+0];
-			float dy = a-pts[3*j+1];
-			float dz = d-pts[3*j+2];
-			float dd = dx*dx+dy*dy+dz*dz;
-			if(dist == -1 || dd<dist) {
-				dist = dd;
-				offe = posd;
-				pt = j;
+		float ax = pts[12];
+		float ay = pts[14];
+		float az = pts[13];
+		for(j=0; j<4; j++) {
+			float t1, t2;
+			int k = (j+1) & 3;
+			tri_calc_pq(ax, ay, pts[3*j], pts[3*j+2], pts[3*k], pts[3*k+2], c, d, &t1, &t2);
+			if(t1 >= 0 && t2 >= 0 && t1+t2 <= 1) {
+				float z = az+t1*(pts[3*j+1]-az)+t2*(pts[3*k+1]-az);
+				float d = (a-z)*(a-z);
+				if(dist == -1 || d<dist) {
+					dist = d;
+					behaviour = tgp_data[posd+15];
+					height = z;
+					entry = bpos+i;
 			}
 		}
 	}
-
-	if(dist == -1) {
-		behaviour = 0;
-		height = 0.0;
-	} else {
-		// Maybe it's doing some kind of interpolation, go figure
-		behaviour = tgp_data[offe+15];
-		height = u2f(tgp_data[offe+pt*3+1]);
 	}
 
 	ram_data[0x0000] = 0; // non zero = still computing
 	ram_data[0x8001] = f2u(height);
-	ram_data[0x8002] = behaviour;
+	ram_data[0x8002] = entry;
 
 	next_fn();
 }
@@ -1017,6 +1071,13 @@ static void f56(void)
 	float e = fifoin_pop_f();
 	float f = fifoin_pop_f();
 	UINT32 g = fifoin_pop();
+	(void)a;
+	(void)b;
+	(void)c;
+	(void)d;
+	(void)e;
+	(void)f;
+	(void)g;
 
 	logerror("TGP f56 %f, %f, %f, %f, %f, %f, %d (%x)\n", a, b, c, d, e, f, g, activecpu_get_pc());
 	fifoout_push(0);
@@ -1077,7 +1138,7 @@ static void col_testpt(void)
 	logerror("TGP col_testpt %f, %f (%x)\n", a, b, activecpu_get_pc());
 	x = a - tgp_vr_circx;
 	y = b - tgp_vr_circy;
-	fifoout_push_f(sqrt(x*x+y*y) - tgp_vr_circrad);
+	fifoout_push_f(((x*x+y*y)/sqrt(x*x+y*y)) - tgp_vr_circrad);
 	next_fn();
 }
 
@@ -1142,7 +1203,7 @@ static void distance(void)
 	logerror("TGP distance (%f, %f), (%f, %f) (%x)\n", a, b, c, d, activecpu_get_pc());
 	c -= a;
 	d -= b;
-	fifoout_push_f(sqrt(c*c+d*d));
+	fifoout_push_f((c*c+d*d)/sqrt(c*c+d*d));
 	next_fn();
 }
 
@@ -1353,6 +1414,9 @@ static void f89(void)
 	UINT32 b = fifoin_pop();
     UINT32 c = fifoin_pop();
 	UINT32 d = fifoin_pop();
+	(void)a;
+	(void)b;
+	(void)c;
 	logerror("TGP list set base 0x%x, 0x%x, %d, length=%d (%x)\n", a, b, c, d, activecpu_get_pc());
 	list_length = d;
 	next_fn();
@@ -1364,6 +1428,10 @@ static void f92(void)
 	float b = fifoin_pop_f();
 	float c = fifoin_pop_f();
 	float d = fifoin_pop_f();
+	(void)a;
+	(void)b;
+	(void)c;
+	(void)d;
 	logerror("TGP f92 %f, %f, %f, %f (%x)\n", a, b, c, d, activecpu_get_pc());
 	next_fn();
 }
@@ -1371,6 +1439,7 @@ static void f92(void)
 static void f93(void)
 {
 	float a = fifoin_pop_f();
+	(void)a;
 	logerror("TGP f93 %f (%x)\n", a, activecpu_get_pc());
 	next_fn();
 }
@@ -1378,6 +1447,7 @@ static void f93(void)
 static void f94(void)
 {
 	UINT32 a = fifoin_pop();
+	(void)a;
 	logerror("TGP f94 %d (%x)\n", a, activecpu_get_pc());
 	next_fn();
 }
@@ -1433,6 +1503,7 @@ static void f98_load(void)
 	int i;
 	for(i=0; i<list_length; i++) {
 		float f = fifoin_pop_f();
+		(void)f;
 		logerror("TGP load list (%2d/%2d) %f (%x)\n", i, list_length, f, activecpu_get_pc());
 	}
 	next_fn();
@@ -1441,6 +1512,7 @@ static void f98_load(void)
 static void f98(void)
 {
     UINT32 a = fifoin_pop();
+	(void)a;
 	logerror("TGP load list start %d (%x)\n", a, activecpu_get_pc());
 	fifoin_cbcount = list_length;
 	fifoin_cb = f98_load;
@@ -1569,7 +1641,7 @@ static struct function ftab_vf[] = {
 	{  20, matrix_rotx,     1 },
 	{  21, matrix_roty,     1 },
 	{  22, matrix_rotz,     1 },
-	{  24, f24, 1 },
+	{  24, track_read_quad, 1 },
 	{  26, transform_point, 3 },
 	{  27, fsin_m1,         1 },
 	{  28, fcos_m1,         1 },
@@ -1587,7 +1659,7 @@ static struct function ftab_vf[] = {
 	{  44, f44,   1 },
 	{  45, f45,   1 },
 	{  46, vlength,         3 },
-	{  48, f48,   1 },
+	{  48, track_read_info, 1 },
 	{  49, colbox_set,     12 },
 	{  50, colbox_test,     3 },
 	{  54, track_lookup,    4 },
@@ -1834,3 +1906,217 @@ void model1_tgp_reset(int swa)
 	state_save_register_float ("tgp", 0, "acc",           &acc, 1);
 	state_save_register_UINT32("tgp", 0, "list_length",   &list_length, 1);
 }
+
+/*********************************** Virtua Racing ***********************************/
+
+static int copro_fifoout_rpos, copro_fifoout_wpos;
+static UINT32 copro_fifoout_data[FIFO_SIZE];
+static int copro_fifoout_num;
+static int copro_fifoin_rpos, copro_fifoin_wpos;
+static UINT32 copro_fifoin_data[FIFO_SIZE];
+static int copro_fifoin_num;
+
+void model1_vr_tgp_reset( void )
+{
+	ram_adr = 0;
+	ram_data = auto_malloc(0x8000*4);
+	memset(ram_data, 0, 0x8000*4);
+
+	copro_fifoout_rpos = 0;
+	copro_fifoout_wpos = 0;
+	copro_fifoout_num = 0;
+	copro_fifoin_rpos = 0;
+	copro_fifoin_wpos = 0;
+	copro_fifoin_num = 0;
+}
+
+/* FIFO */
+static int copro_fifoin_pop(UINT32 *result)
+{
+	UINT32 r;
+
+	if (copro_fifoin_num == 0)
+	{
+		return 0;
+	}
+
+	r = copro_fifoin_data[copro_fifoin_rpos++];
+
+	if (copro_fifoin_rpos == FIFO_SIZE)
+	{
+		copro_fifoin_rpos = 0;
+	}
+
+	copro_fifoin_num--;
+
+	*result = r;
+
+	return 1;
+}
+
+static void copro_fifoin_push(UINT32 data)
+{
+	if (copro_fifoin_num == FIFO_SIZE)
+	{
+		fatalerror("Copro FIFOIN overflow (at %08X)", activecpu_get_pc());
+		return;
+	}
+
+	copro_fifoin_data[copro_fifoin_wpos++] = data;
+
+	if (copro_fifoin_wpos == FIFO_SIZE)
+	{
+		copro_fifoin_wpos = 0;
+	}
+
+	copro_fifoin_num++;
+}
+
+static UINT32 copro_fifoout_pop(void)
+{
+	UINT32 r;
+
+	if (copro_fifoout_num == 0)
+	{
+		// Reading from empty FIFO causes the v60 to enter wait state
+		extern void v60_stall(void);
+		v60_stall();
+
+		timer_set(TIME_NOW, 0, NULL);
+
+		return 0;
+	}
+
+	r = copro_fifoout_data[copro_fifoout_rpos++];
+
+	if (copro_fifoout_rpos == FIFO_SIZE)
+	{
+		copro_fifoout_rpos = 0;
+	}
+
+	copro_fifoout_num--;
+
+	return r;
+}
+
+static void copro_fifoout_push(UINT32 data)
+{
+	if (copro_fifoout_num == FIFO_SIZE)
+	{
+		fatalerror("Copro FIFOOUT overflow (at %08X)", activecpu_get_pc());
+		return;
+	}
+
+	copro_fifoout_data[copro_fifoout_wpos++] = data;
+
+	if (copro_fifoout_wpos == FIFO_SIZE)
+	{
+		copro_fifoout_wpos = 0;
+	}
+
+	copro_fifoout_num++;
+}
+
+static READ32_HANDLER(copro_ram_r)
+{
+	return ram_data[offset & 0x7fff];
+}
+
+static WRITE32_HANDLER(copro_ram_w)
+{
+	ram_data[offset&0x7fff] = data;
+}
+
+READ16_HANDLER( model1_tgp_vr_adr_r )
+{
+	if ( ram_adr == 0 && copro_fifoin_num != 0 )
+	{
+		/* spin the main cpu and let the TGP catch up */
+		cpu_spinuntil_time( TIME_IN_USEC(100));
+	}
+
+	return ram_adr;
+}
+
+WRITE16_HANDLER( model1_tgp_vr_adr_w )
+{
+	COMBINE_DATA(&ram_adr);
+}
+
+READ16_HANDLER( model1_vr_tgp_ram_r )
+{
+	UINT16	r;
+
+	if (!offset)
+	{
+		r = ram_data[ram_adr&0x7fff];
+	}
+	else
+	{
+		r = ram_data[ram_adr&0x7fff] >> 16;
+
+		if ( ram_adr == 0 && r == 0xffff )
+		{
+			/* if the TGP is busy, spin some more */
+			cpu_spinuntil_time( TIME_IN_USEC(100));
+		}
+
+		if ( ram_adr & 0x8000 )
+			ram_adr++;
+	}
+
+	return r;
+}
+
+WRITE16_HANDLER( model1_vr_tgp_ram_w )
+{
+	COMBINE_DATA(ram_latch+offset);
+
+	if (offset)
+	{
+		UINT32 v = ram_latch[0]|(ram_latch[1]<<16);
+		ram_data[ram_adr&0x7fff] = v;
+		if ( ram_adr & 0x8000 )
+			ram_adr++;
+	}
+}
+
+READ16_HANDLER( model1_vr_tgp_r )
+{
+	static UINT32 cur;
+
+	if (!offset)
+	{
+		cur = copro_fifoout_pop();
+		return cur;
+	}
+	else
+		return cur >> 16;
+}
+
+WRITE16_HANDLER( model1_vr_tgp_w )
+{
+	static UINT32 cur;
+
+	if (offset)
+	{
+		cur = (cur & 0x0000ffff) | (data << 16);
+		copro_fifoin_push(cur);
+	}
+	else
+		cur = (cur & 0xffff0000) | data;
+}
+
+/* TGP config */
+struct mb86233_config model1_vr_tgp_config =
+{
+	copro_fifoin_pop,
+	copro_fifoout_push
+};
+
+/* TGP memory map */
+ADDRESS_MAP_START( model1_vr_tgp_map, ADDRESS_SPACE_PROGRAM, 32 )
+	AM_RANGE(0x00000000, 0x000007ff) AM_RAM AM_REGION(REGION_CPU3, 0)
+	AM_RANGE(0x00400000, 0x00407fff) AM_READWRITE(copro_ram_r, copro_ram_w)
+	AM_RANGE(0xff800000, 0xff87ffff) AM_ROM AM_REGION(REGION_USER2, 0)
+ADDRESS_MAP_END

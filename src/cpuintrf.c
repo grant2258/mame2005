@@ -174,6 +174,7 @@ void tms7000_get_info(UINT32 state, union cpuinfo *info);
 void tms7000_exl_get_info(UINT32 state, union cpuinfo *info);
 #endif
 
+void mb86233_get_info(UINT32 state, union cpuinfo *info);
 
 /*************************************
  *
@@ -711,11 +712,14 @@ const struct
 #if (HAS_TMS7000)
 	{ CPU_TMS7000, tms7000_get_info },
 #endif
-#if (HAS_TMS7000_EXL)
+#if	(HAS_TMS7000_EXL)
 	{ CPU_TMS7000_EXL, tms7000_exl_get_info },
 #endif
 #endif /* MESS */
-
+//new cpu cores that are to be added go here
+#if (HAS_MB86233)
+	{ CPU_MB86233, mb86233_get_info },
+#endif
 };
 
 

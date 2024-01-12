@@ -71,11 +71,11 @@
 					- calls InitCheat() [cheat.c] to initialize the cheat system
 					- calls the driver's NVRAM_HANDLER to load NVRAM
 					- calls cpu_run() [cpuexec.c]
-					
+
 					cpu_run() [cpuexec.c]
 						- calls mame_debug_init() [mamedbg.c] to init the debugger (old debugger only)
 						- calls cpu_pre_run() [cpuexec.c]
-						
+
 						cpu_pre_run() [cpuexec.c]
 							- begins resource tracking (level 3)
 							- calls hs_open() and hs_init() [hiscore.c] to set up high score hacks
@@ -88,17 +88,17 @@
 							- calls cpu_vblankreset() [cpuexec.c] to set up the first VBLANK callback
 
 						--------------( at this point, we're up and running )---------------------------
-						
+
 						- calls cpu_post_run() [cpuexec.c]
-						
+
 						cpu_post_run() [cpuexec.c]
 							- calls hs_close() [hiscore.c] to flush high score data
 							- calls the driver's MACHINE_STOP callback
 							- ends resource tracking (level 3), freeing all auto_mallocs and timers
-						
+
 						- if the machine is just being reset, loops back to the cpu_pre_run() step above
 						- calls mame_debug_exit() [mamedbg.c] to shut down the debugger (old debugger only)
-					
+
 					- calls the driver's NVRAM_HANDLER to save NVRAM
 					- calls StopCheat() [cheat.c] to tear down the cheat system
 					- calls save_input_port_settings() [inptport.c] to save the game's configuration
@@ -279,7 +279,9 @@ INLINE void bail_and_print(const char *message)
 	{
 		bailing = 1;
 		printf("%s\n", message);
+		exit(0); // just exit ra has issues 
 	}
+
 }
 
 
@@ -303,9 +305,7 @@ int run_game(int game)
 
 	/* validity checks -- the default is to perform these in all builds now
 	 * due to the number of incorrect submissions */
-	if (!options.skip_validitychecks)
-		if (mame_validitychecks())
-			return 1;
+
 
 	/* first give the machine a good cleaning */
 	memset(Machine, 0, sizeof(Machine));
@@ -337,7 +337,9 @@ int run_game(int game)
 
 	/* here's the meat of it all */
 	bailing = 0;
-
+	if (!options.skip_validitychecks)
+		mame_validitychecks();
+			
 	/* let the OSD layer start up first */
 	if (osd_init())
 		bail_and_print("Unable to initialize system");
@@ -557,7 +559,7 @@ static int run_machine(void)
 }
 
 void run_machine_done(void)
-{				
+{
 	sound_stop();
 
     /* shut down the driver's video and kill and artwork */
@@ -655,7 +657,7 @@ void run_machine_core_done(void)
 				/* save input ports settings */
 				save_input_port_settings();
 }
-		
+
 /*-------------------------------------------------
 	shutdown_machine - tear down the emulated
 	machine
@@ -2279,7 +2281,7 @@ int mame_validitychecks(void)
 						error = 1;
 					}
 			}
-			
+
 			for (j = 0; j < MAX_SOUND && drv.sound[j].sound_type != SOUND_DUMMY; j++)
 			{
 				int k, l;
@@ -2301,7 +2303,7 @@ int mame_validitychecks(void)
 					}
 				}
 			}
-			
+
 			end_resource_tracking();
 		}
 	}

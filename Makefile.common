@@ -24,11 +24,9 @@ SOURCES_C += \
 	$(CORE_DIR)/audit.c $(CORE_DIR)/info.c $(CORE_DIR)/png.c $(CORE_DIR)/artwork.c \
 	$(CORE_DIR)/tilemap.c $(CORE_DIR)/fileio.c \
 	$(CORE_DIR)/state.c $(CORE_DIR)/datafile.c $(CORE_DIR)/hiscore.c \
-	$(sort $(CPUOBJS)) \
 	$(CORE_DIR)/sndintrf.c \
 	$(CORE_DIR)/sound/streams.c $(CORE_DIR)/sound/filter.c \
 	$(CORE_DIR)/sound/flt_vol.c $(CORE_DIR)/sound/flt_rc.c \
-	$(sort $(SOUNDOBJS)) \
 	$(CORE_DIR)/vidhrdw/generic.c $(CORE_DIR)/vidhrdw/vector.c \
 	$(CORE_DIR)/machine/eeprom.c \
 	$(CORE_DIR)/profiler.c \
@@ -36,7 +34,7 @@ SOURCES_C += \
 	$(CORE_DIR)/chd.c $(CORE_DIR)/harddisk.c $(CORE_DIR)/md5.c \
 	$(CORE_DIR)/cdrom.c \
 	$(CORE_DIR)/sound/wavwrite.c \
-	$(CORE_DIR)/expat/xmlparse.c  $(CORE_DIR)/expat/xmlrole.c  $(CORE_DIR)/expat/xmltok.c    
+	$(CORE_DIR)/expat/xmlparse.c  $(CORE_DIR)/expat/xmlrole.c  $(CORE_DIR)/expat/xmltok.c  
 
 # uncomment the following lines to include a CPU core
 CPUS+=Z80@
@@ -146,9 +144,7 @@ CPUS+=E116T@
 CPUS+=E132N@
 #CPUS+=E132T@
 #CPUS+=E132XN@
-CPUS+=E132XT@ -
-CPUDEFS += -DHAS_E132N -DHAS_E116T -DHAS_E132XT
-
+CPUS+=E132XT@
 #CPUS+=E132XS@
 #CPUS+=E132XSR@
 CPUS+=GMS30C2116@
@@ -165,6 +161,7 @@ CPUS+=PPC602@
 CPUS+=PPC603@
 CPUS+=SE3208@
 CPUS+=MC68HC11@
+CPUS+=MB86233@
 
 # uncomment the following lines to include a sound core
 SOUNDS+=CUSTOM@
@@ -244,13 +241,12 @@ SOUNDS+=VRENDER0@
 
 SOURCES_C += \
 
-
 # List of CPU core (and, for a debug build, disassembler) object files
-
 CPU=$(strip $(findstring Z80@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_Z80=1
 SOURCES_C += $(CORE_DIR)/cpu/z80/z80.c
+SOURCES_C += $(CORE_DIR)/cpu/z80/z80dasm.c
 else
 CPUDEFS += -DHAS_Z80=0
 endif
@@ -259,6 +255,7 @@ CPU=$(strip $(findstring Z180@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_Z180=1
 SOURCES_C += $(CORE_DIR)/cpu/z180/z180.c
+SOURCES_C += $(CORE_DIR)/cpu/z180/z180dasm.c
 else
 CPUDEFS += -DHAS_Z180=0
 endif
@@ -267,6 +264,7 @@ CPU=$(strip $(findstring 8080@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_8080=1
 SOURCES_C += $(CORE_DIR)/cpu/i8085/i8085.c
+SOURCES_C += $(CORE_DIR)/cpu/i8085/8085dasm.c
 else
 CPUDEFS += -DHAS_8080=0
 endif
@@ -274,6 +272,8 @@ endif
 CPU=$(strip $(findstring 8085A@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_8085A=1
+SOURCES_C += $(CORE_DIR)/cpu/i8085/i8085.c
+SOURCES_C += $(CORE_DIR)/cpu/i8085/8085dasm.c
 else
 CPUDEFS += -DHAS_8085A=0
 endif
@@ -282,6 +282,7 @@ CPU=$(strip $(findstring M6502@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_M6502=1
 SOURCES_C += $(CORE_DIR)/cpu/m6502/m6502.c
+SOURCES_C += $(CORE_DIR)/cpu/m6502/6502dasm.c
 else
 CPUDEFS += -DHAS_M6502=0
 endif
@@ -289,6 +290,8 @@ endif
 CPU=$(strip $(findstring M65C02@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_M65C02=1
+SOURCES_C += $(CORE_DIR)/cpu/m6502/m6502.c
+SOURCES_C += $(CORE_DIR)/cpu/m6502/6502dasm.c
 else
 CPUDEFS += -DHAS_M65C02=0
 endif
@@ -296,6 +299,8 @@ endif
 CPU=$(strip $(findstring M65SC02@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_M65SC02=1
+SOURCES_C += $(CORE_DIR)/cpu/m6502/m6502.c
+SOURCES_C += $(CORE_DIR)/cpu/m6502/6502dasm.c
 else
 CPUDEFS += -DHAS_M65SC02=0
 endif
@@ -303,6 +308,8 @@ endif
 CPU=$(strip $(findstring M65CE02@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_M65CE02=1
+SOURCES_C += $(CORE_DIR)/cpu/m6502/m65ce02.c
+SOURCES_C += $(CORE_DIR)/cpu/m6502/6502dasm.c
 else
 CPUDEFS += -DHAS_M65CE02=0
 endif
@@ -311,6 +318,7 @@ CPU=$(strip $(findstring M6509@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_M6509=1
 SOURCES_C += $(CORE_DIR)/cpu/m6502/m6509.c
+SOURCES_C += $(CORE_DIR)/cpu/m6502/6502dasm.c
 else
 CPUDEFS += -DHAS_M6509=0
 endif
@@ -318,6 +326,8 @@ endif
 CPU=$(strip $(findstring M6510@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_M6510=1
+SOURCES_C += $(CORE_DIR)/cpu/m6502/m6502.c
+SOURCES_C += $(CORE_DIR)/cpu/m6502/6502dasm.c
 else
 CPUDEFS += -DHAS_M6510=0
 endif
@@ -325,7 +335,8 @@ endif
 CPU=$(strip $(findstring M6510T@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_M6510=1 -DHAS_M6510T=1
-
+SOURCES_C += $(CORE_DIR)/cpu/m6502/m6502.c
+SOURCES_C += $(CORE_DIR)/cpu/m6502/6502dasm.c
 else
 CPUDEFS += -DHAS_M6510T=0
 endif
@@ -333,6 +344,8 @@ endif
 CPU=$(strip $(findstring M7501@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_M6510=1 -DHAS_M7501=1
+SOURCES_C += $(CORE_DIR)/cpu/m6502/m6502.c
+SOURCES_C += $(CORE_DIR)/cpu/m6502/6502dasm.c
 else
 CPUDEFS += -DHAS_M7501=0
 endif
@@ -340,6 +353,8 @@ endif
 CPU=$(strip $(findstring M8502@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_M6510=1 -DHAS_M8502=1
+SOURCES_C += $(CORE_DIR)/cpu/m6502/m6502.c
+SOURCES_C += $(CORE_DIR)/cpu/m6502/6502dasm.c
 else
 CPUDEFS += -DHAS_M8502=0
 endif
@@ -347,6 +362,8 @@ endif
 CPU=$(strip $(findstring N2A03@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_N2A03=1
+SOURCES_C += $(CORE_DIR)/cpu/m6502/m6502.c
+SOURCES_C += $(CORE_DIR)/cpu/m6502/6502dasm.c
 else
 CPUDEFS += -DHAS_N2A03=0
 endif
@@ -354,6 +371,8 @@ endif
 CPU=$(strip $(findstring DECO16@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_DECO16=1
+SOURCES_C += $(CORE_DIR)/cpu/m6502/m6502.c
+SOURCES_C += $(CORE_DIR)/cpu/m6502/6502dasm.c
 else
 CPUDEFS += -DHAS_DECO16=0
 endif
@@ -362,6 +381,7 @@ CPU=$(strip $(findstring M4510@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_M4510=1
 SOURCES_C += $(CORE_DIR)/cpu/m6502/m4510.c
+SOURCES_C += $(CORE_DIR)/cpu/m6502/6502dasm.c
 else
 CPUDEFS += -DHAS_M4510=0
 endif
@@ -370,6 +390,7 @@ CPU=$(strip $(findstring H6280@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_H6280=1
 SOURCES_C += $(CORE_DIR)/cpu/h6280/h6280.c
+SOURCES_C += $(CORE_DIR)/cpu/h6280/6280dasm.c
 else
 CPUDEFS += -DHAS_H6280=0
 endif
@@ -378,6 +399,7 @@ CPU=$(strip $(findstring I86@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_I86=1
 SOURCES_C += $(CORE_DIR)/cpu/i86/i86.c
+SOURCES_C += $(CORE_DIR)/cpu/i386/i386dasm.c
 else
 CPUDEFS += -DHAS_I86=0
 endif
@@ -385,6 +407,8 @@ endif
 CPU=$(strip $(findstring I88@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_I88=1
+SOURCES_C += $(CORE_DIR)/cpu/i86/i86.c
+SOURCES_C += $(CORE_DIR)/cpu/i386/i386dasm.c
 else
 CPUDEFS += -DHAS_I88=0
 endif
@@ -392,6 +416,8 @@ endif
 CPU=$(strip $(findstring I186@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_I186=1
+SOURCES_C += $(CORE_DIR)/cpu/i86/i86.c
+SOURCES_C += $(CORE_DIR)/cpu/i386/i386dasm.c
 else
 CPUDEFS += -DHAS_I186=0
 endif
@@ -399,6 +425,8 @@ endif
 CPU=$(strip $(findstring I188@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_I188=1
+SOURCES_C += $(CORE_DIR)/cpu/i86/i86.c
+SOURCES_C += $(CORE_DIR)/cpu/i386/i386dasm.c
 else
 CPUDEFS += -DHAS_I188=0
 endif
@@ -407,6 +435,7 @@ CPU=$(strip $(findstring I286@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_I286=1
 SOURCES_C += $(CORE_DIR)/cpu/i86/i286.c
+SOURCES_C += $(CORE_DIR)/cpu/i386/i386dasm.c
 else
 CPUDEFS += -DHAS_I286=0
 endif
@@ -415,6 +444,7 @@ CPU=$(strip $(findstring I386@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_I386=1
 SOURCES_C += $(CORE_DIR)/cpu/i386/i386.c
+SOURCES_C += $(CORE_DIR)/cpu/i386/i386dasm.c
 else
 CPUDEFS += -DHAS_I386=0
 endif
@@ -423,6 +453,7 @@ CPU=$(strip $(findstring V20@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_V20=1
 SOURCES_C += $(CORE_DIR)/cpu/nec/nec.c
+SOURCES_C += $(CORE_DIR)/cpu/i386/i386dasm.c
 else
 CPUDEFS += -DHAS_V20=0
 endif
@@ -430,6 +461,8 @@ endif
 CPU=$(strip $(findstring V30@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_V30=1
+SOURCES_C += $(CORE_DIR)/cpu/nec/nec.c
+SOURCES_C += $(CORE_DIR)/cpu/i386/i386dasm.c
 else
 CPUDEFS += -DHAS_V30=0
 endif
@@ -437,6 +470,8 @@ endif
 CPU=$(strip $(findstring V33@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_V33=1
+SOURCES_C += $(CORE_DIR)/cpu/nec/nec.c
+SOURCES_C += $(CORE_DIR)/cpu/i386/i386dasm.c
 else
 CPUDEFS += -DHAS_V33=0
 endif
@@ -445,6 +480,7 @@ CPU=$(strip $(findstring V60@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_V60=1
 SOURCES_C += $(CORE_DIR)/cpu/v60/v60.c
+SOURCES_C += $(CORE_DIR)/cpu/v60/v60d.c
 else
 CPUDEFS += -DHAS_V60=0
 endif
@@ -452,6 +488,8 @@ endif
 CPU=$(strip $(findstring V70@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_V70=1
+SOURCES_C += $(CORE_DIR)/cpu/v60/v60.c
+SOURCES_C += $(CORE_DIR)/cpu/v60/v60d.c
 else
 CPUDEFS += -DHAS_V70=0
 endif
@@ -460,6 +498,7 @@ CPU=$(strip $(findstring I8035@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_I8035=1
 SOURCES_C += $(CORE_DIR)/cpu/i8039/i8039.c
+SOURCES_C += $(CORE_DIR)/cpu/i8039/8039dasm.c
 else
 CPUDEFS += -DHAS_I8035=0
 endif
@@ -467,6 +506,8 @@ endif
 CPU=$(strip $(findstring I8039@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_I8039=1
+SOURCES_C += $(CORE_DIR)/cpu/i8039/i8039.c
+SOURCES_C += $(CORE_DIR)/cpu/i8039/8039dasm.c
 else
 CPUDEFS += -DHAS_I8039=0
 endif
@@ -474,6 +515,8 @@ endif
 CPU=$(strip $(findstring I8048@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_I8048=1
+SOURCES_C += $(CORE_DIR)/cpu/i8039/i8039.c
+SOURCES_C += $(CORE_DIR)/cpu/i8039/8039dasm.c
 else
 CPUDEFS += -DHAS_I8048=0
 endif
@@ -481,6 +524,8 @@ endif
 CPU=$(strip $(findstring N7751@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_N7751=1
+SOURCES_C += $(CORE_DIR)/cpu/i8039/i8039.c
+SOURCES_C += $(CORE_DIR)/cpu/i8039/8039dasm.c
 else
 CPUDEFS += -DHAS_N7751=0
 endif
@@ -489,14 +534,52 @@ CPU=$(strip $(findstring I8X41@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_I8X41=1
 SOURCES_C += $(CORE_DIR)/cpu/i8x41/i8x41.c
+SOURCES_C += $(CORE_DIR)/cpu/i8x41/8x41dasm.c
 else
 CPUDEFS += -DHAS_I8X41=0
+endif
+
+CPU=$(strip $(findstring I8051@,$(CPUS)))
+ifneq ($(CPU),)
+CPUDEFS += -DHAS_I8051=1
+SOURCES_C += $(CORE_DIR)/cpu/i8051/i8051.c
+SOURCES_C += $(CORE_DIR)/cpu/i8051/8051dasm.c
+else
+CPUDEFS += -DHAS_I8051=0
+endif
+
+CPU=$(strip $(findstring I8052@,$(CPUS)))
+ifneq ($(CPU),)
+CPUDEFS += -DHAS_I8052=1
+SOURCES_C += $(CORE_DIR)/cpu/i8051/i8051.c
+SOURCES_C += $(CORE_DIR)/cpu/i8051/8051dasm.c
+else
+CPUDEFS += -DHAS_I8052=0
+endif
+
+CPU=$(strip $(findstring I8751@,$(CPUS)))
+ifneq ($(CPU),)
+CPUDEFS += -DHAS_I8751=1
+SOURCES_C += $(CORE_DIR)/cpu/i8051/i8051.c
+SOURCES_C += $(CORE_DIR)/cpu/i8051/8051dasm.c
+else
+CPUDEFS += -DHAS_I8751=0
+endif
+
+CPU=$(strip $(findstring I8752@,$(CPUS)))
+ifneq ($(CPU),)
+CPUDEFS += -DHAS_I8752=1
+SOURCES_C += $(CORE_DIR)/cpu/i8051/i8051.c
+SOURCES_C += $(CORE_DIR)/cpu/i8051/8051dasm.c
+else
+CPUDEFS += -DHAS_I8752=0
 endif
 
 CPU=$(strip $(findstring M6800@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_M6800=1
 SOURCES_C += $(CORE_DIR)/cpu/m6800/m6800.c
+SOURCES_C += $(CORE_DIR)/cpu/m6800/6800dasm.c
 else
 CPUDEFS += -DHAS_M6800=0
 endif
@@ -504,6 +587,8 @@ endif
 CPU=$(strip $(findstring M6801@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_M6801=1
+SOURCES_C += $(CORE_DIR)/cpu/m6800/m6800.c
+SOURCES_C += $(CORE_DIR)/cpu/m6800/6800dasm.c
 else
 CPUDEFS += -DHAS_M6801=0
 endif
@@ -511,6 +596,8 @@ endif
 CPU=$(strip $(findstring M6802@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_M6802=1
+SOURCES_C += $(CORE_DIR)/cpu/m6800/m6800.c
+SOURCES_C += $(CORE_DIR)/cpu/m6800/6800dasm.c
 else
 CPUDEFS += -DHAS_M6802=0
 endif
@@ -518,6 +605,8 @@ endif
 CPU=$(strip $(findstring M6803@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_M6803=1
+SOURCES_C += $(CORE_DIR)/cpu/m6800/m6800.c
+SOURCES_C += $(CORE_DIR)/cpu/m6800/6800dasm.c
 else
 CPUDEFS += -DHAS_M6803=0
 endif
@@ -525,6 +614,8 @@ endif
 CPU=$(strip $(findstring M6808@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_M6808=1
+SOURCES_C += $(CORE_DIR)/cpu/m6800/m6800.c
+SOURCES_C += $(CORE_DIR)/cpu/m6800/6800dasm.c
 else
 CPUDEFS += -DHAS_M6808=0
 endif
@@ -532,6 +623,8 @@ endif
 CPU=$(strip $(findstring HD63701@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_HD63701=1
+SOURCES_C += $(CORE_DIR)/cpu/m6800/m6800.c
+SOURCES_C += $(CORE_DIR)/cpu/m6800/6800dasm.c
 else
 CPUDEFS += -DHAS_HD63701=0
 endif
@@ -539,6 +632,8 @@ endif
 CPU=$(strip $(findstring NSC8105@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_NSC8105=1
+SOURCES_C += $(CORE_DIR)/cpu/m6800/m6800.c
+SOURCES_C += $(CORE_DIR)/cpu/m6800/6800dasm.c
 else
 CPUDEFS += -DHAS_NSC8105=0
 endif
@@ -547,6 +642,7 @@ CPU=$(strip $(findstring M6805@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_M6805=1
 SOURCES_C += $(CORE_DIR)/cpu/m6805/m6805.c
+SOURCES_C += $(CORE_DIR)/cpu/m6805/6805dasm.c
 else
 CPUDEFS += -DHAS_M6805=0
 endif
@@ -554,6 +650,8 @@ endif
 CPU=$(strip $(findstring M68705@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_M68705=1
+SOURCES_C += $(CORE_DIR)/cpu/m6805/m6805.c
+SOURCES_C += $(CORE_DIR)/cpu/m6805/6805dasm.c
 else
 CPUDEFS += -DHAS_M68705=0
 endif
@@ -561,6 +659,8 @@ endif
 CPU=$(strip $(findstring HD63705@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_HD63705=1
+SOURCES_C += $(CORE_DIR)/cpu/m6805/m6805.c
+SOURCES_C += $(CORE_DIR)/cpu/m6805/6805dasm.c
 else
 CPUDEFS += -DHAS_HD63705=0
 endif
@@ -569,6 +669,7 @@ CPU=$(strip $(findstring HD6309@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_HD6309=1
 SOURCES_C += $(CORE_DIR)/cpu/hd6309/hd6309.c
+SOURCES_C += $(CORE_DIR)/cpu/hd6309/6309dasm.c
 else
 CPUDEFS += -DHAS_HD6309=0
 endif
@@ -577,6 +678,7 @@ CPU=$(strip $(findstring M6809@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_M6809=1
 SOURCES_C += $(CORE_DIR)/cpu/m6809/m6809.c
+SOURCES_C += $(CORE_DIR)/cpu/m6809/6809dasm.c
 else
 CPUDEFS += -DHAS_M6809=0
 endif
@@ -584,6 +686,8 @@ endif
 CPU=$(strip $(findstring M6809E@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_M6809E=1
+SOURCES_C += $(CORE_DIR)/cpu/m6809/m6809.c
+SOURCES_C += $(CORE_DIR)/cpu/m6809/6809dasm.c
 else
 CPUDEFS += -DHAS_M6809E=0
 endif
@@ -592,6 +696,7 @@ CPU=$(strip $(findstring KONAMI@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_KONAMI=1
 SOURCES_C += $(CORE_DIR)/cpu/konami/konami.c
+SOURCES_C += $(CORE_DIR)/cpu/konami/knmidasm.c
 else
 CPUDEFS += -DHAS_KONAMI=0
 endif
@@ -599,17 +704,12 @@ endif
 CPU=$(strip $(findstring M68000@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_M68000=1
-ifdef X86_ASM_68000
-SOURCES_C += $(CORE_DIR)/cpu/m68000/asmintf.c $(CORE_DIR)/cpu/m68000/68000.c
-ASMDEFS += -DA68K0
-else
 M68000_GENERATED_OBJS = \
 $(CORE_DIR)/cpu/m68000/m68kops.o $(CORE_DIR)/cpu/m68000/m68kopac.o \
 $(CORE_DIR)/cpu/m68000/m68kopdm.o $(CORE_DIR)/cpu/m68000/m68kopnz.o
 SOURCES_C += $(CORE_DIR)/cpu/m68000/m68kcpu.c $(CORE_DIR)/cpu/m68000/m68kmame.c \
 $(CORE_DIR)/cpu/m68000/m68kops.o $(CORE_DIR)/cpu/m68000/m68kopac.o \
 $(CORE_DIR)/cpu/m68000/m68kopdm.o $(CORE_DIR)/cpu/m68000/m68kopnz.o
-endif
 else
 CPUDEFS += -DHAS_M68000=0
 endif
@@ -617,6 +717,7 @@ endif
 CPU=$(strip $(findstring M68008@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_M68008=1
+
 else
 CPUDEFS += -DHAS_M68008=0
 endif
@@ -624,18 +725,27 @@ endif
 CPU=$(strip $(findstring M68010@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_M68010=1
+M68000_GENERATED_OBJS = \
+$(CORE_DIR)/cpu/m68000/m68kops.o $(CORE_DIR)/cpu/m68000/m68kopac.o \
+$(CORE_DIR)/cpu/m68000/m68kopdm.o $(CORE_DIR)/cpu/m68000/m68kopnz.o
+SOURCES_C += $(CORE_DIR)/cpu/m68000/m68kcpu.c $(CORE_DIR)/cpu/m68000/m68kmame.c \
+$(CORE_DIR)/cpu/m68000/m68kops.o $(CORE_DIR)/cpu/m68000/m68kopac.o \
+$(CORE_DIR)/cpu/m68000/m68kopdm.o $(CORE_DIR)/cpu/m68000/m68kopnz.o
+SOURCES_C += $(CORE_DIR)/cpu/m68000/m68kdasm.c
 else
 CPUDEFS += -DHAS_M68010=0
 endif
 
 CPU=$(strip $(findstring M68EC020@,$(CPUS)))
 ifneq ($(CPU),)
-CPUDEFS += -DHAS_M68EC020=1
-ifdef X86_ASM_68020
-ASMDEFS += -DA68K2
-SOURCES_C += $(CORE_DIR)/cpu/m68000/asmintf.c $(CORE_DIR)/cpu/m68000/68020.c
-ASMDEFS += -DA68KEM
-endif
+CPUDEFS += -DHAS_M68EC020=1 
+M68000_GENERATED_OBJS = \
+$(CORE_DIR)/cpu/m68000/m68kops.o $(CORE_DIR)/cpu/m68000/m68kopac.o \
+$(CORE_DIR)/cpu/m68000/m68kopdm.o $(CORE_DIR)/cpu/m68000/m68kopnz.o
+SOURCES_C += $(CORE_DIR)/cpu/m68000/m68kcpu.c $(CORE_DIR)/cpu/m68000/m68kmame.c \
+$(CORE_DIR)/cpu/m68000/m68kops.o $(CORE_DIR)/cpu/m68000/m68kopac.o \
+$(CORE_DIR)/cpu/m68000/m68kopdm.o $(CORE_DIR)/cpu/m68000/m68kopnz.o
+SOURCES_C += $(CORE_DIR)/cpu/m68000/m68kdasm.c
 else
 CPUDEFS += -DHAS_M68EC020=0
 endif
@@ -643,6 +753,13 @@ endif
 CPU=$(strip $(findstring M68020@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_M68020=1
+M68000_GENERATED_OBJS = \
+$(CORE_DIR)/cpu/m68000/m68kops.o $(CORE_DIR)/cpu/m68000/m68kopac.o \
+$(CORE_DIR)/cpu/m68000/m68kopdm.o $(CORE_DIR)/cpu/m68000/m68kopnz.o
+SOURCES_C += $(CORE_DIR)/cpu/m68000/m68kcpu.c $(CORE_DIR)/cpu/m68000/m68kmame.c \
+$(CORE_DIR)/cpu/m68000/m68kops.o $(CORE_DIR)/cpu/m68000/m68kopac.o \
+$(CORE_DIR)/cpu/m68000/m68kopdm.o $(CORE_DIR)/cpu/m68000/m68kopnz.o
+SOURCES_C += $(CORE_DIR)/cpu/m68000/m68kdasm.c
 else
 CPUDEFS += -DHAS_M68020=0
 endif
@@ -651,6 +768,7 @@ CPU=$(strip $(findstring T11@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_T11=1
 SOURCES_C += $(CORE_DIR)/cpu/t11/t11.c
+SOURCES_C += $(CORE_DIR)/cpu/t11/t11dasm.c
 else
 CPUDEFS += -DHAS_T11=0
 endif
@@ -659,6 +777,7 @@ CPU=$(strip $(findstring S2650@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_S2650=1
 SOURCES_C += $(CORE_DIR)/cpu/s2650/s2650.c
+SOURCES_C += $(CORE_DIR)/cpu/s2650/2650dasm.c
 else
 CPUDEFS += -DHAS_S2650=0
 endif
@@ -667,6 +786,7 @@ CPU=$(strip $(findstring TMS34010@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_TMS34010=1
 SOURCES_C += $(CORE_DIR)/cpu/tms34010/tms34010.c $(CORE_DIR)/cpu/tms34010/34010fld.c
+SOURCES_C += $(CORE_DIR)/cpu/tms34010/34010dsm.c
 else
 CPUDEFS += -DHAS_TMS34010=0
 endif
@@ -674,6 +794,8 @@ endif
 CPU=$(strip $(findstring TMS34020@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_TMS34020=1
+SOURCES_C += $(CORE_DIR)/cpu/tms34010/tms34010.c $(CORE_DIR)/cpu/tms34010/34010fld.c
+SOURCES_C += $(CORE_DIR)/cpu/tms34010/34010dsm.c
 else
 CPUDEFS += -DHAS_TMS34020=0
 endif
@@ -682,6 +804,7 @@ CPU=$(strip $(findstring TMS9900@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_TMS9900=1
 SOURCES_C += $(CORE_DIR)/cpu/tms9900/tms9900.c
+SOURCES_C += $(CORE_DIR)/cpu/tms9900/9900dasm.c
 else
 CPUDEFS += -DHAS_TMS9900=0
 endif
@@ -689,6 +812,8 @@ endif
 CPU=$(strip $(findstring TMS9940@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_TMS9940=1
+SOURCES_C += $(CORE_DIR)/cpu/tms9900/tms9900.c
+SOURCES_C += $(CORE_DIR)/cpu/tms9900/9900dasm.c
 else
 CPUDEFS += -DHAS_TMS9940=0
 endif
@@ -697,6 +822,7 @@ CPU=$(strip $(findstring TMS9980@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_TMS9980=1
 SOURCES_C += $(CORE_DIR)/cpu/tms9900/tms9980a.c
+SOURCES_C += $(CORE_DIR)/cpu/tms9900/9900dasm.c
 else
 CPUDEFS += -DHAS_TMS9980=0
 endif
@@ -704,6 +830,8 @@ endif
 CPU=$(strip $(findstring TMS9985@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_TMS9985=1
+SOURCES_C += $(CORE_DIR)/cpu/tms9900/tms9980a.c
+SOURCES_C += $(CORE_DIR)/cpu/tms9900/9900dasm.c
 else
 CPUDEFS += -DHAS_TMS9985=0
 endif
@@ -711,6 +839,8 @@ endif
 CPU=$(strip $(findstring TMS9989@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_TMS9989=1
+SOURCES_C += $(CORE_DIR)/cpu/tms9900/tms9980a.c
+SOURCES_C += $(CORE_DIR)/cpu/tms9900/9900dasm.c
 else
 CPUDEFS += -DHAS_TMS9989=0
 endif
@@ -719,6 +849,7 @@ CPU=$(strip $(findstring TMS9995@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_TMS9995=1
 SOURCES_C += $(CORE_DIR)/cpu/tms9900/tms9995.c
+SOURCES_C += $(CORE_DIR)/cpu/tms9900/9900dasm.c
 else
 CPUDEFS += -DHAS_TMS9995=0
 endif
@@ -726,6 +857,8 @@ endif
 CPU=$(strip $(findstring TMS9900@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_TMS99000=1
+SOURCES_C += $(CORE_DIR)/cpu/tms9900/tms9900.c
+SOURCES_C += $(CORE_DIR)/cpu/tms9900/9900dasm.c
 else
 CPUDEFS += -DHAS_TMS99000=0
 endif
@@ -734,6 +867,7 @@ CPU=$(strip $(findstring TMS99010@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_TI990_10=1
 SOURCES_C += $(CORE_DIR)/cpu/tms9900/ti990_10.c
+SOURCES_C += $(CORE_DIR)/cpu/tms9900/9900dasm.c
 else
 CPUDEFS += -DHAS_TI990_10=0
 endif
@@ -741,6 +875,8 @@ endif
 CPU=$(strip $(findstring TMS99105A@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_TMS99105A=1
+SOURCES_C += $(CORE_DIR)/cpu/tms9900/tms9995.c
+SOURCES_C += $(CORE_DIR)/cpu/tms9900/9900dasm.c
 else
 CPUDEFS += -DHAS_TMS99105A=0
 endif
@@ -748,6 +884,8 @@ endif
 CPU=$(strip $(findstring TMS99110A@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_TMS99110A=1
+SOURCES_C += $(CORE_DIR)/cpu/tms9900/tms9995.c
+SOURCES_C += $(CORE_DIR)/cpu/tms9900/9900dasm.c
 else
 CPUDEFS += -DHAS_TMS99110A=0
 endif
@@ -756,6 +894,7 @@ CPU=$(strip $(findstring Z8000@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_Z8000=1
 SOURCES_C += $(CORE_DIR)/cpu/z8000/z8000.c
+SOURCES_C += $(CORE_DIR)/cpu/z8000/8000dasm.c
 else
 CPUDEFS += -DHAS_Z8000=0
 endif
@@ -764,6 +903,7 @@ CPU=$(strip $(findstring TMS32010@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_TMS32010=1
 SOURCES_C += $(CORE_DIR)/cpu/tms32010/tms32010.c
+//SOURCES_C += $(CORE_DIR)/cpu/tms32010/32010dsm.c
 else
 CPUDEFS += -DHAS_TMS32010=0
 endif
@@ -772,6 +912,7 @@ CPU=$(strip $(findstring TMS32025@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_TMS32025=1
 SOURCES_C += $(CORE_DIR)/cpu/tms32025/tms32025.c
+//SOURCES_C += $(CORE_DIR)/cpu/tms32025/32025dsm.c
 else
 CPUDEFS += -DHAS_TMS32025=0
 endif
@@ -779,6 +920,8 @@ endif
 CPU=$(strip $(findstring TMS32026@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_TMS32026=1
+SOURCES_C += $(CORE_DIR)/cpu/tms32025/tms32025.c
+//SOURCES_C += $(CORE_DIR)/cpu/tms32025/32025dsm.c
 else
 CPUDEFS += -DHAS_TMS32026=0
 endif
@@ -787,6 +930,7 @@ CPU=$(strip $(findstring TMS32031@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_TMS32031=1
 SOURCES_C += $(CORE_DIR)/cpu/tms32031/tms32031.c
+SOURCES_C += $(CORE_DIR)/cpu/tms32031/dis32031.c
 else
 CPUDEFS += -DHAS_TMS32031=0
 endif
@@ -794,7 +938,8 @@ endif
 CPU=$(strip $(findstring CCPU@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_CCPU=1
-SOURCES_C += $(CORE_DIR)/cpu/ccpu/ccpu.c $(CORE_DIR)/vidhrdw/cinemat.c
+SOURCES_C += $(CORE_DIR)/cpu/ccpu/ccpu.c
+SOURCES_C += $(CORE_DIR)/cpu/ccpu/ccpudasm.c
 else
 CPUDEFS += -DHAS_CCPU=0
 endif
@@ -803,6 +948,7 @@ CPU=$(strip $(findstring ADSP2100@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_ADSP2100=1
 SOURCES_C += $(CORE_DIR)/cpu/adsp2100/adsp2100.c
+SOURCES_C += $(CORE_DIR)/cpu/adsp2100/2100dasm.c
 else
 CPUDEFS += -DHAS_ADSP2100=0
 endif
@@ -810,6 +956,8 @@ endif
 CPU=$(strip $(findstring ADSP2101@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_ADSP2101=1
+SOURCES_C += $(CORE_DIR)/cpu/adsp2100/adsp2100.c
+SOURCES_C += $(CORE_DIR)/cpu/adsp2100/2100dasm.c
 else
 CPUDEFS += -DHAS_ADSP2101=0
 endif
@@ -817,6 +965,8 @@ endif
 CPU=$(strip $(findstring ADSP2104@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_ADSP2104=1
+SOURCES_C += $(CORE_DIR)/cpu/adsp2100/adsp2100.c
+SOURCES_C += $(CORE_DIR)/cpu/adsp2100/2100dasm.c
 else
 CPUDEFS += -DHAS_ADSP2104=0
 endif
@@ -824,6 +974,8 @@ endif
 CPU=$(strip $(findstring ADSP2105@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_ADSP2105=1
+SOURCES_C += $(CORE_DIR)/cpu/adsp2100/adsp2100.c
+SOURCES_C += $(CORE_DIR)/cpu/adsp2100/2100dasm.c
 else
 CPUDEFS += -DHAS_ADSP2105=0
 endif
@@ -831,6 +983,8 @@ endif
 CPU=$(strip $(findstring ADSP2115@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_ADSP2115=1
+SOURCES_C += $(CORE_DIR)/cpu/adsp2100/adsp2100.c
+SOURCES_C += $(CORE_DIR)/cpu/adsp2100/2100dasm.c
 else
 CPUDEFS += -DHAS_ADSP2115=0
 endif
@@ -838,6 +992,8 @@ endif
 CPU=$(strip $(findstring ADSP2181@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_ADSP2181=1
+SOURCES_C += $(CORE_DIR)/cpu/adsp2100/adsp2100.c
+SOURCES_C += $(CORE_DIR)/cpu/adsp2100/2100dasm.c
 else
 CPUDEFS += -DHAS_ADSP2181=0
 endif
@@ -846,6 +1002,7 @@ CPU=$(strip $(findstring PSXCPU@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_PSXCPU=1
 SOURCES_C += $(CORE_DIR)/cpu/mips/psx.c
+SOURCES_C += $(CORE_DIR)/cpu/mips/mipsdasm.c
 else
 CPUDEFS += -DHAS_PSXCPU=0
 endif
@@ -854,6 +1011,7 @@ CPU=$(strip $(findstring ASAP@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_ASAP=1
 SOURCES_C += $(CORE_DIR)/cpu/asap/asap.c
+SOURCES_C += $(CORE_DIR)/cpu/asap/asapdasm.c
 else
 CPUDEFS += -DHAS_ASAP=0
 endif
@@ -862,6 +1020,7 @@ CPU=$(strip $(findstring UPD7810@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_UPD7810=1
 SOURCES_C += $(CORE_DIR)/cpu/upd7810/upd7810.c
+SOURCES_C += $(CORE_DIR)/cpu/upd7810/7810dasm.c
 else
 CPUDEFS += -DHAS_UPD7810=0
 endif
@@ -869,6 +1028,8 @@ endif
 CPU=$(strip $(findstring UPD7807@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_UPD7807=1
+SOURCES_C += $(CORE_DIR)/cpu/upd7810/upd7810.c
+SOURCES_C += $(CORE_DIR)/cpu/upd7810/7810dasm.c
 else
 CPUDEFS += -DHAS_UPD7807=0
 endif
@@ -877,14 +1038,25 @@ CPU=$(strip $(findstring ARM@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_ARM=1
 SOURCES_C += $(CORE_DIR)/cpu/arm/arm.c
+SOURCES_C += $(CORE_DIR)/cpu/arm/armdasm.c
 else
 CPUDEFS += -DHAS_ARM=0
+endif
+
+CPU=$(strip $(findstring ARM7@,$(CPUS)))
+ifneq ($(CPU),)
+CPUDEFS += -DHAS_ARM7=1
+SOURCES_C += $(CORE_DIR)/cpu/arm7/arm7.c
+SOURCES_C += $(CORE_DIR)/cpu/arm7/arm7dasm.c
+else
+CPUDEFS += -DHAS_ARM7=0
 endif
 
 CPU=$(strip $(findstring JAGUAR@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_JAGUAR=1
 SOURCES_C += $(CORE_DIR)/cpu/jaguar/jaguar.c
+SOURCES_C += $(CORE_DIR)/cpu/jaguar/jagdasm.c
 else
 CPUDEFS += -DHAS_JAGUAR=0
 endif
@@ -893,6 +1065,7 @@ CPU=$(strip $(findstring R3000@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_R3000=1
 SOURCES_C += $(CORE_DIR)/cpu/mips/r3000.c
+SOURCES_C += $(CORE_DIR)/cpu/mips/r3kdasm.c
 else
 CPUDEFS += -DHAS_R3000=0
 endif
@@ -905,6 +1078,7 @@ SOURCES_C += $(CORE_DIR)/cpu/mips/mips3drc.c
 else
 SOURCES_C += $(CORE_DIR)/cpu/mips/mips3.c
 endif
+SOURCES_C += $(CORE_DIR)/cpu/mips/mips3dsm.c
 else
 CPUDEFS += -DHAS_R4600=0
 endif
@@ -912,6 +1086,12 @@ endif
 CPU=$(strip $(findstring R4700@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_R4700=1
+ifdef X86_MIPS3_DRC
+SOURCES_C += $(CORE_DIR)/cpu/mips/mips3drc.c
+else
+SOURCES_C += $(CORE_DIR)/cpu/mips/mips3.c
+endif
+SOURCES_C += $(CORE_DIR)/cpu/mips/mips3dsm.c
 else
 CPUDEFS += -DHAS_R4700=0
 endif
@@ -919,6 +1099,12 @@ endif
 CPU=$(strip $(findstring R5000@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_R5000=1
+ifdef X86_MIPS3_DRC
+SOURCES_C += $(CORE_DIR)/cpu/mips/mips3drc.c
+else
+SOURCES_C += $(CORE_DIR)/cpu/mips/mips3.c
+endif
+SOURCES_C += $(CORE_DIR)/cpu/mips/mips3dsm.c
 else
 CPUDEFS += -DHAS_R5000=0
 endif
@@ -926,6 +1112,12 @@ endif
 CPU=$(strip $(findstring QED5271@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_QED5271=1
+ifdef X86_MIPS3_DRC
+SOURCES_C += $(CORE_DIR)/cpu/mips/mips3drc.c
+else
+SOURCES_C += $(CORE_DIR)/cpu/mips/mips3.c
+endif
+SOURCES_C += $(CORE_DIR)/cpu/mips/mips3dsm.c
 else
 CPUDEFS += -DHAS_QED5271=0
 endif
@@ -933,6 +1125,12 @@ endif
 CPU=$(strip $(findstring RM7000@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_RM7000=1
+ifdef X86_MIPS3_DRC
+SOURCES_C += $(CORE_DIR)/cpu/mips/mips3drc.c
+else
+SOURCES_C += $(CORE_DIR)/cpu/mips/mips3.c
+endif
+SOURCES_C += $(CORE_DIR)/cpu/mips/mips3dsm.c
 else
 CPUDEFS += -DHAS_RM7000=0
 endif
@@ -941,6 +1139,7 @@ CPU=$(strip $(findstring SH2@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_SH2=1
 SOURCES_C += $(CORE_DIR)/cpu/sh2/sh2.c
+SOURCES_C += $(CORE_DIR)/cpu/sh2/sh2dasm.c
 else
 CPUDEFS += -DHAS_SH2=0
 endif
@@ -949,6 +1148,7 @@ CPU=$(strip $(findstring DSP32C@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_DSP32C=1
 SOURCES_C += $(CORE_DIR)/cpu/dsp32/dsp32.c
+SOURCES_C += $(CORE_DIR)/cpu/dsp32/dsp32dis.c
 else
 CPUDEFS += -DHAS_DSP32C=0
 endif
@@ -956,6 +1156,10 @@ endif
 CPU=$(strip $(findstring PIC16C54@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_PIC16C54=1
+SOURCES_C += $(CORE_DIR)/cpu/pic16c5x/pic16c5x.c
+//SOURCES_C += $(CORE_DIR)/cpu/pic16c5x/16c5xdsm.c  
+//SOURCES_C += $(CORE_DIR)/cpu/pic16c5x/dis16c5x.c 
+
 else
 CPUDEFS += -DHAS_PIC16C54=0
 endif
@@ -964,6 +1168,7 @@ CPU=$(strip $(findstring PIC16C55@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_PIC16C55=1
 SOURCES_C += $(CORE_DIR)/cpu/pic16c5x/pic16c5x.c
+//SOURCES_C += $(CORE_DIR)/cpu/pic16c5x/16c5xdsm.c
 else
 CPUDEFS += -DHAS_PIC16C55=0
 endif
@@ -971,6 +1176,8 @@ endif
 CPU=$(strip $(findstring PIC16C56@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_PIC16C56=1
+SOURCES_C += $(CORE_DIR)/cpu/pic16c5x/pic16c5x.c
+//SOURCES_C += $(CORE_DIR)/cpu/pic16c5x/16c5xdsm.c
 else
 CPUDEFS += -DHAS_PIC16C56=0
 endif
@@ -978,6 +1185,8 @@ endif
 CPU=$(strip $(findstring PIC16C57@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_PIC16C57=1
+SOURCES_C += $(CORE_DIR)/cpu/pic16c5x/pic16c5x.c
+//SOURCES_C += $(CORE_DIR)/cpu/pic16c5x/16c5xdsm.c
 else
 CPUDEFS += -DHAS_PIC16C57=0
 endif
@@ -985,6 +1194,8 @@ endif
 CPU=$(strip $(findstring PIC16C58@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_PIC16C58=1
+SOURCES_C += $(CORE_DIR)/cpu/pic16c5x/pic16c5x.c
+//SOURCES_C += $(CORE_DIR)/cpu/pic16c5x/16c5xdsm.c
 else
 CPUDEFS += -DHAS_PIC16C58=0
 endif
@@ -999,6 +1210,7 @@ SOURCES_C += $(CORE_DIR)/$(G6D)/g65816o1.c
 SOURCES_C += $(CORE_DIR)/$(G6D)/g65816o2.c
 SOURCES_C += $(CORE_DIR)/$(G6D)/g65816o3.c
 SOURCES_C += $(CORE_DIR)/$(G6D)/g65816o4.c
+SOURCES_C += $(CORE_DIR)/$(G6D)/g65816ds.c
 else
 CPUDEFS += -DHAS_G65816=0
 endif
@@ -1008,16 +1220,135 @@ ifneq ($(CPU),)
 SPCD = cpu/spc700
 CPUDEFS += -DHAS_SPC700=1
 SOURCES_C += $(CORE_DIR)/$(SPCD)/spc700.c
+SOURCES_C += $(CORE_DIR)/$(SPCD)/spc700ds.c
 else
 CPUDEFS += -DHAS_SPC700=0
+endif
+
+CPU=$(strip $(findstring E116T@,$(CPUS)))
+ifneq ($(CPU),)
+CPUDEFS += -DHAS_E116T=1
+SOURCES_C += $(CORE_DIR)/cpu/e132xs/e132xs.c
+SOURCES_C += $(CORE_DIR)/cpu/e132xs/32xsdasm.c
+else
+CPUDEFS += -DHAS_E116T=0
+endif
+
+CPU=$(strip $(findstring E116XT@,$(CPUS)))
+ifneq ($(CPU),)
+CPUDEFS += -DHAS_E116XT=1
+SOURCES_C += $(CORE_DIR)/cpu/e132xs/e132xs.c
+SOURCES_C += $(CORE_DIR)/cpu/e132xs/32xsdasm.c
+else
+CPUDEFS += -DHAS_E116XT=0
+endif
+
+CPU=$(strip $(findstring E116XS@,$(CPUS)))
+ifneq ($(CPU),)
+CPUDEFS += -DHAS_E116XS=1
+SOURCES_C += $(CORE_DIR)/cpu/e132xs/e132xs.c
+SOURCES_C += $(CORE_DIR)/cpu/e132xs/32xsdasm.c
+else
+CPUDEFS += -DHAS_E116XS=0
+endif
+
+CPU=$(strip $(findstring E116XSR@,$(CPUS)))
+ifneq ($(CPU),)
+CPUDEFS += -DHAS_E116XSR=1
+SOURCES_C += $(CORE_DIR)/cpu/e132xs/e132xs.c
+SOURCES_C += $(CORE_DIR)/cpu/e132xs/32xsdasm.c
+else
+CPUDEFS += -DHAS_E116XSR=0
+endif
+
+CPU=$(strip $(findstring E132N@,$(CPUS)))
+ifneq ($(CPU),)
+CPUDEFS += -DHAS_E132N=1
+SOURCES_C += $(CORE_DIR)/cpu/e132xs/e132xs.c
+SOURCES_C += $(CORE_DIR)/cpu/e132xs/32xsdasm.c
+else
+CPUDEFS += -DHAS_E132N=0
+endif
+
+CPU=$(strip $(findstring E132T@,$(CPUS)))
+ifneq ($(CPU),)
+CPUDEFS += -DHAS_E132T=1
+SOURCES_C += $(CORE_DIR)/cpu/e132xs/e132xs.c
+SOURCES_C += $(CORE_DIR)/cpu/e132xs/32xsdasm.c
+else
+CPUDEFS += -DHAS_E132T=0
+endif
+
+CPU=$(strip $(findstring E132XN@,$(CPUS)))
+ifneq ($(CPU),)
+CPUDEFS += -DHAS_E132XN=1
+SOURCES_C += $(CORE_DIR)/cpu/e132xs/e132xs.c
+SOURCES_C += $(CORE_DIR)/cpu/e132xs/32xsdasm.c
+else
+CPUDEFS += -DHAS_E132XN=0
+endif
+
+CPU=$(strip $(findstring E132XT@,$(CPUS)))
+ifneq ($(CPU),)
+CPUDEFS += -DHAS_E132XT=1
+SOURCES_C += $(CORE_DIR)/cpu/e132xs/e132xs.c
+SOURCES_C += $(CORE_DIR)/cpu/e132xs/32xsdasm.c
+else
+CPUDEFS += -DHAS_E132XT=0
 endif
 
 CPU=$(strip $(findstring E132XS@,$(CPUS)))
 ifneq ($(CPU),)
 CPUDEFS += -DHAS_E132XS=1
 SOURCES_C += $(CORE_DIR)/cpu/e132xs/e132xs.c
+SOURCES_C += $(CORE_DIR)/cpu/e132xs/32xsdasm.c
 else
 CPUDEFS += -DHAS_E132XS=0
+endif
+
+CPU=$(strip $(findstring E132XSR@,$(CPUS)))
+ifneq ($(CPU),)
+CPUDEFS += -DHAS_E132XSR=1
+SOURCES_C += $(CORE_DIR)/cpu/e132xs/e132xs.c
+SOURCES_C += $(CORE_DIR)/cpu/e132xs/32xsdasm.c
+else
+CPUDEFS += -DHAS_E132XSR=0
+endif
+
+CPU=$(strip $(findstring GMS30C2116@,$(CPUS)))
+ifneq ($(CPU),)
+CPUDEFS += -DHAS_GMS30C2116=1
+SOURCES_C += $(CORE_DIR)/cpu/e132xs/e132xs.c
+SOURCES_C += $(CORE_DIR)/cpu/e132xs/32xsdasm.c
+else
+CPUDEFS += -DHAS_GMS30C2116=0
+endif
+
+CPU=$(strip $(findstring GMS30C2132@,$(CPUS)))
+ifneq ($(CPU),)
+CPUDEFS += -DHAS_GMS30C2132=1
+SOURCES_C += $(CORE_DIR)/cpu/e132xs/e132xs.c
+SOURCES_C += $(CORE_DIR)/cpu/e132xs/32xsdasm.c
+else
+CPUDEFS += -DHAS_GMS30C2132=0
+endif
+
+CPU=$(strip $(findstring GMS30C2216@,$(CPUS)))
+ifneq ($(CPU),)
+CPUDEFS += -DHAS_GMS30C2216=1
+SOURCES_C += $(CORE_DIR)/cpu/e132xs/e132xs.c
+SOURCES_C += $(CORE_DIR)/cpu/e132xs/32xsdasm.c
+else
+CPUDEFS += -DHAS_GMS30C2216=0
+endif
+
+CPU=$(strip $(findstring GMS30C2232@,$(CPUS)))
+ifneq ($(CPU),)
+CPUDEFS += -DHAS_GMS30C2232=1
+SOURCES_C += $(CORE_DIR)/cpu/e132xs/e132xs.c
+SOURCES_C += $(CORE_DIR)/cpu/e132xs/32xsdasm.c
+else
+CPUDEFS += -DHAS_GMS30C2232=0
 endif
 
 CPU=$(strip $(findstring I960@,$(CPUS)))
@@ -1029,21 +1360,97 @@ else
 CPUDEFS += -DHAS_I960=0
 endif
 
-
-CPU=$(strip $(findstring I8752@,$(CPUS)))
+CPU=$(strip $(findstring H83002@,$(CPUS)))
 ifneq ($(CPU),)
-CPUDEFS += -DHAS_I8752=1
-SOURCES_C += $(CORE_DIR)/cpu/i8051/i8051.c
+CPUDEFS += -DHAS_H83002=1
+SOURCES_C += $(CORE_DIR)/cpu/h83002/h83002.c $(CORE_DIR)/cpu/h83002/h8periph.c
+SOURCES_C += $(CORE_DIR)/cpu/h83002/h8disasm.c
 else
-CPUDEFS += -DHAS_I8752=0
+CPUDEFS += -DHAS_H83002=0
 endif
 
-CPU=$(strip $(findstring E132N@,$(CPUS)))
+CPU=$(strip $(findstring V810@,$(CPUS)))
 ifneq ($(CPU),)
-CPUDEFS += -DHAS_E132N=1
-SOURCES_C += $(CORE_DIR)/cpu/e132xs/e132xs.c
+CPUDEFS += -DHAS_V810=1
+SOURCES_C += $(CORE_DIR)/cpu/v810/v810.c
+SOURCES_C += $(CORE_DIR)/cpu/v810/v810dasm.c
 else
-CPUDEFS += -DHAS_E132N=0
+CPUDEFS += -DHAS_V810=0
+endif
+
+CPU=$(strip $(findstring M37710@,$(CPUS)))
+ifneq ($(CPU),)
+CPUDEFS += -DHAS_M37710=1
+SOURCES_C += $(CORE_DIR)/cpu/m37710/m37710.c 
+SOURCES_C += $(CORE_DIR)/cpu/m37710/m37710o0.c 
+SOURCES_C += $(CORE_DIR)/cpu/m37710/m37710o1.c 
+SOURCES_C += $(CORE_DIR)/cpu/m37710/m37710o2.c 
+SOURCES_C += $(CORE_DIR)/cpu/m37710/m37710o3.c 
+SOURCES_C += $(CORE_DIR)/cpu/m37710/m7700ds.c
+else
+CPUDEFS += -DHAS_M37710=0
+endif
+
+CPU=$(strip $(findstring PPC403@,$(CPUS)))
+ifneq ($(CPU),)
+CPUDEFS += -DHAS_PPC403=1
+SOURCES_C += $(CORE_DIR)/cpu/powerpc/ppc.c
+SOURCES_C += $(CORE_DIR)/cpu/powerpc/ppc_dasm.c
+else
+CPUDEFS += -DHAS_PPC403=0
+endif
+
+CPU=$(strip $(findstring PPC602@,$(CPUS)))
+ifneq ($(CPU),)
+CPUDEFS += -DHAS_PPC602=1
+SOURCES_C += $(CORE_DIR)/cpu/powerpc/ppc.c
+SOURCES_C += $(CORE_DIR)/cpu/powerpc/ppc_dasm.c
+else
+CPUDEFS += -DHAS_PPC602=0
+endif
+
+CPU=$(strip $(findstring PPC602@,$(CPUS)))
+ifneq ($(CPU),)
+CPUDEFS += -DHAS_PPC602=1
+SOURCES_C += $(CORE_DIR)/cpu/powerpc/ppc.c
+SOURCES_C += $(CORE_DIR)/cpu/powerpc/ppc_dasm.c
+else
+CPUDEFS += -DHAS_PPC602=0
+endif
+
+CPU=$(strip $(findstring PPC603@,$(CPUS)))
+ifneq ($(CPU),)
+CPUDEFS += -DHAS_PPC603=1
+SOURCES_C += $(CORE_DIR)/cpu/powerpc/ppc.c
+SOURCES_C += $(CORE_DIR)/cpu/powerpc/ppc_dasm.c
+else
+CPUDEFS += -DHAS_PPC603=0
+endif
+
+CPU=$(strip $(findstring SE3208@,$(CPUS)))
+ifneq ($(CPU),)
+CPUDEFS += -DHAS_SE3208=1
+SOURCES_C += $(CORE_DIR)/cpu/se3208/se3208.c
+SOURCES_C += $(CORE_DIR)/cpu/se3208/se3208dis.c
+else
+CPUDEFS += -DHAS_SE3208=0
+endif
+
+CPU=$(strip $(findstring MC68HC11@,$(CPUS)))
+ifneq ($(CPU),)
+CPUDEFS += -DHAS_MC68HC11=1
+SOURCES_C += $(CORE_DIR)/cpu/mc68hc11/mc68hc11.c
+SOURCES_C += $(CORE_DIR)/cpu/mc68hc11/hc11dasm.c
+else
+CPUDEFS += -DHAS_MC68HC11=0
+endif
+
+CPU=$(strip $(findstring MB86233@,$(CPUS)))
+ifneq ($(CPU),)
+SOURCES_C += $(CORE_DIR)/cpu/mb86233/mb86233.c
+CPUDEFS += -DHAS_MB86233=1
+else
+CPUDEFS += -DHAS_MB86233=1
 endif
 
 SOUND=$(strip $(findstring CDDA@,$(SOUNDS)))
@@ -1057,6 +1464,7 @@ endif
 SOUND=$(strip $(findstring CUSTOM@,$(SOUNDS)))
 ifneq ($(SOUND),)
 SOUNDDEFS += -DHAS_CUSTOM=1
+SOURCES_C += $(CORE_DIR)/sound/custom.c
 else
 SOUNDDEFS += -DHAS_CUSTOM=0
 endif
@@ -1088,7 +1496,8 @@ endif
 SOUND=$(strip $(findstring DISCRETE@,$(SOUNDS)))
 ifneq ($(SOUND),)
 SOUNDDEFS += -DHAS_DISCRETE=1
-SOURCES_C += $(CORE_DIR)/sound/discrete.c
+SOURCES_C += $(CORE_DIR)/sound/discrete.c \
+		
 else
 SOUNDDEFS += -DHAS_DISCRETE=0
 endif
@@ -1104,7 +1513,7 @@ endif
 SOUND=$(strip $(findstring YM2203@,$(SOUNDS)))
 ifneq ($(SOUND),)
 SOUNDDEFS += -DHAS_YM2203=1
-SOURCES_C += $(CORE_DIR)/sound/2203intf.c  $(CORE_DIR)/sound/fm.c
+SOURCES_C += $(CORE_DIR)/sound/2203intf.c $(CORE_DIR)/sound/ay8910.c $(CORE_DIR)/sound/fm.c
 else
 SOUNDDEFS += -DHAS_YM2203=0
 endif
@@ -1112,23 +1521,15 @@ endif
 SOUND=$(strip $(findstring YM2151@,$(SOUNDS)))
 ifneq ($(SOUND),)
 SOUNDDEFS += -DHAS_YM2151=1
-#SOURCES_C += $(CORE_DIR)/sound/2151intf.c $(CORE_DIR)/sound/ym2151.c 
-else
-SOUNDDEFS += -DHAS_YM2151=0
-endif
-
-SOUND=$(strip $(findstring YM2151_ALT@,$(SOUNDS)))
-ifneq ($(SOUND),)
-SOUNDDEFS += -DHAS_YM2151_ALT=1
 SOURCES_C += $(CORE_DIR)/sound/2151intf.c $(CORE_DIR)/sound/ym2151.c
 else
-SOUNDDEFS += -DHAS_YM2151_ALT=0
+SOUNDDEFS += -DHAS_YM2151=0
 endif
 
 SOUND=$(strip $(findstring YM2608@,$(SOUNDS)))
 ifneq ($(SOUND),)
 SOUNDDEFS += -DHAS_YM2608=1
-SOURCES_C += $(CORE_DIR)/sound/2608intf.c $(CORE_DIR)/sound/ymdeltat.c
+SOURCES_C += $(CORE_DIR)/sound/2608intf.c $(CORE_DIR)/sound/ay8910.c $(CORE_DIR)/sound/fm.c $(CORE_DIR)/sound/ymdeltat.c
 else
 SOUNDDEFS += -DHAS_YM2608=0
 endif
@@ -1136,7 +1537,7 @@ endif
 SOUND=$(strip $(findstring YM2610@,$(SOUNDS)))
 ifneq ($(SOUND),)
 SOUNDDEFS += -DHAS_YM2610=1
-SOURCES_C += $(CORE_DIR)/sound/2610intf.c 
+SOURCES_C += $(CORE_DIR)/sound/2610intf.c $(CORE_DIR)/sound/ay8910.c $(CORE_DIR)/sound/fm.c $(CORE_DIR)/sound/ymdeltat.c
 else
 SOUNDDEFS += -DHAS_YM2610=0
 endif
@@ -1144,6 +1545,7 @@ endif
 SOUND=$(strip $(findstring YM2610B@,$(SOUNDS)))
 ifneq ($(SOUND),)
 SOUNDDEFS += -DHAS_YM2610B=1
+SOURCES_C += $(CORE_DIR)/sound/2610intf.c $(CORE_DIR)/sound/ay8910.c $(CORE_DIR)/sound/fm.c $(CORE_DIR)/sound/ymdeltat.c
 else
 SOUNDDEFS += -DHAS_YM2610B=0
 endif
@@ -1151,7 +1553,7 @@ endif
 SOUND=$(strip $(findstring YM2612@,$(SOUNDS)))
 ifneq ($(SOUND),)
 SOUNDDEFS += -DHAS_YM2612=1
-SOURCES_C += $(CORE_DIR)/sound/2612intf.c 
+SOURCES_C += $(CORE_DIR)/sound/2612intf.c $(CORE_DIR)/sound/ay8910.c $(CORE_DIR)/sound/fm.c
 else
 SOUNDDEFS += -DHAS_YM2612=0
 endif
@@ -1159,6 +1561,7 @@ endif
 SOUND=$(strip $(findstring YM3438@,$(SOUNDS)))
 ifneq ($(SOUND),)
 SOUNDDEFS += -DHAS_YM3438=1
+SOURCES_C += $(CORE_DIR)/sound/2612intf.c $(CORE_DIR)/sound/ay8910.c $(CORE_DIR)/sound/fm.c
 else
 SOUNDDEFS += -DHAS_YM3438=0
 endif
@@ -1182,6 +1585,7 @@ endif
 SOUND=$(strip $(findstring YM3526@,$(SOUNDS)))
 ifneq ($(SOUND),)
 SOUNDDEFS += -DHAS_YM3526=1
+SOURCES_C += $(CORE_DIR)/sound/3812intf.c $(CORE_DIR)/sound/fmopl.c
 else
 SOUNDDEFS += -DHAS_YM3526=0
 endif
@@ -1197,6 +1601,7 @@ endif
 SOUND=$(strip $(findstring Y8950@,$(SOUNDS)))
 ifneq ($(SOUND),)
 SOUNDDEFS += -DHAS_Y8950=1
+SOURCES_C += $(CORE_DIR)/sound/3812intf.c $(CORE_DIR)/sound/fmopl.c $(CORE_DIR)/sound/ymdeltat.c
 else
 SOUNDDEFS += -DHAS_Y8950=0
 endif
@@ -1264,7 +1669,7 @@ endif
 SOUND=$(strip $(findstring NAMCO_15XX@,$(SOUNDS)))
 ifneq ($(SOUND),)
 SOUNDDEFS += -DHAS_NAMCO_15XX=1
-#SOURCES_C += $(CORE_DIR)/sound/namco.c
+SOURCES_C += $(CORE_DIR)/sound/namco.c
 else
 SOUNDDEFS += -DHAS_NAMCO_15XX=0
 endif
@@ -1272,7 +1677,7 @@ endif
 SOUND=$(strip $(findstring NAMCO_CUS30@,$(SOUNDS)))
 ifneq ($(SOUND),)
 SOUNDDEFS += -DHAS_NAMCO_CUS30=1
-#SOURCES_C += $(CORE_DIR)/sound/namco.c
+SOURCES_C += $(CORE_DIR)/sound/namco.c
 else
 SOUNDDEFS += -DHAS_NAMCO_CUS30=0
 endif
@@ -1341,17 +1746,10 @@ else
 SOUNDDEFS += -DHAS_VLM5030=0
 endif
 
-SOUND=$(strip $(findstring ADPCM@,$(SOUNDS)))
-ifneq ($(SOUND),)
-SOUNDDEFS += -DHAS_ADPCM=1
-else
-SOUNDDEFS += -DHAS_ADPCM=0
-endif
-
 SOUND=$(strip $(findstring OKIM6295@,$(SOUNDS)))
 ifneq ($(SOUND),)
 SOUNDDEFS += -DHAS_OKIM6295=1
-#SOURCES_C += $(CORE_DIR)/sound/adpcm.c
+SOURCES_C += $(CORE_DIR)/sound/okim6295.c
 else
 SOUNDDEFS += -DHAS_OKIM6295=0
 endif
@@ -1495,7 +1893,7 @@ endif
 SOUND=$(strip $(findstring ES5506@,$(SOUNDS)))
 ifneq ($(SOUND),)
 SOUNDDEFS += -DHAS_ES5506=1
-#SOURCES_C += $(CORE_DIR)/sound/es5506.c
+SOURCES_C += $(CORE_DIR)/sound/es5506.c
 else
 SOUNDDEFS += -DHAS_ES5506=0
 endif
@@ -1535,7 +1933,7 @@ endif
 SOUND=$(strip $(findstring GAELCO_GAE1@,$(SOUNDS)))
 ifneq ($(SOUND),)
 SOUNDDEFS += -DHAS_GAELCO_GAE1=1
-#SOURCES_C += $(CORE_DIR)/sound/gaelco.c
+SOURCES_C += $(CORE_DIR)/sound/gaelco.c
 else
 SOUNDDEFS += -DHAS_GAELCO_GAE1=0
 endif
@@ -1612,22 +2010,6 @@ else
 SOUNDDEFS += -DHAS_ST0016=0
 endif
 
-SOUND=$(strip $(findstring OKIM6295@,$(SOUNDS)))
-ifneq ($(SOUND),)
-SOUNDDEFS += -DHAS_OKIM6295=1
-SOURCES_C += $(CORE_DIR)/sound/okim6295.c
-else
-SOUNDDEFS += -DHAS_OKIM6295=0
-endif
-
-SOUND=$(strip $(findstring YM2151@,$(SOUNDS)))
-ifneq ($(SOUND),)
-SOUNDDEFS += -DHAS_YM2151=1
-SOURCES_C += $(CORE_DIR)/sound/2151intf.c $(CORE_DIR)/sound/ym2151.c
-else
-SOUNDDEFS += -DHAS_YM2151=0
-endif
-
 SOUND=$(strip $(findstring C352@,$(SOUNDS)))
 ifneq ($(SOUND),)
 SOUNDDEFS += -DHAS_C352=1
@@ -1644,12 +2026,12 @@ else
 SOUNDDEFS += -DHAS_VRENDER0=0
 endif
 
-SOUND=$(strip $(findstring CUSTOM@,$(SOUNDS)))
+SOUND=$(strip $(findstring VOTRAX@,$(SOUNDS)))
 ifneq ($(SOUND),)
-SOUNDDEFS += -DHAS_CUSTOM=1
-SOURCES_C += $(CORE_DIR)/sound/custom.c
+SOUNDDEFS += -DHAS_VOTRAX=1
+SOURCES_C += $(CORE_DIR)/sound/votrax.c
 else
-SOUNDDEFS += -DHAS_CUSTOM=0
+SOUNDDEFS += -DHAS_VOTRAX=0
 endif
 
 SOURCES_C += \
@@ -2240,7 +2622,7 @@ SOURCES_C += \
 	$(CORE_DIR)/vidhrdw/quizdna.c $(CORE_DIR)/drivers/quizdna.c \
 	$(CORE_DIR)/vidhrdw/jack.c $(CORE_DIR)/drivers/jack.c \
 	$(CORE_DIR)/drivers/embargo.c \
-	$(CORE_DIR)/sndhrdw/cinemat.c $(CORE_DIR)/drivers/cinemat.c \
+	$(CORE_DIR)/sndhrdw/cinemat.c $(CORE_DIR)/drivers/cinemat.c  $(CORE_DIR)/vidhrdw/cinemat.c \
 	$(CORE_DIR)/machine/cchasm.c $(CORE_DIR)/vidhrdw/cchasm.c $(CORE_DIR)/sndhrdw/cchasm.c $(CORE_DIR)/drivers/cchasm.c \
 	$(CORE_DIR)/vidhrdw/thepit.c $(CORE_DIR)/drivers/thepit.c \
 	$(CORE_DIR)/vidhrdw/timelimt.c $(CORE_DIR)/drivers/timelimt.c \
@@ -2539,8 +2921,8 @@ SOURCES_C += \
 	$(CORE_DIR)/vidhrdw/avgdvg.c \
 	$(CORE_DIR)/vidhrdw/poly.c \
 	$(CORE_DIR)/vidhrdw/tlc34076.c \
-	$(CORE_DIR)/vidhrdw/res_net.c 
-
+	$(CORE_DIR)/vidhrdw/res_net.c  \
+	
 
 LIBRETRO_COMM_DIR := $(CORE_DIR)/libretro-common
 ifeq ($(STATIC_LINKING),1)
@@ -2553,6 +2935,7 @@ SOURCES_C += \
 	$(LIBRETRO_COMM_DIR)/compat/fopen_utf8.c \
 	$(LIBRETRO_COMM_DIR)/encodings/encoding_utf.c \
 	$(LIBRETRO_COMM_DIR)/file/file_path.c \
+	$(LIBRETRO_COMM_DIR)/time/rtime.c \
 	$(LIBRETRO_COMM_DIR)/streams/file_stream.c \
 	$(LIBRETRO_COMM_DIR)/string/stdstring.c \
 	$(LIBRETRO_COMM_DIR)/utils/md5.c \
@@ -2574,3 +2957,4 @@ SOURCES_C += \
 	$(CORE_DIR)/lib/zlib/unzip.c \
 	$(CORE_DIR)/lib/zlib/zutil.c
 endif
+
