@@ -5804,15 +5804,18 @@ BOMULEUL CHAJARA SEGA ST-V  1997/04/11
 	DRIVER( twineag2 )	/* (c) 1994 Seta */
 	DRIVER( srmp7 )		/* (c) 1997 Seta */
 	DRIVER( survarts )	/* (c) 1993 Sammy (American) */
+	DRIVER( survartu )
+	DRIVER( gdfs )
 	DRIVER( dynagear )	/* (c) 1993 Sammy */
 	DRIVER( eaglshot )
-	DRIVER( eaglshta )
 	DRIVER( hypreact )	/* (c) 1995 Sammy */
 	DRIVER( koikois2 )  /* (c) 1997 Visco */
 	DRIVER( meosism )	/* (c) Sammy */
 	DRIVER( hypreac2 )	/* (c) 1997 Sammy */
 	DRIVER( sxyreact )	/* (c) 1998 Sammy */
+	DRIVER( sxyreac2 )
 	DRIVER( cairblad )	/* (c) 1999 Sammy */
+	DRIVER( janjans2 )
 	DRIVER( keithlcy )	/* (c) 1993 Visco */
 	DRIVER( drifto94 )	/* (c) 1994 Visco */
 	DRIVER( janjans1 )	/* (c) 1996 Visco */

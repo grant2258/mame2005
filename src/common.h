@@ -39,6 +39,13 @@ struct mame_bitmap
 	void (*plot_box)(struct mame_bitmap *bitmap,int x,int y,int width,int height,pen_t pen);
 };
 
+/* Macros for accessing bitmap pixels */
+#define BITMAP_ADDR(bitmap, type, y, x)	\
+	((type *)(bitmap)->base + (y) * (bitmap)->rowpixels + (x))
+
+#define BITMAP_ADDR8(bitmap, y, x)	BITMAP_ADDR(bitmap, UINT8, y, x)
+#define BITMAP_ADDR16(bitmap, y, x)	BITMAP_ADDR(bitmap, UINT16, y, x)
+#define BITMAP_ADDR32(bitmap, y, x)	BITMAP_ADDR(bitmap, UINT32, y, x)
 
 struct RomModule
 {
@@ -120,6 +127,7 @@ enum
 	REGION_USER7,
 	REGION_USER8,
 	REGION_DISKS,
+	REGION_PLDS,
 	REGION_MAX
 };
 
