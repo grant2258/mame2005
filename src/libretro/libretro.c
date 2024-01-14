@@ -32,7 +32,6 @@ unsigned rstick_to_btns = 0;
 unsigned option_tate_mode = 0;
 int  pressure_check =  655.36 * 45;
 int gun;
-int32_t             analogjoy[4][8]= {0};
 
 // Wrapper to build MAME on 3DS. It doesn't have stricmp.
 #ifdef _3DS
@@ -384,8 +383,8 @@ void retro_run (void)
       retroJsState[ 29 + offset] = convert_analog_scale(-abs(input_cb( i, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_BUTTON, RETRO_DEVICE_ID_JOYPAD_R2)));
       if (gun)
       {
-         retroJsState[ 30 + offset] = 2 * analogjoy[i][6]; //gunx
-         retroJsState[ 31 + offset] = 2 * analogjoy[i][7];//gun y
+         retroJsState[ 30 + offset] = 2 * input_cb(i, RETRO_DEVICE_LIGHTGUN, i, RETRO_DEVICE_ID_LIGHTGUN_SCREEN_X);
+         retroJsState[ 31 + offset] = 2 * input_cb(i, RETRO_DEVICE_LIGHTGUN, i, RETRO_DEVICE_ID_LIGHTGUN_SCREEN_Y);
       }
    }
    mame_frame();

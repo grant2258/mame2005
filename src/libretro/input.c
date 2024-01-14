@@ -20,7 +20,7 @@ INT32 osd_get_code_value(os_code_t code)
     return retroJsState[code - RETROK_LAST];
 }
 
-INT32 osd_readkey_unicode(INT32flush)
+INT32 osd_readkey_unicode(INT32 flush)
 {
     // TODO
     return 0;

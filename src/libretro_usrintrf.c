@@ -35,6 +35,7 @@ static bool generate_DAT;
 	Externals
 
 ***************************************************************************/
+void write_mame_xml(const struct GameDriver* games[]);
 
 /* Variables for stat menu */
 extern char build_version[];
@@ -53,20 +54,6 @@ static int game_paused = 0; /* not zero if the game is paused */
 #endif
 /* MARTINEZ.F 990207 Memory Card End */
 
-void write_mame_xml(void)
-{
-
-    FILE *xml_dat = fopen("mame2005.xml", "wa");
-
-    if (xml_dat != NULL)
-    {
-	    logerror("Generating mame2005.xml\n");
-		print_mame_xml( xml_dat, drivers );
-    } else {
-      logerror("Unable to open mame2003.xml for writing.\n");
-      return;
-}
-}
 
 /***************************************************************************
 
@@ -4081,7 +4068,7 @@ int handle_user_interface(struct mame_bitmap *bitmap)
 	if (options.cheat) DoCheat(bitmap);
 	if(generate_DAT)
 	{
-    write_mame_xml();
+    write_mame_xml(drivers);
     generate_DAT = false;
 	}
 

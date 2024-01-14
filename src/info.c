@@ -1001,3 +1001,121 @@ void print_mame_xml(FILE* out, const struct GameDriver* games[])
 
 	fprintf(out, "</" XML_ROOT ">\n");
 }
+
+
+/* Print the MAME database in XML format */
+void write_mame_xml(const struct GameDriver* games[])
+{
+    FILE *out;
+
+    out = fopen("mame2005.xml", "wb+");
+
+    if (out != NULL)
+    {
+       printf("Generating mame2005.xml\n");
+    }
+    else 
+    {
+       printf("Unable to open mame2003-plus.xml for writing.\n");
+       return;
+    }
+
+	fprintf(out,
+		"<?xml version=\"1.0\"?>\n"
+		"<!DOCTYPE " XML_ROOT " [\n"
+		"<!ELEMENT " XML_ROOT " (" XML_TOP "+)>\n"
+#ifdef MESS
+		"\t<!ELEMENT " XML_TOP " (description, year?, manufacturer, history?, biosset*, rom*, disk*, sample*, chip*, video?, sound?, input?, dipswitch*, driver?, device*)>\n"
+#else
+		"\t<!ELEMENT " XML_TOP " (description, year?, manufacturer, history?, biosset*, rom*, disk*, sample*, chip*, video?, sound?, input?, dipswitch*, driver?)>\n"
+#endif
+		"\t\t<!ATTLIST " XML_TOP " name CDATA #REQUIRED>\n"
+		"\t\t<!ATTLIST " XML_TOP " sourcefile CDATA #IMPLIED>\n"
+		"\t\t<!ATTLIST " XML_TOP " runnable (yes|no) \"yes\">\n"
+		"\t\t<!ATTLIST " XML_TOP " cloneof CDATA #IMPLIED>\n"
+		"\t\t<!ATTLIST " XML_TOP " romof CDATA #IMPLIED>\n"
+		"\t\t<!ATTLIST " XML_TOP " sampleof CDATA #IMPLIED>\n"
+		"\t\t<!ELEMENT description (#PCDATA)>\n"
+		"\t\t<!ELEMENT year (#PCDATA)>\n"
+		"\t\t<!ELEMENT manufacturer (#PCDATA)>\n"
+		"\t\t<!ELEMENT history (#PCDATA)>\n"
+		"\t\t<!ELEMENT biosset EMPTY>\n"
+		"\t\t\t<!ATTLIST biosset name CDATA #REQUIRED>\n"
+		"\t\t\t<!ATTLIST biosset description CDATA #REQUIRED>\n"
+		"\t\t\t<!ATTLIST biosset default (yes|no) \"no\">\n"
+		"\t\t<!ELEMENT rom EMPTY>\n"
+		"\t\t\t<!ATTLIST rom name CDATA #REQUIRED>\n"
+		"\t\t\t<!ATTLIST rom bios CDATA #IMPLIED>\n"
+		"\t\t\t<!ATTLIST rom size CDATA #REQUIRED>\n"
+		"\t\t\t<!ATTLIST rom crc CDATA #IMPLIED>\n"
+		"\t\t\t<!ATTLIST rom md5 CDATA #IMPLIED>\n"
+		"\t\t\t<!ATTLIST rom sha1 CDATA #IMPLIED>\n"
+		"\t\t\t<!ATTLIST rom merge CDATA #IMPLIED>\n"
+		"\t\t\t<!ATTLIST rom region CDATA #IMPLIED>\n"
+		"\t\t\t<!ATTLIST rom offset CDATA #IMPLIED>\n"
+		"\t\t\t<!ATTLIST rom status (baddump|nodump|good) \"good\">\n"
+		"\t\t\t<!ATTLIST rom dispose (yes|no) \"no\">\n"
+		"\t\t\t<!ATTLIST rom soundonly (yes|no) \"no\">\n"
+		"\t\t<!ELEMENT disk EMPTY>\n"
+		"\t\t\t<!ATTLIST disk name CDATA #REQUIRED>\n"
+		"\t\t\t<!ATTLIST disk md5 CDATA #IMPLIED>\n"
+		"\t\t\t<!ATTLIST disk sha1 CDATA #IMPLIED>\n"
+		"\t\t\t<!ATTLIST disk merge CDATA #IMPLIED>\n"
+		"\t\t\t<!ATTLIST disk region CDATA #IMPLIED>\n"
+		"\t\t\t<!ATTLIST disk index CDATA #IMPLIED>\n"
+		"\t\t\t<!ATTLIST disk status (baddump|nodump|good) \"good\">\n"
+		"\t\t<!ELEMENT sample EMPTY>\n"
+		"\t\t\t<!ATTLIST sample name CDATA #REQUIRED>\n"
+		"\t\t<!ELEMENT chip EMPTY>\n"
+		"\t\t\t<!ATTLIST chip name CDATA #REQUIRED>\n"
+		"\t\t\t<!ATTLIST chip type (cpu|audio) #REQUIRED>\n"
+		"\t\t\t<!ATTLIST chip soundonly (yes|no) \"no\">\n"
+		"\t\t\t<!ATTLIST chip clock CDATA #IMPLIED>\n"
+		"\t\t<!ELEMENT video EMPTY>\n"
+		"\t\t\t<!ATTLIST video screen (raster|vector) #REQUIRED>\n"
+		"\t\t\t<!ATTLIST video orientation (vertical|horizontal) #REQUIRED>\n"
+		"\t\t\t<!ATTLIST video width CDATA #IMPLIED>\n"
+		"\t\t\t<!ATTLIST video height CDATA #IMPLIED>\n"
+		"\t\t\t<!ATTLIST video aspectx CDATA #IMPLIED>\n"
+		"\t\t\t<!ATTLIST video aspecty CDATA #IMPLIED>\n"
+		"\t\t\t<!ATTLIST video refresh CDATA #REQUIRED>\n"
+		"\t\t<!ELEMENT sound EMPTY>\n"
+		"\t\t\t<!ATTLIST sound channels CDATA #REQUIRED>\n"
+		"\t\t<!ELEMENT input EMPTY>\n"
+		"\t\t\t<!ATTLIST input service (yes|no) \"no\">\n"
+		"\t\t\t<!ATTLIST input tilt (yes|no) \"no\">\n"
+		"\t\t\t<!ATTLIST input players CDATA #REQUIRED>\n"
+		"\t\t\t<!ATTLIST input control CDATA #IMPLIED>\n"
+		"\t\t\t<!ATTLIST input buttons CDATA #IMPLIED>\n"
+		"\t\t\t<!ATTLIST input coins CDATA #IMPLIED>\n"
+		"\t\t<!ELEMENT dipswitch (dipvalue*)>\n"
+		"\t\t\t<!ATTLIST dipswitch name CDATA #REQUIRED>\n"
+		"\t\t\t<!ELEMENT dipvalue EMPTY>\n"
+		"\t\t\t\t<!ATTLIST dipvalue name CDATA #REQUIRED>\n"
+		"\t\t\t\t<!ATTLIST dipvalue default (yes|no) \"no\">\n"
+		"\t\t<!ELEMENT driver EMPTY>\n"
+		"\t\t\t<!ATTLIST driver status (good|imperfect|preliminary) #REQUIRED>\n"
+		"\t\t\t<!ATTLIST driver emulation (good|imperfect|preliminary) #REQUIRED>\n"
+		"\t\t\t<!ATTLIST driver color (good|imperfect|preliminary) #REQUIRED>\n"
+		"\t\t\t<!ATTLIST driver sound (good|imperfect|preliminary) #REQUIRED>\n"
+		"\t\t\t<!ATTLIST driver graphic (good|imperfect|preliminary) #REQUIRED>\n"
+		"\t\t\t<!ATTLIST driver cocktail (good|imperfect|preliminary) #IMPLIED>\n"
+		"\t\t\t<!ATTLIST driver protection (good|imperfect|preliminary) #IMPLIED>\n"
+		"\t\t\t<!ATTLIST driver palettesize CDATA #REQUIRED>\n"
+#ifdef MESS
+		"\t\t<!ELEMENT device (extension*)>\n"
+		"\t\t\t<!ATTLIST device name CDATA #REQUIRED>\n"
+		"\t\t\t<!ELEMENT extension EMPTY>\n"
+		"\t\t\t\t<!ATTLIST extension name CDATA #REQUIRED>\n"
+#endif
+		"]>\n\n"
+		"<" XML_ROOT ">\n"
+	);
+
+	/* print games */
+	for(int j=0;games[j];++j)
+	   print_game_info(out, games[j]);
+
+	fprintf(out, "</" XML_ROOT ">\n"); 
+    fclose(out);
+}

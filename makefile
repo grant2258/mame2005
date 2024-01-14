@@ -555,9 +555,11 @@ endif
 
 # Architecture-specific flags #############################
 
-#ifeq ($(BIGENDIAN), 1)
-#	PLATCFLAGS += -DMSB_FIRST
-#endif
+ifeq ($(BIGENDIAN), 1)
+	PLATCFLAGS += -DMSB_FIRST
+else 
+	PLATCFLAGS += -DLSB_FIRST
+endif
 
 # End of architecture-specific flags ######################
 
@@ -565,7 +567,7 @@ endif
 
 # explictly use -fsigned-char on all platforms to solve problems with code written/tested on x86 but used on ARM
 # for example, audio on rtype leo is wrong on ARM without this flag
-CFLAGS += -fsigned-char
+CFLAGS += -fsigned-char 
 
 # Use position-independent code for all platforms
 CFLAGS += $(fpic)

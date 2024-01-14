@@ -1,9 +1,11 @@
-This is just a core for my person use no real plans for it
+This is just a core for my personal use no real plans for it, there is no affiliation with libretro.
+
 
 # todo
 * audiobuffer frameskip needs added
 * update all system16 and cps2 sets
 * find out why the analog controls are the wrong way wround in vr other drivers are fine probably driver related
+* add relative and abs mouse definitions problem is RA doesnt really provide this information look into it.
 
 # cpu cores
 * updated v60 cpu core to mame0114
