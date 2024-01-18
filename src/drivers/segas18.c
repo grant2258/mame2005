@@ -1149,7 +1149,29 @@ static INPUT_PORTS_START( wwally )
 	PORT_BIT( 0xff, 0x80, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(75) PORT_KEYDELTA(5) PORT_PLAYER(3)
 INPUT_PORTS_END
 
-
+static INPUT_PORTS_START( aquario )
+	PORT_INCLUDE( system18_generic )
+	PORT_MODIFY("DSW")
+	PORT_DIPNAME( 0x01, 0x01, "Credits to Start" ) 
+	PORT_DIPSETTING(    0x01, "1")
+	PORT_DIPSETTING(    0x00, "2")
+	PORT_DIPNAME( 0x02, 0x02, DEF_STR( Demo_Sounds ) )
+	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x0c, 0x00, "Number of Players" )
+	PORT_DIPSETTING(    0x00, "1" )
+	PORT_DIPSETTING(    0x04, "2" )
+	PORT_DIPSETTING(    0x0c, "3" )
+	PORT_DIPSETTING(    0x08, "4" )
+	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Difficulty ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Hard ) )
+	PORT_DIPSETTING(    0x10, DEF_STR( Normal ) )
+	PORT_DIPNAME( 0x20, 0x20, "Switch to Start" ) 
+	PORT_DIPSETTING(    0x20, "Start" )
+	PORT_DIPSETTING(    0x00, "Attack" )
+	//"SW2:7" unused
+	//"SW2:8" unused
+INPUT_PORTS_END
 
 /*************************************
  *
@@ -2084,6 +2106,38 @@ ROM_START( wwally1 )
 	ROM_LOAD( "mpr14722.c4",   0x190000, 0x80000, CRC(1bd081f8) SHA1(e5b0b5d8334486f813d7c430bb7fce3f69605a21) )
 ROM_END
 
+ROM_START( aquario )
+	ROM_REGION( 0x200000, REGION_CPU1, 0 ) /* 68000 code */
+	// not sure about the SHA1's yet
+	ROM_LOAD16_BYTE( "a4.bin",  0x000000, 0x80000, CRC(c58ff95f) )
+	ROM_LOAD16_BYTE( "a6.bin",  0x000001, 0x80000, CRC(b4a94cd9) )
+	ROM_LOAD16_BYTE( "a5.bin",  0x100000, 0x80000, CRC(1cef8145) SHA1(78a1be8ea0cc0d4e56b2cf9a7c1bd3e08352e175) )
+	ROM_LOAD16_BYTE( "a7.bin",  0x100001, 0x80000, CRC(504e4665) SHA1(9b052b48b7cb2da880d6589fdcd1041eca555f7c) )
+
+// these are same as Clutch Hitter boot values
+	ROM_REGION( 0x180000,  REGION_GFX1, ROMREGION_DISPOSE ) /* tiles */
+	ROM_LOAD( "c1.bin",       0x000000, 0x080000, CRC(93ad1357) SHA1(09b35481798035b5f7d7d533e27418a298c6e2c7) )
+	ROM_LOAD( "c2.bin",       0x080000, 0x080000, CRC(4010d14b) SHA1(f9d2e726a032f49fac69a223107966f2884821b5) )
+	ROM_LOAD( "c3.bin",       0x100000, 0x080000, CRC(3a3d0285) SHA1(21899b3b2bcb979d53e78b0d48c493a9a15955c7) )
+	
+// these are the same as Laser Ghost boot values
+	ROM_REGION16_BE( 0x800000, REGION_GFX2, 0 ) /* sprites */
+	ROM_LOAD16_BYTE( "a10.bin",      0x000000, 0x080000, CRC(b863e533) SHA1(e80fa6a74c43c040fd4b857247aecf03a3de3d87) )
+	ROM_LOAD16_BYTE( "c10.bin",      0x000001, 0x080000, CRC(c9ce76f9) SHA1(a096583f5e81f02d6a34802688d201d8d986a84a) )
+	ROM_LOAD16_BYTE( "a11.bin",      0x200000, 0x080000, CRC(8b568940) SHA1(19cd028cd43fa07904deb0250564251ba0128c4b) )
+	ROM_LOAD16_BYTE( "c11.bin",      0x200001, 0x080000, CRC(06edb7bc) SHA1(e24ec7b52638edaa8debee0aca40ddf902c63334) )
+	ROM_LOAD16_BYTE( "a12.bin",      0x400000, 0x080000, CRC(0219923f) SHA1(1e52df5ef155f5a4d74eabea22bb431a569e344f) )
+	ROM_LOAD16_BYTE( "c12.bin",      0x400001, 0x080000, CRC(0bb79c56) SHA1(fdaa6cc9efb3104b78392530547bd82c21cff825) )
+	ROM_LOAD16_BYTE( "a13.bin",      0x600000, 0x080000, CRC(9ea5c73d) SHA1(e42002cc13548a8aba6ffb0c60470b345b88eaa8) )
+	ROM_LOAD16_BYTE( "c13.bin",      0x600001, 0x080000, CRC(0beef46e) SHA1(eccba6d4e015e93f5ca25ef6df31a491193d08a4) )
+
+// Use generic MAME95 segas18 sound loading with 4 and 8 same as Desert Breaker not sure as per SHA1's yet
+	ROM_REGION( 0x210000, REGION_CPU2, ROMREGION_ERASEFF ) /* sound CPU */
+	ROM_LOAD( "c7.bin",	 0x010000, 0x40000, CRC(f1183938) )
+	ROM_LOAD( "c6.bin",  0x090000, 0x80000, CRC(39f11291) )
+	ROM_LOAD( "c5.bin",  0x110000, 0x80000, CRC(6a380dca) )
+	ROM_LOAD( "c4.bin",  0x190000, 0x80000, CRC(1bd081f8) )
+ROM_END
 
 
 /*************************************
@@ -2143,26 +2197,27 @@ static DRIVER_INIT( wwally )
  *
  *************************************/
 
-GAMEX(1990, astorm,   0,        system18,      astorm,   generic_5874, ROT0,   "Sega",    "Alien Storm (set 4, 2 Players, FD1094 317-?)", GAME_NOT_WORKING ) // not decrypted
-GAME( 1990, astorm3,  astorm,   system18,      astorm,   generic_5874, ROT0,   "Sega",    "Alien Storm (set 3, World, 3 Players, FD1094 317-0148)" )
-GAME( 1990, astormu,  astorm,   system18,      astorm,   generic_5874, ROT0,   "Sega",    "Alien Storm (set 2, US, 3 Players, FD1094 317-0147)" )
-GAME( 1990, astormj,  astorm,   system18,      astorm,   generic_5874, ROT0,   "Sega",    "Alien Storm (set 1, Japan, 2 Players, FD1094 317-0146)" )
-GAME( 1990, bloxeed,  0,        system18,      bloxeed,  generic_5874, ROT0,   "Sega",    "Bloxeed (Japan, FD1094 317-0139)" )
-GAME( 1991, cltchitr, 0,        system18,      cltchitr, generic_5987, ROT0,   "Sega",    "Clutch Hitter (set 2, US, FD1094 317-0176)" )
-GAME( 1991, cltchtrj, cltchitr, system18,      cltchitr, generic_5987, ROT0,   "Sega",    "Clutch Hitter (set 1, Japan, FD1094 317-0175)" )
-GAME( 1992, desertbr, 0,        system18,      desertbr, generic_5987, ROT270, "Sega",    "Desert Breaker (FD1094 317-0196)" )
-GAMEX(1991, ddcrew,   0,        system18,      ddcrew,   ddcrew,       ROT0,   "Sega",    "D. D. Crew (set 4, World, 3 Player, FD1094 317-0187)", GAME_NOT_WORKING ) // not decrypted
-GAME( 1991, ddcrewu,  ddcrew,   system18,      ddcrew,   ddcrew,       ROT0,   "Sega",    "D. D. Crew (set 3, US, 4 Player, FD1094 317-0186)" )
-GAME( 1991, ddcrew2,  ddcrew,   system18,      ddcrew,   ddcrew,       ROT0,   "Sega",    "D. D. Crew (set 2, World, 2 Player, FD1094 317-0184)" )
-GAME( 1991, ddcrew1,  ddcrew,   system18,      ddcrew,   ddcrew,       ROT0,   "Sega",    "D. D. Crew (set 1, World, 4 Player, FD1094 317-?)" )
-GAME( 1990, lghost,   0,        lghost,        lghost,   lghost,       ROT0,   "Sega",    "Laser Ghost (set 2, World, 317-0166)" )
-GAME( 1990, lghostu,  lghost,   lghost,        lghost,   lghost,       ROT0,   "Sega",    "Laser Ghost (set 1, US, 317-0165)" )
-GAME( 1990, mwalk,    0,        system18_8751, mwalk,    generic_5874, ROT0,   "Sega",    "Michael Jackson's Moonwalker (set 3, World, FD1094/8751 317-0159)" )
-GAME( 1990, mwalku,   mwalk,    system18_8751, mwalka,   generic_5874, ROT0,   "Sega",    "Michael Jackson's Moonwalker (set 2, US, FD1094/8751 317-0158)" )
-GAME( 1990, mwalkj,   mwalk,    system18_8751, mwalk,    generic_5874, ROT0,   "Sega",    "Michael Jackson's Moonwalker (set 1, Japan, FD1094/8751 317-0157)" )
-GAMEX(1989, pontoon,  0,        system18,      shdancer, generic_5874, ROT0,   "Sega",    "Pontoon", GAME_NOT_WORKING )
-GAME( 1989, shdancer, 0,        system18,      shdancer, generic_shad, ROT0,   "Sega",    "Shadow Dancer (set 3, US)"  )
-GAME( 1989, shdancej, shdancer, system18,      shdancer, generic_shad, ROT0,   "Sega",    "Shadow Dancer (set 2, Japan)" )
-GAME( 1989, shdance1, shdancer, system18,      shdancer, generic_shad, ROT0,   "Sega",    "Shadow Dancer (set 1)" )
-GAME( 1992, wwally,   0,        system18,      wwally,   wwally,       ROT0,   "Sega",    "Where's Wally? (rev A, Japan, FD1094 317-0197A)" )
-GAMEX(1992, wwally1,  wwally,   system18,      wwally,   wwally,       ROT0,   "Sega",    "Where's Wally? (rev B, FD1094 317-197B)", GAME_NOT_WORKING ) // not decrypted
+GAMEX(1990, astorm,   0,        system18,      astorm,   generic_5874, ROT0,   "Sega",            "Alien Storm (set 4, 2 Players, FD1094 317-?)", GAME_NOT_WORKING ) // not decrypted
+GAME( 1990, astorm3,  astorm,   system18,      astorm,   generic_5874, ROT0,   "Sega",            "Alien Storm (set 3, World, 3 Players, FD1094 317-0148)" )
+GAME( 1990, astormu,  astorm,   system18,      astorm,   generic_5874, ROT0,   "Sega",            "Alien Storm (set 2, US, 3 Players, FD1094 317-0147)" )
+GAME( 1990, astormj,  astorm,   system18,      astorm,   generic_5874, ROT0,   "Sega",            "Alien Storm (set 1, Japan, 2 Players, FD1094 317-0146)" )
+GAME( 1990, bloxeed,  0,        system18,      bloxeed,  generic_5874, ROT0,   "Sega",            "Bloxeed (Japan, FD1094 317-0139)" )
+GAME( 1991, cltchitr, 0,        system18,      cltchitr, generic_5987, ROT0,   "Sega",            "Clutch Hitter (set 2, US, FD1094 317-0176)" )
+GAME( 1991, cltchtrj, cltchitr, system18,      cltchitr, generic_5987, ROT0,   "Sega",            "Clutch Hitter (set 1, Japan, FD1094 317-0175)" )
+GAME( 1992, desertbr, 0,        system18,      desertbr, generic_5987, ROT270, "Sega",            "Desert Breaker (FD1094 317-0196)" )
+GAMEX(1991, ddcrew,   0,        system18,      ddcrew,   ddcrew,       ROT0,   "Sega",            "D. D. Crew (set 4, World, 3 Player, FD1094 317-0187)", GAME_NOT_WORKING ) // not decrypted
+GAME( 1991, ddcrewu,  ddcrew,   system18,      ddcrew,   ddcrew,       ROT0,   "Sega",            "D. D. Crew (set 3, US, 4 Player, FD1094 317-0186)" )
+GAME( 1991, ddcrew2,  ddcrew,   system18,      ddcrew,   ddcrew,       ROT0,   "Sega",            "D. D. Crew (set 2, World, 2 Player, FD1094 317-0184)" )
+GAME( 1991, ddcrew1,  ddcrew,   system18,      ddcrew,   ddcrew,       ROT0,   "Sega",            "D. D. Crew (set 1, World, 4 Player, FD1094 317-?)" )
+GAME( 1990, lghost,   0,        lghost,        lghost,   lghost,       ROT0,   "Sega",            "Laser Ghost (set 2, World, 317-0166)" )
+GAME( 1990, lghostu,  lghost,   lghost,        lghost,   lghost,       ROT0,   "Sega",            "Laser Ghost (set 1, US, 317-0165)" )
+GAME( 1990, mwalk,    0,        system18_8751, mwalk,    generic_5874, ROT0,   "Sega",            "Michael Jackson's Moonwalker (set 3, World, FD1094/8751 317-0159)" )
+GAME( 1990, mwalku,   mwalk,    system18_8751, mwalka,   generic_5874, ROT0,   "Sega",            "Michael Jackson's Moonwalker (set 2, US, FD1094/8751 317-0158)" )
+GAME( 1990, mwalkj,   mwalk,    system18_8751, mwalk,    generic_5874, ROT0,   "Sega",            "Michael Jackson's Moonwalker (set 1, Japan, FD1094/8751 317-0157)" )
+GAMEX(1989, pontoon,  0,        system18,      shdancer, generic_5874, ROT0,   "Sega",            "Pontoon", GAME_NOT_WORKING )
+GAME( 1989, shdancer, 0,        system18,      shdancer, generic_shad, ROT0,   "Sega",            "Shadow Dancer (set 3, US)"  )
+GAME( 1989, shdancej, shdancer, system18,      shdancer, generic_shad, ROT0,   "Sega",            "Shadow Dancer (set 2, Japan)" )
+GAME( 1989, shdance1, shdancer, system18,      shdancer, generic_shad, ROT0,   "Sega",            "Shadow Dancer (set 1)" )
+GAME( 1992, wwally,   0,        system18,      wwally,   wwally,       ROT0,   "Sega",            "Where's Wally? (rev A, Japan, FD1094 317-0197A)" )
+GAMEX(1992, wwally1,  wwally,   system18,      wwally,   wwally,       ROT0,   "Sega",            "Where's Wally? (rev B, FD1094 317-197B)", GAME_NOT_WORKING ) // not decrypted
+GAMEX(2021, aquario,  0,        system18,      aquario,  generic_5987, ROT0,    "ININ / Westone", "Clockwork Aquario" , GAME_NOT_WORKING )
