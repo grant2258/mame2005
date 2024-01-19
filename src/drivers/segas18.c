@@ -128,7 +128,7 @@ static const struct segaic16_memory_map_entry rom_171_5987_info[] =
 	{ 0x31/2, 0x00000, 0x00800, 0xfff800,      ~0, MRA16_BANK13,          MWA16_BANK13,          &segaic16_spriteram_0, "object RAM" },
 	{ 0x2d/2, 0x00000, 0x04000, 0xffc000,      ~0, MRA16_BANK14,          MWA16_BANK14,          &workram,              "work RAM" },
 	{ 0x29/2, 0x00000, 0x00010, 0xfffff0,      ~0, segac2_vdp_r,          segac2_vdp_w,          NULL,                  "VDP" },
-	{ 0x25/2, 0x00000, 0x80000, 0xf80000, 0x80000, MRA16_BANK16,          rom_5987_bank_w,       NULL,                  "ROM 1/banking" },
+	{ 0x25/2, 0x00000, 0x100000, 0xf00000, 0x100000, MRA16_BANK16,          rom_5987_bank_w,       NULL,                  "ROM 1/banking" },
 	{ 0x21/2, 0x00000, 0x100000,0xf00000, 0x00000, MRA16_BANK17,          MWA16_ROM,             NULL,                  "ROM 0" },
 	{ 0 }
 };
@@ -2107,12 +2107,12 @@ ROM_START( wwally1 )
 ROM_END
 
 ROM_START( aquario )
-	ROM_REGION( 0x200000, REGION_CPU1, 0 ) /* 68000 code */
+	ROM_REGION( 0x300000, REGION_CPU1, 0 ) /* 68000 code */
 	// not sure about the SHA1's yet
 	ROM_LOAD16_BYTE( "a4.bin",  0x000000, 0x80000, CRC(c58ff95f) )
 	ROM_LOAD16_BYTE( "a6.bin",  0x000001, 0x80000, CRC(b4a94cd9) )
-	ROM_LOAD16_BYTE( "a5.bin",  0x100000, 0x80000, CRC(1cef8145) SHA1(78a1be8ea0cc0d4e56b2cf9a7c1bd3e08352e175) )
-	ROM_LOAD16_BYTE( "a7.bin",  0x100001, 0x80000, CRC(504e4665) SHA1(9b052b48b7cb2da880d6589fdcd1041eca555f7c) )
+	ROM_LOAD16_BYTE( "a5.bin",  0x200000, 0x80000, CRC(1cef8145) SHA1(78a1be8ea0cc0d4e56b2cf9a7c1bd3e08352e175) )
+	ROM_LOAD16_BYTE( "a7.bin",  0x200001, 0x80000, CRC(504e4665) SHA1(9b052b48b7cb2da880d6589fdcd1041eca555f7c) )
 
 // these are same as Clutch Hitter boot values
 	ROM_REGION( 0x180000,  REGION_GFX1, ROMREGION_DISPOSE ) /* tiles */
