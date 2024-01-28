@@ -3,7 +3,7 @@ This is just a core for my personal use no real plans for it, there is no affili
 
 # todo
 * audiobuffer frameskip needs added
-* update all system16 and cps2 sets
+* update all system16
 * find out why the analog controls are the wrong way wround in vr other drivers are fine probably driver related
 * add relative and abs mouse definitions problem is RA doesnt really provide this information look into it.
 
@@ -22,6 +22,9 @@ This is just a core for my personal use no real plans for it, there is no affili
 * Virtua Fighter
 * Virtua Racing
 * Virtua Formula
+
+
+#cps2 updated all cps2 sets 
 
 # ssv driver ( backports from mame0114)
 * Change Air Blade (Japan)

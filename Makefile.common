@@ -2258,7 +2258,7 @@ SOURCES_C += \
 	$(CORE_DIR)/machine/kabuki.c \
 	$(CORE_DIR)/vidhrdw/mitchell.c $(CORE_DIR)/drivers/mitchell.c \
 	$(CORE_DIR)/vidhrdw/cbasebal.c $(CORE_DIR)/drivers/cbasebal.c \
-	$(CORE_DIR)/vidhrdw/cps1.c $(CORE_DIR)/drivers/cps1.c $(CORE_DIR)/drivers/cps2.c \
+	$(CORE_DIR)/vidhrdw/cps1.c $(CORE_DIR)/drivers/cps1.c $(CORE_DIR)/drivers/cps2.c $(CORE_DIR)/machine/cps2crypt.c \
 	$(CORE_DIR)/drivers/cps3.c \
 	$(CORE_DIR)/machine/znsec.c $(CORE_DIR)/machine/at28c16.c $(CORE_DIR)/machine/mb3773.c $(CORE_DIR)/drivers/zn.c \
 	$(CORE_DIR)/vidhrdw/tms34061.c \
