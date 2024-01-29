@@ -228,7 +228,7 @@ WRITE8_HANDLER( radarscp_grid_color_w )
 
 WRITE8_HANDLER( dkong_flipscreen_w )
 {
-	flip_screen_set(~data & 0x01);
+	flip_screen_set(data & 0x01);
 }
 
 /***************************************************************************
