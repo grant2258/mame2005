@@ -881,6 +881,9 @@ const struct GameDriver *drivers[] =
 	DRIVER( dkong3 )	/* (c) 1983 Nintendo of America */
 	DRIVER( dkong3j )	/* (c) 1983 Nintendo */
 	DRIVER( dkong3b )	/* bootleg */
+	DRIVER( dkongx )	
+	DRIVER( dkremix )
+	DRIVER( dkchrmx )
 	DRIVER( mario )		/* (c) 1983 Nintendo of America */
 	DRIVER( mariojp )	/* (c) 1983 Nintendo */
 	DRIVER( masao )		/* bootleg */
