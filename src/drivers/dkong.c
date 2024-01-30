@@ -395,6 +395,28 @@ static READ8_HANDLER( epos_decrypt_rom )
 	return 0;
 }
 
+static ADDRESS_MAP_START( dkong_map, ADDRESS_SPACE_PROGRAM, 8 )
+    AM_RANGE(0x0000, 0x3fff) AM_ROM
+    AM_RANGE(0x6000, 0x6bff) AM_RAM
+    AM_RANGE(0x7000, 0x73ff) AM_RAM AM_BASE(&spriteram) AM_SIZE(&spriteram_size) /* sprite set 1 */
+    AM_RANGE(0x7400, 0x77ff) AM_WRITE(dkong_videoram_w) AM_BASE(&videoram)
+ //   AM_RANGE(0x7800, 0x780f) AM_DEVREADWRITE("dma8257", i8257_r, i8257_w)   /* P8257 control registers */
+ //   AM_RANGE(0x7c00, 0x7c00) AM_READ_PORT("IN0") AM_LATCH8_WRITE("ls175.3d")    /* IN0, sound CPU intf */
+	AM_RANGE(0x7c00, 0x7c00) AM_READ(input_port_0_r)	/* IN0 */
+ //   AM_RANGE(0x7c80, 0x7c80) AM_READ_PORT("IN1") AM_WRITE(radarscp_grid_color_w)/* IN1 */
+    AM_RANGE(0x7c80, 0x7c80) AM_READ(input_port_1_r)	/* IN1 */
+    AM_RANGE(0x7d00, 0x7d00) AM_READ(dkong_in2_r)                               /* IN2 */
+ //   AM_RANGE(0x7d00, 0x7d07) AM_DEVWRITE("ls259.6h", latch8_bit0_w)     		/* Sound signals */
+
+ //   AM_RANGE(0x7d80, 0x7d80) AM_READ_PORT("DSW0") AM_WRITE(dkong_audio_irq_w)   /* DSW0 */
+    AM_RANGE(0x7d80, 0x7d80) AM_READ(input_port_3_r)
+ //   AM_RANGE(0x7d81, 0x7d81) AM_WRITE(radarscp_grid_enable_w)
+    AM_RANGE(0x7d82, 0x7d82) AM_WRITE(dkong_flipscreen_w)
+    AM_RANGE(0x7d83, 0x7d83) AM_WRITE(MWA8_RAM/*dkong_spritebank_w*/)                       /* 2 PSL Signal */
+    AM_RANGE(0x7d84, 0x7d84) AM_WRITE(interrupt_enable_w)
+ //   AM_RANGE(0x7d85, 0x7d85) AM_DEVWRITE("dma8257", p8257_drq_w)        		/* P8257 ==> /DRQ0 /DRQ1 */
+    AM_RANGE(0x7d86, 0x7d87) AM_WRITE(dkong_palettebank_w)
+ADDRESS_MAP_END
 
 static ADDRESS_MAP_START( readmem, ADDRESS_SPACE_PROGRAM, 8 )
 	AM_RANGE(0x0000, 0x5fff) AM_READ(MRA8_ROM)	/* DK: 0000-3fff */
@@ -2004,7 +2026,7 @@ static MACHINE_DRIVER_START( braze )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD(Z80, 3072000)	/* 3.072 MHz (?) */
-	MDRV_CPU_PROGRAM_MAP(readmem,dkong_writemem)
+	MDRV_CPU_PROGRAM_MAP(dkong_map,0)
 	MDRV_CPU_VBLANK_INT(nmi_line_pulse,1)
 
 	MDRV_CPU_ADD(I8035,6000000/15)
@@ -2970,18 +2992,22 @@ ROM_START( dkchrmx )
 	ROM_LOAD( "v-5e.ch",        0x0200, 0x0100, CRC(5a8ca805) SHA1(8e711af73ddb20ed62a9a8b53f1150feab1dc051) )
 ROM_END
 
+
+
 static DRIVER_INIT( dkongx )
 {
-	braze_decrypt_rom(memory_region(REGION_USER1) + 0x10000);
-
 	//memset (memory_region(REGION_CPU1), 0, 0x10000);
+	memory_install_read8_handler(0, ADDRESS_SPACE_PROGRAM, 0x0000, 0x5fff, 0, 0, MRA8_BANK1);
+	memory_install_read8_handler(0, ADDRESS_SPACE_PROGRAM, 0x8000, 0xffff, 0, 0, MRA8_BANK2);	
 
-	banks = 0;
-	cpu_setbank(1, memory_region(REGION_USER1) + 0x10000 + (0x8000 * banks));
-	cpu_setbank(2, memory_region(REGION_USER1) + 0x10000 + (0x8000 * banks));
 	memory_install_write8_handler(0, ADDRESS_SPACE_PROGRAM, 0xe000, 0xe000, 0, 0, braze_a15_w);
 	memory_install_write8_handler(0, ADDRESS_SPACE_PROGRAM, 0xc800, 0xc800, 0, 0, braze_eeprom_w);
 	memory_install_read8_handler(0,  ADDRESS_SPACE_PROGRAM, 0xc800, 0xc800, 0, 0, braze_eeprom_r);
+	braze_decrypt_rom(memory_region(REGION_USER1) + 0x10000);
+	banks = 0;
+	cpu_setbank(1, memory_region(REGION_USER1) + 0x10000 + (0x8000 * banks));
+	cpu_setbank(2, memory_region(REGION_USER1) + 0x10000 + (0x8000 * banks));
+
 }
 
 static DRIVER_INIT( herodk )
