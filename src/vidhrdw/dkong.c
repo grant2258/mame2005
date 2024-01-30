@@ -13,6 +13,7 @@
 static int gfx_bank, palette_bank;
 static int grid_on;
 static const UINT8 *color_codes;
+static UINT8	sprite_bank;
 
 static struct tilemap *bg_tilemap;
 
@@ -231,6 +232,11 @@ WRITE8_HANDLER( dkong_flipscreen_w )
 	flip_screen_set(data & 0x01);
 }
 
+WRITE8_HANDLER( dkong_spritebank_w )
+{
+	sprite_bank = data & 0x01;
+}
+
 /***************************************************************************
 
   Draw the game screen in the given mame_bitmap.
@@ -244,7 +250,7 @@ static void draw_sprites(struct mame_bitmap *bitmap, unsigned int mask_bank, uns
 	int offs;
 
 	/* Draw the sprites. */
-	for (offs = 0;offs < spriteram_size;offs += 4)
+	for (offs = sprite_bank*512;offs < (sprite_bank+1)*512;offs += 4)
 	{
 		if (spriteram[offs])
 		{
