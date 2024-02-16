@@ -3217,7 +3217,8 @@ DokiDoki Penguin Land *not confirmed
 	DRIVER( lghostu )   /* (protected) */
 	DRIVER( wwally )	/* (protected) */
 	DRIVER( wwally1 )	/* (protected) */
-	DRIVER( aquario )
+//	DRIVER( aquario )
+	DRIVER( hamaway )
 	/* System18 Bootlegs */
 	DRIVER( astormbl )	/* BOOTLEG */
 	DRIVER( shdancbl )	/* BOOTLEG */

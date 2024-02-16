@@ -11,12 +11,18 @@ This is just a core for my personal use no real plans for it, there is no affili
 * updated v60 cpu core to mame0114
 * added mb86233 cpu core from mame0114
 
+#audio cores
+*update rf5c68 soundcore to mame094u4 to fix hamaway missing sound
+
 # porting notes
 * removed the need cpuintrf_temp_str() in cpu interface
 * added BITMAP_ADDR8, BITMAP_ADDR16, BITMAP_ADDR32 macros
 
 
 # games now working (added or updated to working status)
+
+# sega system18
+* hammer away prototype
 
 # model1
 * Virtua Fighter
