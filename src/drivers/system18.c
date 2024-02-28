@@ -1130,7 +1130,7 @@ static MACHINE_DRIVER_START( system18 )
 	MDRV_SCREEN_SIZE(40*8, 28*8)
 	MDRV_VISIBLE_AREA(0*8, 40*8-1, 0*8, 28*8-1)
 	MDRV_GFXDECODE(sys16_gfxdecodeinfo)
-	MDRV_PALETTE_LENGTH((2048+2048)*ShadowColorsMultiplier) // 64 extra colours for vdp (but we use 2048 so shadow mask works)
+	MDRV_PALETTE_LENGTH((2048*2 + 64*3)*ShadowColorsMultiplier) // 64 extra colours for vdp (but we use 2048 so shadow mask works)
 
 	MDRV_VIDEO_START(system18old)
 	MDRV_VIDEO_UPDATE(system18old)
