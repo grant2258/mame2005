@@ -21,6 +21,8 @@ This is just a core for my personal use no real plans for it, there is no affili
 
 # games now working (added or updated to working status)
 
+# added top roller
+
 # sega system18
 * hammer away prototype
 
