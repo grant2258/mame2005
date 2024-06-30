@@ -3328,8 +3328,8 @@ Sep.1994 Quiz Ghost Hunter
 	DRIVER( ga2 )		/* (c) 1992 (World)*/
 	DRIVER( ga2u )		/* (c) 1992 (US)*/
 	DRIVER( ga2j )		/* (c) 1992 (Japan)*/
-	DRIVER( spidey )	/* (c) 1991 (World)*/
-	DRIVER( spideyu )	/* (c) 1991 (US) */
+	DRIVER( spidman )	/* (c) 1991 (World)*/
+	DRIVER( spidmanu )	/* (c) 1991 (US) */
 	DRIVER( arabfgt )	/* (c) 1991 */
 	DRIVER( arabfgtj )	/* (c) 1991 */
 	DRIVER( arescue )	/* (c) 1992 */
