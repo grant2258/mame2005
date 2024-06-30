@@ -28,7 +28,7 @@
 
 
 #include <stdint.h>
-
+#include <strings.h>
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
  #define LSB_FIRST 1
 #else
