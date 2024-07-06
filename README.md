@@ -33,7 +33,7 @@ This is just a core for my personal use no real plans for it, there is no affili
 * Virtua Formula
 
 
-#cps2 
+# cps2 
 * updated all cps2 sets 
 
 # ssv driver ( backports from mame0114)
