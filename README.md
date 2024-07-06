@@ -11,8 +11,8 @@ This is just a core for my personal use no real plans for it, there is no affili
 * updated v60 cpu core to mame0114
 * added mb86233 cpu core from mame0114
 
-#audio cores
-*update rf5c68 soundcore to mame094u4 to fix hamaway missing sound
+# audio cores
+*update rf5c68 soundcore to mame096u4
 
 # porting notes
 * removed the need cpuintrf_temp_str() in cpu interface
@@ -21,7 +21,8 @@ This is just a core for my personal use no real plans for it, there is no affili
 
 # games now working (added or updated to working status)
 
-# added top roller
+# added 
+* top roller
 
 # sega system18
 * hammer away prototype
@@ -32,7 +33,8 @@ This is just a core for my personal use no real plans for it, there is no affili
 * Virtua Formula
 
 
-#cps2 updated all cps2 sets 
+#cps2 
+* updated all cps2 sets 
 
 # ssv driver ( backports from mame0114)
 * Change Air Blade (Japan)
