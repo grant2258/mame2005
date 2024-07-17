@@ -27,7 +27,10 @@ This is just a core for my personal use no real plans for it, there is no affili
 # sega system18
 * hammer away prototype
 
-# model1
+# sega system32
+* update too mame0104u7
+
+# sega model1
 * Virtua Fighter
 * Virtua Racing
 * Virtua Formula
