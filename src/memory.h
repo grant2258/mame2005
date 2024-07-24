@@ -1058,6 +1058,8 @@ extern struct address_map_t *construct_map_0(struct address_map_t *map);
 #define ACCESSING_LSB32				((mem_mask & 0x000000ff) == 0)
 #define ACCESSING_MSB32				((mem_mask & 0xff000000) == 0)
 
+#define ACCESSING_BITS_0_15			((mem_mask & 0x0000ffff) != 0x0000ffff)
+#define ACCESSING_BITS_16_31			((mem_mask & 0xffff0000) != 0xffff0000)
 /* ----- opcode range safety checks ----- */
 #if CPUREADOP_SAFETY_NONE
 #define address_is_unsafe(A)		(0)
