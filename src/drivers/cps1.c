@@ -14204,7 +14204,7 @@ static DRIVER_INIT( pang3 )
 }
 
 
-
+#if defined(CPS1_old)
 GAME( 1988, forgottn, 0,        forgottn, forgottn, cps1,     ROT0,   "Capcom", "Forgotten Worlds (US)" )
 GAME( 1988, lostwrld, forgottn, forgottn, forgottn, cps1,     ROT0,   "Capcom", "Lost Worlds (Japan)" )
 GAME( 1988, ghouls,   0,        cps1,     ghouls,   cps1,     ROT0,   "Capcom", "Ghouls'n Ghosts (World)" )						// Wed.26.10.1988 in the ROMS
@@ -14319,3 +14319,5 @@ GAME( 1994, pnickj,   0,        cps1,     pnickj,   cps1,     ROT0,   "Compile (
 /* Japanese version of Pang 3 is encrypted, Euro version is not */
 GAME( 1995, pang3,    0,        pang3,    pang3,    cps1,     ROT0,   "Mitchell", "Pang! 3 (Euro 950511)" )
 GAME( 1995, pang3j,   pang3,    pang3,    pang3,    pang3,    ROT0,   "Mitchell", "Pang! 3 (Japan 950511)" )
+#endif
+GAME( 1995, megaman,  0,        cps1,     megaman,  cps1,     ROT0,   "Capcom", "Mega Man - The Power Battle (CPS1 Asia 951006)" ) 

@@ -2173,6 +2173,7 @@ V-V                           TP-027
 
 
 	/* Capcom CPS1 games */
+#if defined(CPS1_old)
 	DRIVER( forgottn )	/*  7/1988 (c) 1988 (US) */
 	DRIVER( lostwrld )	/*  7/1988 (c) 1988 (Japan) */
 	DRIVER( ghouls )	/* 12/1988 (c) 1988 (World) */
@@ -2284,6 +2285,8 @@ V-V                           TP-027
 	DRIVER( pang3j )	/* 11/05/1995 (c) 1995 Mitchell (Japan) not listed on Capcom's site */
 	DRIVER( megaman )	/* 06/10/1995 (c) 1995 (Asia)  */
 	DRIVER( rockmanj )	/* 22/09/1995 (c) 1995 (Japan) */
+#endif
+DRIVER( megaman )	/* 06/10/1995 (c) 1995 (Asia)  cps2 uses this remove when finished*/ 
 
 	/* Capcom CPS2 games */
 	/* list completed by CPS2Shock */

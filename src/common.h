@@ -150,6 +150,7 @@ enum
 #define ROMENTRYTYPE_FILL			5					/* this entry fills an area with a constant value */
 #define ROMENTRYTYPE_COPY			6					/* this entry copies data from another region/offset */
 #define ROMENTRYTYPE_COUNT			7
+#define ROMENTRYTYPE_IGNORE			8					/* this entry continues loading the previous ROM but throws the data away */
 
 #define ROMENTRY_REGION				((const char *)ROMENTRYTYPE_REGION)
 #define ROMENTRY_END				((const char *)ROMENTRYTYPE_END)
@@ -157,6 +158,7 @@ enum
 #define ROMENTRY_CONTINUE			((const char *)ROMENTRYTYPE_CONTINUE)
 #define ROMENTRY_FILL				((const char *)ROMENTRYTYPE_FILL)
 #define ROMENTRY_COPY				((const char *)ROMENTRYTYPE_COPY)
+#define ROMENTRY_IGNORE				((const char *)ROMENTRYTYPE_IGNORE)
 
 /* ----- per-entry macros ----- */
 #define ROMENTRY_GETTYPE(r)			((FPTR)(r)->_name)
@@ -168,6 +170,7 @@ enum
 #define ROMENTRY_ISCONTINUE(r)		((r)->_name == ROMENTRY_CONTINUE)
 #define ROMENTRY_ISFILL(r)			((r)->_name == ROMENTRY_FILL)
 #define ROMENTRY_ISCOPY(r)			((r)->_name == ROMENTRY_COPY)
+#define ROMENTRY_ISIGNORE(r)		((r)->_name == ROMENTRY_IGNORE)
 #define ROMENTRY_ISREGIONEND(r)		(ROMENTRY_ISREGION(r) || ROMENTRY_ISEND(r))
 
 
@@ -320,9 +323,9 @@ enum
 #define ROM_LOAD_OPTIONAL(name,offset,length,hash)   ROMX_LOAD(name, offset, length, hash, ROM_OPTIONAL)
 #define ROM_CONTINUE(offset,length)					ROMX_LOAD(ROMENTRY_CONTINUE, offset, length, 0, ROM_INHERITFLAGS)
 #define ROM_RELOAD(offset,length)					ROMX_LOAD(ROMENTRY_RELOAD, offset, length, 0, ROM_INHERITFLAGS)
-#define ROM_FILL(offset,length,value)                ROM_LOAD(ROMENTRY_FILL, offset, length, (const char*)value)
-#define ROM_COPY(rgn,srcoffset,offset,length)        ROMX_LOAD(ROMENTRY_COPY, offset, length, (const char*)srcoffset, (rgn) << 24)
-
+#define ROM_FILL(offset,length,value)               ROM_LOAD(ROMENTRY_FILL, offset, length, (const char*)value)
+#define ROM_COPY(rgn,srcoffset,offset,length)       ROMX_LOAD(ROMENTRY_COPY, offset, length, (const char*)srcoffset, (rgn) << 24)
+#define ROM_IGNORE(length)
 /* ----- nibble loading macros ----- */
 #define ROM_LOAD_NIB_HIGH(name,offset,length,hash)   ROMX_LOAD(name, offset, length, hash, ROM_NIBBLE | ROM_SHIFT_NIBBLE_HI)
 #define ROM_LOAD_NIB_LOW(name,offset,length,hash)    ROMX_LOAD(name, offset, length, hash, ROM_NIBBLE | ROM_SHIFT_NIBBLE_LO)
