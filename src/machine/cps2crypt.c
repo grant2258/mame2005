@@ -119,9 +119,9 @@ the decryption keys.
 
 
 /******************************************************************************/
-extern int scanline1;
-extern int scanline2;
-extern int scancalls;
+extern int cps1_scanline1;
+extern int cps1_scanline2;
+extern int cps1_scancalls;
 
 static const int fn1_groupA[8] = { 10, 4, 6, 7, 2, 13, 15, 14 };
 static const int fn1_groupB[8] = {  0, 1, 3, 5, 8,  9, 11, 12 };
@@ -797,9 +797,9 @@ DRIVER_INIT( cps2 )
 		memory_set_opcode_base(0,decrypted_opcodes);
 		m68k_set_encrypted_opcode_range(0,0,memory_region_length(REGION_CPU1));
 		cps2_gfx_decode();
-		scanline1 = 262;
-		scanline2 = 262;
-		scancalls = 0;
+		cps1_scanline1 = 262;
+		cps1_scanline2 = 262;
+		cps1_scancalls = 0;
 	}
 }
 
