@@ -473,12 +473,7 @@ const struct RomModule *rom_next_chunk(const struct RomModule *romp);
 void printromlist(const struct RomModule *romp,const char *name);
 
 
-
-/***************************************************************************
-
-	Useful macros to deal with bit shuffling encryptions
-
-***************************************************************************/
+#define BITNEW(x, n, w) (((x)>>(n))&make_bitmask(w))
 
 #define BIT(x,n) (((x)>>(n))&1)
 

@@ -14332,11 +14332,94 @@ DRIVER_INIT( pang3 )
 	init_pang3b();
 }
 
+READ16_HANDLER(sf2rb_prot_r )
+{
+	switch (offset)
+	{
+		case 0x01201/2:
+			return 0x0002;
+
+		case 0x81201/2:
+			return 0x0040;
+	}
+
+	return 0;
+}
+
+DRIVER_INIT( sf2rb )
+{
+	memory_install_read16_handler  (0, ADDRESS_SPACE_PROGRAM,0x200000, 0x2fffff, 0, 0, sf2rb_prot_r);
+	init_cps1();
+}
+
+READ16_HANDLER(sf2rb2_prot_r )
+{
+	switch (offset)
+	{
+		case 0x01201/2:
+			return 0x0000;
+
+		case 0x81201/2:
+			return 0x0040;
+	}
+
+	return 0;
+}
+
+DRIVER_INIT( sf2rb2 )
+{
+	memory_install_read16_handler  (0, ADDRESS_SPACE_PROGRAM,0x200000, 0x2fffff, 0, 0, sf2rb2_prot_r);
+	init_cps1();
+}
+
+
 DRIVER_INIT( sf2hack )
 {
 	/* some SF2 hacks have some inputs wired to the LSB instead of MSB */
-	memory_install_read16_handler  (0, ADDRESS_SPACE_PROGRAM,0x800018, 0x80001f, 0, 0, cps1_eeprom_port_r);
+	memory_install_read16_handler  (0, ADDRESS_SPACE_PROGRAM,0x800018, 0x80001f, 0, 0, cps1_hack_dsw_r);
 	init_cps1();
+}
+
+DRIVER_INIT( sf2ee )
+{
+//	m_maincpu->space(AS_PROGRAM).unmap_readwrite(0x800140, 0x80017f);
+	memory_install_read16_handler  (0, ADDRESS_SPACE_PROGRAM, 0x8001c0, 0x8001ff, 0, 0, cps1_cps_b_r);
+	memory_install_write16_handler (0, ADDRESS_SPACE_PROGRAM, 0x8001c0, 0x8001ff, 0, 0, cps1_cps_b_w);
+
+	init_cps1();
+}
+
+DRIVER_INIT( sf2thndr )
+{
+	/* This particular hack uses a modified B-board PAL which mirrors the CPS-B registers at an alternate address */
+	memory_install_read16_handler  (0, ADDRESS_SPACE_PROGRAM, 0x8001c0, 0x8001ff, 0, 0, cps1_cps_b_r);
+	memory_install_write16_handler(0, ADDRESS_SPACE_PROGRAM,  0x8001c0, 0x8001ff, 0, 0, cps1_cps_b_w);
+
+	init_cps1();
+}
+
+
+DRIVER_INIT( sf2rk )
+{
+
+	UINT8 *gfx = (UINT8 *)memory_region(REGION_GFX1);
+
+	// descramble the GFX ROMs
+	for (int i = 0; i < 0x400000; i++)
+	{
+		UINT8 x = gfx[i];
+		gfx[i] = BITSWAP8(x, 0, 6 ,5, 4, 3, 2, 1, 7);
+
+	}
+
+	// the 0x400000 - 0x480000 range is covered by the extra GFX layer ROMs, which aren't scrambled
+
+	for (int i = 0x480000; i < 0x600000; i++)
+	{
+		UINT8 x = gfx[i];
+		gfx[i] = BITSWAP8(x, 0, 6 ,5, 4, 3, 2, 1, 7);
+	}
+	init_sf2hack();// dont do this at the start as the current gfxdecode messes with the values should be removed soon
 }
 
 GAME(  1988, forgottn,    0,        cps1_10MHz,   forgottn,  forgottn,     ROT0,   "Capcom", "Forgotten Worlds (World, newer)" )  
@@ -14410,7 +14493,7 @@ GAME(  1991, sf2,         0,        cps1_10MHz, sf2,       cps1,     ROT0,   "Ca
 GAME(  1991, sf2ea,       sf2,      cps1_10MHz, sf2,       cps1,     ROT0,   "Capcom", "Street Fighter II: The World Warrior (World 910204)" )   // "ETC"
 GAME(  1991, sf2eb,       sf2,      cps1_10MHz, sf2,       cps1,     ROT0,   "Capcom", "Street Fighter II: The World Warrior (World 910214)" )   // "ETC"
 GAME(  1991, sf2ed,       sf2,      cps1_10MHz, sf2,       cps1,     ROT0,   "Capcom", "Street Fighter II: The World Warrior (World 910318)" )   // "ETC"
-//GAME(  1991, sf2ee,       sf2,      cps1_10MHz, sf2,       sf2ee,    ROT0,   "Capcom", "Street Fighter II: The World Warrior (World 910228)" )   // "ETC"
+GAME(  1991, sf2ee,       sf2,      cps1_10MHz, sf2,       sf2ee,    ROT0,   "Capcom", "Street Fighter II: The World Warrior (World 910228)" )   // "ETC"
 GAME(  1991, sf2ef,       sf2,      cps1_10MHz, sf2,       cps1,     ROT0,   "Capcom", "Street Fighter II: The World Warrior (World 910411)" )   // "ETC"
 GAME(  1991, sf2em,       sf2,      cps1_10MHz, sf2,       cps1,     ROT0,   "Capcom", "Street Fighter II: The World Warrior (World 910129)" )   // "ETC"
 GAME(  1991, sf2en,       sf2,      cps1_10MHz, sf2,       cps1,     ROT0,   "Capcom", "Street Fighter II: The World Warrior (World 910204, conversion)" )   // "ETC"
@@ -14418,7 +14501,7 @@ GAME(  1991, sf2ua,       sf2,      cps1_10MHz, sf2,       cps1,     ROT0,   "Ca
 GAME(  1991, sf2ub,       sf2,      cps1_10MHz, sf2,       cps1,     ROT0,   "Capcom", "Street Fighter II: The World Warrior (USA 910214)" )
 GAME(  1991, sf2uc,       sf2,      cps1_10MHz, sf2,       cps1,     ROT0,   "Capcom", "Street Fighter II: The World Warrior (USA 910306)" )
 GAME(  1991, sf2ud,       sf2,      cps1_10MHz, sf2,       cps1,     ROT0,   "Capcom", "Street Fighter II: The World Warrior (USA 910318)" )
-//GAME(  1991, sf2ue,       sf2,      cps1_10MHz, sf2,       sf2ee,    ROT0,   "Capcom", "Street Fighter II: The World Warrior (USA 910228)" )
+GAME(  1991, sf2ue,       sf2,      cps1_10MHz, sf2,       sf2ee,    ROT0,   "Capcom", "Street Fighter II: The World Warrior (USA 910228)" )
 GAME(  1991, sf2uf,       sf2,      cps1_10MHz, sf2,       cps1,     ROT0,   "Capcom", "Street Fighter II: The World Warrior (USA 910411)" )
 GAME(  1991, sf2ug,       sf2,      cps1_10MHz, sf2,       cps1,     ROT0,   "Capcom", "Street Fighter II: The World Warrior (USA 910522, Rev. G)" )
 GAME(  1991, sf2uh,       sf2,      cps1_10MHz, sf2,       cps1,     ROT0,   "Capcom", "Street Fighter II: The World Warrior (USA 910522, Rev. H)" )
@@ -14436,11 +14519,11 @@ GAME(  1992, sf2ebbl,     sf2,      cps1_10MHz, sf2hack,   sf2hack,  ROT0,   "bo
 GAME(  1992, sf2ebbl2,    sf2,      cps1_10MHz, sf2hack,   sf2hack,  ROT0,   "bootleg", "Street Fighter II: The World Warrior (TAB Austria, bootleg, set 3)" )       // 910214 - based on World version
 GAME(  1992, sf2ebbl3,    sf2,      cps1_10MHz, sf2hack,   sf2hack,  ROT0,   "bootleg", "Street Fighter II: The World Warrior (TAB Austria, bootleg, set 4)" )       // 910214 - based on World version
 GAMEX( 1992, sf2stt,      sf2,      cps1_10MHz, sf2hack,   sf2hack,  ROT0,   "bootleg", "Street Fighter II: The World Warrior (TAB Austria, bootleg, set 2)", GAME_NOT_WORKING )    // 910214 - based on World version
-//GAME(  1992, sf2rk,       sf2,      cps1_10MHz, sf2hack,   sf2rk,    ROT0,   "bootleg", "Street Fighter II: The World Warrior (RK, bootleg)" )               // 910214 - based on World version, dark screen issue confirmed present on real pcb
+GAME(  1992, sf2rk,       sf2,      cps1_10MHz, sf2hack,   sf2rk,    ROT0,   "bootleg", "Street Fighter II: The World Warrior (RK, bootleg)" )               // 910214 - based on World version, dark screen issue confirmed present on real pcb
 GAME(  1991, sf2qp1,      sf2,      cps1_10MHz, sf2,       cps1,     ROT0,   "bootleg", "Street Fighter II: The World Warrior (Quicken Pt-I, bootleg)" )     // 910214 - based on World version
 GAME(  1991, sf2qp2,      sf2,      cps1_10MHz, sf2,       cps1,     ROT0,   "bootleg", "Street Fighter II: The World Warrior (Quicken, bootleg)" )          // 910522 - based on USA Rev.I? version
-//GAME(  1991, sf2thndr,    sf2,      cps1_10MHz, sf2,       sf2thndr, ROT0,   "bootleg", "Street Fighter II: The World Warrior (Thunder Edition, bootleg, set 1)" )  // 910214 - based on World version
-//GAME(  1991, sf2thndr2,   sf2,      cps1_10MHz, sf2,       sf2thndr, ROT0,   "bootleg", "Street Fighter II: The World Warrior (Thunder Edition, bootleg, set 2)" )  // 910214 - based on World version
+GAME(  1991, sf2thndr,    sf2,      cps1_10MHz, sf2,       sf2thndr, ROT0,   "bootleg", "Street Fighter II: The World Warrior (Thunder Edition, bootleg, set 1)" )  // 910214 - based on World version
+GAME(  1991, sf2thndr2,   sf2,      cps1_10MHz, sf2,       sf2thndr, ROT0,   "bootleg", "Street Fighter II: The World Warrior (Thunder Edition, bootleg, set 2)" )  // 910214 - based on World version
 GAME(  1992, sf2rules,    sf2,      cps1_10MHz, sf2hack,   sf2hack,  ROT0,   "bootleg", "Street Fighter II: The World Warrior (bootleg with rules screen)" )     // 910214 - based on World version, shows the rules of the game instead of the warning screen
 GAME(  1991, 3wonders,    0,        cps1_10MHz, 3wonders,  cps1,     ROT0,   "Capcom", "Three Wonders (World 910520)" )  // "ETC"
 GAME(  1991, 3wondersr1,  3wonders, cps1_10MHz, 3wonders,  cps1,     ROT0,   "Capcom", "Three Wonders (World 910513)" )  // "ETC"
@@ -14477,8 +14560,8 @@ GAME(  1992, sf2cejb,     sf2ce,    cps1_12MHz, sf2cej,    cps1,     ROT0,   "Ca
 GAME(  1992, sf2cejc,     sf2ce,    cps1_12MHz, sf2cej,    cps1,     ROT0,   "Capcom", "Street Fighter II': Champion Edition (Japan 920803)" )
 //GAME(  1992, sf2bhh,      sf2ce,    cps1_12MHz, sf2bhh,    f2rb,    ROT0,   "bootleg", "Street Fighter II': Champion Edition (Hung Hsi, bootleg)" ) // derived from sf2cet, was on actual Capcom hw with changed, unlabeled ROMs. Has turbo mode.
 GAME(  1992, sf2cebltw,   sf2ce,    cps1_12MHz, sf2bhh,    cps1,     ROT0,   "bootleg", "Street Fighter II': Champion Edition ('Taiwan' bootleg with PAL)" ) // 'Taiwan', similar to sf2bhh but without Hung Hsi copyright
-//GAME(  1992, sf2rb,       sf2ce,    cps1_12MHz, sf2rb,     sf2rb,    ROT0,   "bootleg", "Street Fighter II': Champion Edition (Rainbow, bootleg, set 1)" )           // 920322 - based on World version
-//GAME(  1992, sf2rb2,      sf2ce,    cps1_12MHz, sf2rb,     sf2rb2,   ROT0,   "bootleg", "Street Fighter II': Champion Edition (Rainbow, bootleg, set 2)" )           // 920322 - based on World version
+GAME(  1992, sf2rb,       sf2ce,    cps1_12MHz, sf2rb,     sf2rb,    ROT0,   "bootleg", "Street Fighter II': Champion Edition (Rainbow, bootleg, set 1)" )           // 920322 - based on World version
+GAME(  1992, sf2rb2,      sf2ce,    cps1_12MHz, sf2rb,     sf2rb2,   ROT0,   "bootleg", "Street Fighter II': Champion Edition (Rainbow, bootleg, set 2)" )           // 920322 - based on World version
 GAME(  1992, sf2rb3,      sf2ce,    cps1_12MHz, sf2rb,     cps1,     ROT0,   "bootleg", "Street Fighter II': Champion Edition (Rainbow, bootleg, set 3)" )           // 920322 - based on World version
 GAME(  1992, sf2red,      sf2ce,    cps1_12MHz, sf2,       cps1,     ROT0,   "bootleg", "Street Fighter II': Champion Edition (Red Wave, bootleg, set 1)" )         // 920313 - based on World version
 GAME(  1992, sf2reda,     sf2ce,    cps1_12MHz, sf2,       cps1,     ROT0,   "bootleg", "Street Fighter II': Champion Edition (Red Wave, bootleg, set 2)" )         // 920313 - based on World version

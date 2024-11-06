@@ -2786,7 +2786,7 @@ static void cps1_render_sprites( struct mame_bitmap *bitmap, const struct rectan
 	UINT16 *base=cps1_buffered_obj;
 
 	/* some sf2 hacks draw the sprites in reverse order */
-	if (cps1_game_config->bootleg_kludge == 1)
+	if (cps1_game_config->bootleg_kludge == 0x41)
 	{
 		base += cps1_last_sprite_offset;
 		baseadd = -4;
