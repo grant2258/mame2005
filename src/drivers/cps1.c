@@ -3131,10 +3131,11 @@ static INPUT_PORTS_START( pang3b4 )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START_TAG("DSWC")
-	//PORT_DIPUNUSED_DIPLOC( 0x01, 0x01, "DIP-C:1" )
-	//PORT_DIPUNUSED_DIPLOC( 0x02, 0x02, "DIP-C:2" )
-	//PORT_DIPUNUSED_DIPLOC( 0x04, 0x04, "DIP-C:3" )
-	//PORT_DIPUNUSED_DIPLOC( 0x08, 0x08, "DIP-C:4" )                  // Missing freeze code @ 0x020B74
+
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Flip_Screen ) )              //PORT_DIPLOCATION("DIP-C:5")
 	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
@@ -3144,7 +3145,8 @@ static INPUT_PORTS_START( pang3b4 )
 	PORT_DIPNAME( 0x40, 0x00, DEF_STR( Allow_Continue ) )           //PORT_DIPLOCATION("DIP-C:7")
 	PORT_DIPSETTING(    0x40, DEF_STR( No ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
-	//PORT_DIPUNUSED_DIPLOC( 0x80, 0x80, "DIP-C:8" )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
+
 INPUT_PORTS_END
 
 // Note: if you have service mode stuck then start button doesn't get recognized on title screen.
@@ -14332,6 +14334,36 @@ DRIVER_INIT( pang3 )
 	init_pang3b();
 }
 
+UINT16 pang3b4_prot = 0;
+
+READ16_HANDLER( pang3b4_prot_r )
+{
+	if ((pang3b4_prot & 0xff) <= 7)
+		return (pang3b4_prot & 0xff) + 0x20;  // Game level + extend
+	if (pang3b4_prot == 0x17)
+		return 0x7321;                      // Guessed from code @0x314
+	return 0xffff;
+}
+
+WRITE16_HANDLER( pang3b4_prot_w )
+{
+	pang3b4_prot = data;
+}
+
+
+DRIVER_INIT( pang3b4 )
+{
+	memory_install_write16_handler(0, ADDRESS_SPACE_PROGRAM, 0x5762b0, 0x5762b1, 0, 0, pang3b4_prot_w);
+	memory_install_read16_handler  (0, ADDRESS_SPACE_PROGRAM, 0x5762b0, 0x5762b1, 0, 0, pang3b4_prot_r);
+	
+	/* In pang3 the Mach215 security chip outputs 2 control signals (pins 4, 6) which switch the eeprom in/out serial data lines onto the main 68k data bus when required
+	   They're mapped in the CPS-B address range but there is not the EPROM on the board
+	   Read and write to port 0x80017a still are present in the code, but they are filtered by the PAL16V8 @ E13 */
+	memory_install_write16_handler(0, ADDRESS_SPACE_PROGRAM, 0x80017a, 0x80017b, 0, 0, MWA16_NOP);
+	memory_install_read16_handler  (0, ADDRESS_SPACE_PROGRAM, 0x80017a, 0x80017b, 0, 0, MRA16_NOP);
+	init_cps1();
+}
+
 READ16_HANDLER(sf2rb_prot_r )
 {
 	switch (offset)
@@ -14558,7 +14590,7 @@ GAME(  1992, sf2cet,      sf2ce,    cps1_12MHz, sf2,       cps1,     ROT0,   "Ca
 GAME(  1992, sf2ceja,     sf2ce,    cps1_12MHz, sf2cej,    cps1,     ROT0,   "Capcom", "Street Fighter II': Champion Edition (Japan 920322)" )
 GAME(  1992, sf2cejb,     sf2ce,    cps1_12MHz, sf2cej,    cps1,     ROT0,   "Capcom", "Street Fighter II': Champion Edition (Japan 920513)" )
 GAME(  1992, sf2cejc,     sf2ce,    cps1_12MHz, sf2cej,    cps1,     ROT0,   "Capcom", "Street Fighter II': Champion Edition (Japan 920803)" )
-//GAME(  1992, sf2bhh,      sf2ce,    cps1_12MHz, sf2bhh,    f2rb,    ROT0,   "bootleg", "Street Fighter II': Champion Edition (Hung Hsi, bootleg)" ) // derived from sf2cet, was on actual Capcom hw with changed, unlabeled ROMs. Has turbo mode.
+GAME(  1992, sf2bhh,      sf2ce,    cps1_12MHz, sf2bhh,    sf2rb,    ROT0,   "bootleg", "Street Fighter II': Champion Edition (Hung Hsi, bootleg)" ) // derived from sf2cet, was on actual Capcom hw with changed, unlabeled ROMs. Has turbo mode.
 GAME(  1992, sf2cebltw,   sf2ce,    cps1_12MHz, sf2bhh,    cps1,     ROT0,   "bootleg", "Street Fighter II': Champion Edition ('Taiwan' bootleg with PAL)" ) // 'Taiwan', similar to sf2bhh but without Hung Hsi copyright
 GAME(  1992, sf2rb,       sf2ce,    cps1_12MHz, sf2rb,     sf2rb,    ROT0,   "bootleg", "Street Fighter II': Champion Edition (Rainbow, bootleg, set 1)" )           // 920322 - based on World version
 GAME(  1992, sf2rb2,      sf2ce,    cps1_12MHz, sf2rb,     sf2rb2,   ROT0,   "bootleg", "Street Fighter II': Champion Edition (Rainbow, bootleg, set 2)" )           // 920322 - based on World version
@@ -14649,7 +14681,7 @@ GAME( 1995, pang3j,      pang3,    pang3,      pang3,       pang3,    ROT0,   "M
 GAME( 1995, pang3b,      pang3,    pang3,      pang3b,      pang3b,   ROT0,   "bootleg",  "Pang! 3 (bootleg, set 1)" )    // 950511 - based on Euro version
 GAME( 1995, pang3b2,     pang3,    pang3,      pang3,       pang3,    ROT0,   "bootleg",  "Pang! 3 (bootleg, set 2)" )    // 950601 - based on Euro version
 GAME( 1995, pang3b3,     pang3,    pang3,      pang3,       pang3,    ROT0,   "bootleg",  "Pang! 3 (bootleg, set 3)" )    // 950511 - based on Euro version, hacked to use cps-b-17
-//GAME( 1995, pang3b4,     pang3,    cps1_12MHz, pang3b4,     pang3b4,  ROT0,   "bootleg",  "Pang! 3 (bootleg, set 4)" )    // 950601 - based on Euro version, unencrypted, protection PIC, no serial EPROM
+GAME( 1995, pang3b4,     pang3,    cps1_12MHz, pang3b4,     pang3b4,  ROT0,   "bootleg",  "Pang! 3 (bootleg, set 4)" )    // 950601 - based on Euro version, unencrypted, protection PIC, no serial EPROM
 GAME( 1995, pang3b5,     pang3,    pang3,      pang3,       pang3,    ROT0,   "bootleg",  "Pang! 3 (bootleg, set 5)" )    // 950511 - based on Euro version
 
 /* Home 'CPS Changer' Unit */

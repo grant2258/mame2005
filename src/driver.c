@@ -2309,7 +2309,7 @@ V-V                           TP-027
 	DRIVER( sf2ceja )
 	DRIVER( sf2cejb )
 	DRIVER( sf2cejc )
-	//DRIVER( sf2bhh )
+	DRIVER( sf2bhh )
 	DRIVER( sf2cebltw )
 	DRIVER( sf2rb )
 	DRIVER( sf2rb2 )
@@ -2396,7 +2396,7 @@ V-V                           TP-027
 	DRIVER( pang3b )
 	DRIVER( pang3b2 )
 	DRIVER( pang3b3 )
-	//DRIVER( pang3b4 )
+	DRIVER( pang3b4 )
 	DRIVER( pang3b5 )
 
 	/* Capcom CPS2 games */
