@@ -23,7 +23,7 @@
 
 FILE *logfile;
 static int errorlog=0; 
-static int erroroslog=0;
+static int erroroslog=1;
 static char log_buffer[2048];
 extern char* systemDir;
 extern char* saveDir;

@@ -271,6 +271,11 @@ static WRITE16_HANDLER( cpsq_coinctrl2_w )
     }
 }
 
+static WRITE16_HANDLER( sf2m3_layer_w )
+{
+	cps1_cps_b_w(0x0a,data,mem_mask);
+}
+
 INTERRUPT_GEN( cps1_interrupt )
 {
 	/* Strider also has a IRQ4 handler. It is input port related, but the game */
@@ -541,6 +546,42 @@ static ADDRESS_MAP_START( main_map, ADDRESS_SPACE_PROGRAM, 16 )
 	AM_RANGE(0xff0000, 0xffffff) AM_RAM
 ADDRESS_MAP_END
 
+
+static ADDRESS_MAP_START(sf2m3_map, ADDRESS_SPACE_PROGRAM, 16 )
+
+	AM_RANGE(0x000000, 0x3fffff) AM_ROM
+	AM_RANGE(0x800010, 0x800011) AM_READ(cps1_in1_r)            
+	AM_RANGE(0x800028, 0x80002f) AM_READ(cps1_hack_dsw_r)            
+	AM_RANGE(0x800030, 0x800037) AM_WRITE(cps1_coinctrl_w)
+	AM_RANGE(0x800100, 0x80013f) AM_WRITE(cps1_cps_a_w) AM_BASE(&cps1_cps_a_regs)	
+	AM_RANGE(0x800140, 0x80017f) AM_READWRITE(cps1_cps_b_r, cps1_cps_b_w) AM_BASE(&cps1_cps_b_regs)
+	AM_RANGE(0x800186, 0x800187) AM_READ(cps1_in2_r)            
+	AM_RANGE(0x800190, 0x800197) AM_WRITE(cps1_soundlatch_w) 
+	AM_RANGE(0x800198, 0x80019f) AM_WRITE(cps1_soundlatch2_w)
+	AM_RANGE(0x8001a0, 0x8001c3) AM_WRITE(cps1_cps_a_w) /*AM_BASE(&cps1_cps_a_regs)*/	
+	AM_RANGE(0x8001c4, 0x8001c5) AM_WRITE(sf2m3_layer_w)
+	AM_RANGE(0x900000, 0x92ffff) AM_RAM AM_WRITE(cps1_gfxram_w) AM_BASE(&cps1_gfxram) AM_SIZE(&cps1_gfxram_size)
+	AM_RANGE(0xff0000, 0xffffff) AM_RAM
+ADDRESS_MAP_END
+
+/*
+void cps_state::sf2m3_map(address_map &map)
+{
+	map(0x000000, 0x3fffff).rom();
+	map(0x800010, 0x800011).portr("IN1");            
+	map(0x800028, 0x80002f).r(FUNC(cps_state::cps1_hack_dsw_r));      
+	map(0x800030, 0x800037).w(FUNC(cps_state::cps1_coinctrl_w));
+	map(0x800100, 0x80013f).w(FUNC(cps_state::cps1_cps_a_w)).share("cps_a_regs");  
+	map(0x800140, 0x80017f).rw(FUNC(cps_state::cps1_cps_b_r), FUNC(cps_state::cps1_cps_b_w)).share("cps_b_regs");   
+	map(0x800186, 0x800187).r(FUNC(cps_state::cps1_in2_r));            
+	map(0x800190, 0x800197).w(FUNC(cps_state::cps1_soundlatch_w));    
+	map(0x800198, 0x80019f).w(FUNC(cps_state::cps1_soundlatch2_w));   
+	map(0x8001a0, 0x8001c3).w(FUNC(cps_state::cps1_cps_a_w));
+	map(0x8001c4, 0x8001c5).w(FUNC(cps_state::sf2m3_layer_w));
+	map(0x900000, 0x92ffff).ram().w(FUNC(cps_state::cps1_gfxram_w)).share("gfxram");
+	map(0xff0000, 0xffffff).ram();
+}
+*/
 /*
 PAL SOU1 (16P8 @ 13E):
 
@@ -3838,6 +3879,44 @@ MACHINE_DRIVER_START( pang3 )
 
 	MDRV_NVRAM_HANDLER(pang3)
 MACHINE_DRIVER_END
+
+MACHINE_DRIVER_START( sf2m3 )
+	/* basic machine hardware */
+	MDRV_CPU_ADD_TAG("main", M68000, 12000000)
+	MDRV_CPU_PROGRAM_MAP(sf2m3_map,0)
+	MDRV_CPU_VBLANK_INT(cps1_interrupt,1)
+
+	MDRV_CPU_ADD_TAG("sound", Z80, 3579545)
+	/* audio CPU */
+	MDRV_CPU_PROGRAM_MAP(sub_map,0)
+
+	MDRV_FRAMES_PER_SECOND(60)
+	MDRV_VBLANK_DURATION(DEFAULT_60HZ_VBLANK_DURATION)
+	/* video hardware */
+	MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER | VIDEO_NEEDS_6BITS_PER_GUN)
+	MDRV_SCREEN_SIZE(64*8, 32*8)
+	MDRV_VISIBLE_AREA(8*8, (64-8)*8-1, 2*8, 30*8-1 )
+
+	MDRV_GFXDECODE(cps1)
+	MDRV_PALETTE_LENGTH(0xc00)
+
+	MDRV_VIDEO_START(cps1)
+	MDRV_VIDEO_EOF(cps1)
+	MDRV_VIDEO_UPDATE(cps1)
+
+	/* sound hardware */
+	MDRV_SPEAKER_STANDARD_MONO("mono")
+
+	MDRV_SOUND_ADD_TAG("2151", YM2151, 3579545)
+	MDRV_SOUND_CONFIG(ym2151_interface)
+	MDRV_SOUND_ROUTE(0, "mono", 0.35)
+	MDRV_SOUND_ROUTE(1, "mono", 0.35)
+
+	MDRV_SOUND_ADD_TAG("okim", OKIM6295, 7576)
+	MDRV_SOUND_CONFIG(okim6295_interface_region_1)
+	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.30)
+MACHINE_DRIVER_END
+
 
 MACHINE_DRIVER_START( qsound )
 
@@ -14334,20 +14413,20 @@ DRIVER_INIT( pang3 )
 	init_pang3b();
 }
 
-UINT16 pang3b4_prot = 0;
+UINT16 m_prot = 0;
 
 READ16_HANDLER( pang3b4_prot_r )
 {
-	if ((pang3b4_prot & 0xff) <= 7)
-		return (pang3b4_prot & 0xff) + 0x20;  // Game level + extend
-	if (pang3b4_prot == 0x17)
+	if ((m_prot & 0xff) <= 7)
+		return (m_prot & 0xff) + 0x20;  // Game level + extend
+	if (m_prot == 0x17)
 		return 0x7321;                      // Guessed from code @0x314
 	return 0xffff;
 }
 
 WRITE16_HANDLER( pang3b4_prot_w )
 {
-	pang3b4_prot = data;
+	m_prot = data;
 }
 
 
@@ -14452,6 +14531,70 @@ DRIVER_INIT( sf2rk )
 		gfx[i] = BITSWAP8(x, 0, 6 ,5, 4, 3, 2, 1, 7);
 	}
 	init_sf2hack();// dont do this at the start as the current gfxdecode messes with the values should be removed soon
+}
+
+
+DRIVER_INIT( sf2m8 )
+{
+	// unscramble gfx
+	UINT8 *grom = (UINT8 *)memory_region(REGION_GFX1);
+	uint8_t *urom = (UINT8 *)memory_region(REGION_USER2);
+	int i = 0x480000, j = 0;
+
+	for (j = 0x20000; j < 0x80000; j+=2)
+	{
+		grom[i++] = urom[j];
+		grom[i++] = urom[j|0x100000];
+		grom[i++] = urom[j|0x000001];
+		grom[i++] = urom[j|0x100001];
+		grom[i++] = urom[j|0x080000];
+		grom[i++] = urom[j|0x180000];
+		grom[i++] = urom[j|0x080001];
+		grom[i++] = urom[j|0x180001];
+	}
+
+	init_cps1();
+}
+
+
+READ16_HANDLER( sf2ceblp_prot_r )
+{
+	if (m_prot == 0x0)
+		return 0x1992;
+	if (m_prot == 0x04)
+		return 0x0408;
+	return 0xffff;
+}
+
+WRITE16_HANDLER( sf2ceblp_prot_w )
+{
+	m_prot = data;
+}
+
+DRIVER_INIT( sf2ceblp )
+{
+	memory_install_read16_handler  (0, ADDRESS_SPACE_PROGRAM, 0x57A2b0, 0x57A2b1, 0, 0, sf2ceblp_prot_r);
+	memory_install_write16_handler(0, ADDRESS_SPACE_PROGRAM,  0x5762b0, 0x5762b1, 0, 0, sf2ceblp_prot_w);
+	init_cps1();
+}
+
+READ16_HANDLER( sf2dongb_prot_r )
+{
+	switch (offset)
+	{
+		case 0x00000/2: // (ret & 0x0f00) == 0x0200
+		case 0x77040/2: // (ret & 0x0ff0) == 0x0210
+			return 0x0210;
+	}
+
+	return 0;
+}
+
+DRIVER_INIT( sf2dongb )
+{
+	// There is a hacked up Altera EP910PC-30 DIP in the 5f socket instead of a 4th EPROM
+	memory_install_read16_handler  (0, ADDRESS_SPACE_PROGRAM, 0x180000, 0x1fffff, 0, 0, sf2dongb_prot_r);
+	init_cps1();
 }
 
 GAME(  1988, forgottn,    0,        cps1_10MHz,   forgottn,  forgottn,     ROT0,   "Capcom", "Forgotten Worlds (World, newer)" )  
@@ -14606,25 +14749,25 @@ GAMEX( 1992, sf2amf,      sf2ce,    cps1_12MHz, sf2amf,    sf2hack,  ROT0,   "bo
 GAME(  1992, sf2amf2,     sf2ce,    cps1_12MHz, sf2amfx,   sf2hack,  ROT0,   "bootleg", "Street Fighter II': Champion Edition (L735 Test Rom, bootleg, set 1)" )     // 920313 - based on World version
 GAME(  1992, sf2amf3,     sf2ce,    cps1_10MHz, sf2amfx,   sf2hack,  ROT0,   "bootleg", "Street Fighter II': Champion Edition (L735 Test Rom, bootleg, set 2)" )     // 920313 - based on World version, confirmed 10MHz
 GAME(  1992, sf2dkot2,    sf2ce,    cps1_12MHz, sf2,       cps1,     ROT0,   "bootleg", "Street Fighter II': Champion Edition (Double K.O. Turbo II, bootleg)" ) // 902140 !!! - based on USA version
-//GAME(  1992, sf2level,    sf2ce,    sf2m3,      sf2level,  cps1,     ROT0,   "bootleg", "Street Fighter II': Champion Edition (bootleg with level selection)" ) // 920322 - based on USA version
-//GAME(  1992, sf2ceblp,    sf2ce,    cps1_10MHz, sf2,       sf2ceblp, ROT0,   "bootleg", "Street Fighter II': Champion Edition (protected bootleg on non-dash board)" )          // 920313 - based on USA version
+GAME(  1992, sf2level,    sf2ce,    sf2m3,      sf2level,  cps1,     ROT0,   "bootleg", "Street Fighter II': Champion Edition (bootleg with level selection)" ) // 920322 - based on USA version
+GAME(  1992, sf2ceblp,    sf2ce,    cps1_10MHz, sf2,       sf2ceblp, ROT0,   "bootleg", "Street Fighter II': Champion Edition (protected bootleg on non-dash board)" )          // 920313 - based on USA version
 GAME(  1992, sf2m2,       sf2ce,    cps1_12MHz, sf2m2,     sf2hack,  ROT0,   "bootleg", "Street Fighter II': Champion Edition (M2, bootleg)" )               // 920313 - based on World version
-//GAME(  1992, sf2m3,       sf2ce,    sf2m3,      sf2,       cps1,     ROT0,   "bootleg", "Street Fighter II': Champion Edition (M3, bootleg)" )               // 920313 - based on USA version
+GAME(  1992, sf2m3,       sf2ce,    sf2m3,      sf2,       cps1,     ROT0,   "bootleg", "Street Fighter II': Champion Edition (M3, bootleg)" )               // 920313 - based on USA version
 //GAME(  1992, sf2m4,       sf2ce,    cps1_12MHz, sf2m4,     sf2hack,  ROT0,   "bootleg", "Street Fighter II': Champion Edition (M4, bootleg)" )               // 920322 - based on Japan version
 GAME(  1992, sf2m5,       sf2ce,    cps1_12MHz, sf2hack,   sf2hack,  ROT0,   "bootleg", "Street Fighter II': Champion Edition (M5, bootleg)" )               // 920313 - based on World version
 GAME(  1992, sf2m6,       sf2ce,    cps1_12MHz, sf2hack,   sf2hack,  ROT0,   "bootleg", "Street Fighter II': Champion Edition (M6, bootleg)" )               // 811102 !!! - based on World version
 GAME(  1992, sf2m7,       sf2ce,    cps1_12MHz, sf2hack,   sf2hack,  ROT0,   "bootleg", "Street Fighter II': Champion Edition (M7, bootleg)" )               // 920313 - based on World version
-//GAME(  1992, sf2m8,       sf2ce,    sf2m3,      sf2,       sf2m8,    ROT0,   "bootleg", "Street Fighter II': Champion Edition (M8, bootleg)" )               // 920313 - based on USA version
+GAME(  1992, sf2m8,       sf2ce,    sf2m3,      sf2,       sf2m8,    ROT0,   "bootleg", "Street Fighter II': Champion Edition (M8, bootleg)" )               // 920313 - based on USA version
 //GAME(  1992, sf2m10,      sf2ce,    sf2m10,     sf2hack,   cps1,     ROT0,   "bootleg", "Street Fighter II': Champion Edition (M10, bootleg)" )
 GAME(  1992, sf2yyc,      sf2ce,    cps1_12MHz, sf2hack,   sf2hack,  ROT0,   "bootleg", "Street Fighter II': Champion Edition (YYC, bootleg)" )              // 920313 - based on World version
 GAME(  1992, sf2koryu,    sf2ce,    cps1_12MHz, sf2hack,   sf2hack,  ROT0,   "bootleg", "Street Fighter II': Champion Edition (Xiang Long, Chinese bootleg)" )       // 811102 !!! - based on World version
-//GAME(  1992, sf2dongb,    sf2ce,    cps1_12MHz, sf2,       sf2dongb, ROT0,   "bootleg", "Street Fighter II': Champion Edition (Dongfang Bubai protection, bootleg)" ) // 920313 - based on World version
+GAME(  1992, sf2dongb,    sf2ce,    cps1_12MHz, sf2,       sf2dongb, ROT0,   "bootleg", "Street Fighter II': Champion Edition (Dongfang Bubai protection, bootleg)" ) // 920313 - based on World version
 //GAME(  1992, sf2ceupl,    sf2ce,    sf2m10,     sf2hack,   cps1,     ROT0,   "bootleg (UPL?)", "Street Fighter II': Champion Edition (Japan 920322, UPL bootleg?)" ) // FIXME: pinpoint a full PCB and deambiguate
 //GAME(  1992, sf2cems6a,   sf2ce,    sf2cems6,   sf2,       cps1,     ROT0,   "bootleg", "Street Fighter II': Champion Edition (Mstreet-6, bootleg, set 1)" ) // 920313 USA
 //GAME(  1992, sf2cems6b,   sf2ce,    sf2cems6,   sf2bhh,    cps1,     ROT0,   "bootleg", "Street Fighter II': Champion Edition (Mstreet-6, bootleg, set 2)" ) // 920322 USA
 //GAME(  1992, sf2cems6c,   sf2ce,    sf2cems6,   sf2bhh,    cps1,     ROT0,   "bootleg", "Street Fighter II': Champion Edition (Mstreet-6, bootleg, set 3)" ) // 920322 USA
 //GAME(  1992, sf2ceds6,    sf2ce,    sf2cems6,   sf2,       cps1,     ROT0,   "bootleg", "Street Fighter II': Champion Edition (Dstreet-6, bootleg)" ) // 920313 USA
-//GAMEX( 1992, sf2re,       sf2,      sf2m3,      sf2,       cps1,     ROT0,   "bootleg", "Street Fighter II': Champion Edition (RE, bootleg)", GAME_IMPERFECT_GRAPHICS )    // 920313 - based on USA version, glitch on title screen confirmed not to happen on PCB so MIG
+GAMEX( 1992, sf2re,       sf2,      sf2m3,      sf2,       cps1,     ROT0,   "bootleg", "Street Fighter II': Champion Edition (RE, bootleg)", GAME_IMPERFECT_GRAPHICS )    // 920313 - based on USA version, glitch on title screen confirmed not to happen on PCB so MIG
 GAME(  1992, sf2mkot,     sf2,      cps1_10MHz, sf2hack,   sf2hack,  ROT0,   "bootleg", "Street Fighter II': Magic KO Turbo!! - Nightmare Crack" ) // 920313 - based on World version
 GAME(  1992, cworld2j,    0,        cps1_12MHz, cworld2j,  cps1,     ROT0,   "Capcom", "Adventure Quiz Capcom World 2 (Japan 920611)" )
 GAME(  1992, cworld2ja,   cworld2j, cps1_12MHz, cworld2j,  cps1,     ROT0,   "Capcom", "Adventure Quiz Capcom World 2 (Japan 920611, B-Board 90629B-3, no battery)" )
