@@ -97,7 +97,7 @@
 
 
 #define MEM_DUMP		(0)
-#define VERBOSE			(1)
+#define VERBOSE			(0)
 
 
 #if VERBOSE
