@@ -97,7 +97,7 @@
 
 
 #define MEM_DUMP		(0)
-#define VERBOSE			(0)
+#define VERBOSE			(1)
 
 
 #if VERBOSE
@@ -373,11 +373,20 @@ static int find_memory(void);
 static void *memory_find_base(int cpunum, int spacenum, int readwrite, offs_t offset);
 static genf *get_static_handler(int databits, int readorwrite, int spacenum, int which);
 
-#if (MEM_DUMP)
-static void mem_dump(void);
-#else
-#define mem_dump()
-#endif
+static void mem_dump(void)
+{
+	FILE *file;
+
+	if (MEM_DUMP)
+	{
+		file = fopen("memdump.log", "w");
+		if (file)
+		{
+			memory_dump(file);
+			fclose(file);
+		}
+	}
+}
 
 
 
@@ -674,16 +683,47 @@ void *memory_get_write_ptr(int cpunum, int spacenum, offs_t offset)
 
 void *memory_get_op_ptr(int cpunum, offs_t offset)
 {
-	offs_t opbase = ~0;
+	offs_t new_offset;
+	void *ptr;
+	UINT8 *saved_opcode_base;
+	UINT8 *saved_opcode_arg_base;
+	offs_t saved_opcode_mask;
+	offs_t saved_opcode_memory_min;
+	offs_t saved_opcode_memory_max;
+	UINT8 saved_opcode_entry;
 
 	if (cpudata[cpunum].opbase)
-		opbase = cpudata[cpunum].opbase(offset);
+	{
+		/* need to save opcode info */
+		saved_opcode_base = opcode_base;
+		saved_opcode_arg_base = opcode_arg_base;
+		saved_opcode_mask = opcode_mask;
+		saved_opcode_memory_min = opcode_memory_min;
+		saved_opcode_memory_max = opcode_memory_max;
+		saved_opcode_entry = opcode_entry;
 
-	if (opbase == ~0)
-		return memory_get_read_ptr(cpunum, ADDRESS_SPACE_PROGRAM, offset);
+		new_offset = cpudata[cpunum].opbase(offset);
+
+		if (new_offset == ~0)
+			ptr = &opcode_base[offset];
 	else
-		return (void *) (opbase + offset);
+			ptr = memory_get_read_ptr(cpunum, ADDRESS_SPACE_PROGRAM, new_offset);
+
+		/* restore opcode info */
+		opcode_base = saved_opcode_base;
+		opcode_arg_base = saved_opcode_arg_base;
+		opcode_mask = saved_opcode_mask;
+		opcode_memory_min = saved_opcode_memory_min;
+		opcode_memory_max = saved_opcode_memory_max;
+		opcode_entry = saved_opcode_entry;
 }
+	else
+	{
+		ptr = memory_get_read_ptr(cpunum, ADDRESS_SPACE_PROGRAM, offset);
+	}
+	return ptr;
+}
+
 
 
 /*-------------------------------------------------
@@ -900,8 +940,6 @@ static int init_cpudata(void)
 	/* loop over CPUs */
 	for (cpunum = 0; cpunum < cpu_gettotalcpu(); cpunum++)
 	{
-		int cputype = Machine->drv->cpu[cpunum].cpu_type;
-
 		/* set the RAM/ROM base */
 		cpudata[cpunum].rambase = cpudata[cpunum].op_ram = cpudata[cpunum].op_rom = memory_region(REGION_CPU1 + cpunum);
 		cpudata[cpunum].op_mem_max = cpudata[cpunum].ramlength = memory_region_length(REGION_CPU1 + cpunum);
@@ -915,11 +953,6 @@ static int init_cpudata(void)
 			if (!init_addrspace(cpunum, spacenum))
 				return 0;
 		cpudata[cpunum].op_mask = cpudata[cpunum].space[ADDRESS_SPACE_PROGRAM].mask;
-
-		/* Z80 port mask kludge */
-		if (cputype == CPU_Z80 || cputype == CPU_Z180)
-			if (!(Machine->drv->cpu[cpunum].cpu_flags & CPU_16BIT_PORT))
-				cpudata[cpunum].space[ADDRESS_SPACE_IO].mask = 0xff;
 	}
 	return 1;
 }
@@ -2850,8 +2883,6 @@ static genf *get_static_handler(int databits, int readorwrite, int spacenum, int
 	debugging
 -------------------------------------------------*/
 
-#if MEM_DUMP
-
 static void dump_map(FILE *file, const struct addrspace_data_t *space, const struct table_data_t *table)
 {
 	static const char *strings[] =
@@ -2926,9 +2957,8 @@ static void dump_map(FILE *file, const struct addrspace_data_t *space, const str
 	}
 }
 
-static void mem_dump(void)
+void memory_dump(FILE *file)
 {
-	FILE *file = fopen("memdump.log", "w");
 	int cpunum, spacenum;
 
 	/* skip if we can't open the file */
@@ -2952,7 +2982,5 @@ static void mem_dump(void)
 				              "==========================================\n", cpunum, spacenum);
 				dump_map(file, &cpudata[cpunum].space[spacenum], &cpudata[cpunum].space[spacenum].write);
 			}
-	fclose(file);
 }
 
-#endif
