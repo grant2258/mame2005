@@ -2298,8 +2298,7 @@ SOURCES_C += \
 	$(CORE_DIR)/drivers/system18.c \
 	$(CORE_DIR)/drivers/system24.c $(CORE_DIR)/machine/system24.c $(CORE_DIR)/vidhrdw/system24.c \
 	$(CORE_DIR)/machine/s24fd.c $(CORE_DIR)/vidhrdw/segaic24.c \
-	$(CORE_DIR)/drivers/segas32.c $(CORE_DIR)/machine/segas32.c $(CORE_DIR)/drivers/multi32.c \
-	$(CORE_DIR)/vidhrdw/system32.c \
+	$(CORE_DIR)/drivers/segas32.c $(CORE_DIR)/machine/segas32.c $(CORE_DIR)/vidhrdw/segas32.c \
 	$(CORE_DIR)/drivers/model1.c $(CORE_DIR)/machine/model1.c $(CORE_DIR)/vidhrdw/model1.c \
 	$(CORE_DIR)/drivers/model2.c \
 	$(CORE_DIR)/vidhrdw/model3.c $(CORE_DIR)/machine/model3.c $(CORE_DIR)/drivers/model3.c \
