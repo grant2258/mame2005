@@ -229,7 +229,7 @@ static WRITE8_HANDLER( cps1_snd_bankswitch_w )
 
 static WRITE8_HANDLER( cps1_oki_pin7_w )
 {
-	/*this needs fixed*/ //OKIM6295_set_pin7(0, (data & 1));
+	OKIM6295_set_pin7(0, (data & 1));
 }
 
 static WRITE16_HANDLER( cps1_soundlatch_w )
@@ -3858,8 +3858,8 @@ MACHINE_DRIVER_START( cps1_10MHz )
 	MDRV_SOUND_ROUTE(0, "mono", 0.35)
 	MDRV_SOUND_ROUTE(1, "mono", 0.35)
 
-	MDRV_SOUND_ADD_TAG("okim", OKIM6295, 7576)
-	MDRV_SOUND_CONFIG(okim6295_interface_region_1)
+	MDRV_SOUND_ADD_TAG("okim", OKIM6295, 1000000)
+	MDRV_SOUND_CONFIG(okim6295_interface_region_1_pin7high) // pin 7 can be changed by the game code
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.30)
 MACHINE_DRIVER_END
 
@@ -3912,8 +3912,8 @@ MACHINE_DRIVER_START( sf2m3 )
 	MDRV_SOUND_ROUTE(0, "mono", 0.35)
 	MDRV_SOUND_ROUTE(1, "mono", 0.35)
 
-	MDRV_SOUND_ADD_TAG("okim", OKIM6295, 7576)
-	MDRV_SOUND_CONFIG(okim6295_interface_region_1)
+	MDRV_SOUND_ADD_TAG("okim", OKIM6295, 1000000)
+	MDRV_SOUND_CONFIG(okim6295_interface_region_1_pin7high) // pin 7 can be changed by the game code
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.30)
 MACHINE_DRIVER_END
 

@@ -959,19 +959,19 @@ static MACHINE_DRIVER_START( mkyawdim )
 
 	/* basic machine hardware */
 	MDRV_IMPORT_FROM(yunit_core)
-	
+
 	MDRV_CPU_ADD(Z80, 5000000)
 	MDRV_CPU_PROGRAM_MAP(yawdim_sound_map,0)
-	
+
 	/* video hardware */
 	MDRV_PALETTE_LENGTH(4096)
 	MDRV_VIDEO_START(mkyawdim)
-	
+
 	/* sound hardware */
 	MDRV_SPEAKER_STANDARD_MONO("mono")
-	
-	MDRV_SOUND_ADD(OKIM6295, 8000)
-	MDRV_SOUND_CONFIG(okim6295_interface_region_1)
+
+	MDRV_SOUND_ADD(OKIM6295, 1056000)
+	MDRV_SOUND_CONFIG(okim6295_interface_region_1_pin7high) // clock frequency & pin 7 not verified
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
 MACHINE_DRIVER_END
 

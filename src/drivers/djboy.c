@@ -115,7 +115,7 @@ static WRITE8_HANDLER( cpu1_bankswitch_w )
 static WRITE8_HANDLER( cpu2_bankswitch_w )
 {
 	data8_t *RAM = memory_region(REGION_CPU2);
-	
+
 	djboy_set_videoreg( data );
 
 	switch( data&0xf )
@@ -155,7 +155,7 @@ static WRITE8_HANDLER( cpu2_data_w )
 	case 0x7987: /* 0x03 memtest write */
 		prot_offs = 0;
 		break;
-	
+
 	case 0x73a5: /* 1 is written; preceeds protection read */
 		return;
 
@@ -197,7 +197,7 @@ static WRITE8_HANDLER( cpu2_data_w )
 
 	case 0x726a: /* 0x08 (?) protection */
 		break;
-	
+
 	case 0x7146: break; /* prot(0x01) */
 	case 0x71f4: break; /* prot(0x02) */
 
@@ -308,7 +308,7 @@ static READ8_HANDLER( cpu2_status_r )
 	case 0x72b4: return 0;//!0x04
 	case 0x72db: return 1<<2;
 	case 0x72fe: return 0;//!0x04
-	
+
 	case 0x7311: return 0;//!0x04
 	case 0x738f: return 1<<2;
 	case 0x73ac: return 0;//!0x04
@@ -519,12 +519,12 @@ static MACHINE_DRIVER_START( djboy )
 	MDRV_SOUND_ADD(YM2203, 3000000)
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
 
-	MDRV_SOUND_ADD(OKIM6295, 12000000/4/165)
-	MDRV_SOUND_CONFIG(okim6295_interface_region_1)
+	MDRV_SOUND_ADD(OKIM6295, 8000000/4)
+	MDRV_SOUND_CONFIG(okim6295_interface_region_1_pin7low)
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
 
-	MDRV_SOUND_ADD(OKIM6295, 12000000/4/165)
-	MDRV_SOUND_CONFIG(okim6295_interface_region_1)
+	MDRV_SOUND_ADD(OKIM6295, 8000000/4)
+	MDRV_SOUND_CONFIG(okim6295_interface_region_1_pin7low)
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
 MACHINE_DRIVER_END
 

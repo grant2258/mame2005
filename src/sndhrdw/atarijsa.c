@@ -386,7 +386,7 @@ static WRITE8_HANDLER( jsa2_io_w )
 			coin_counter_w(0, (data >> 4) & 1);
 
 			/* update the OKI frequency */
-			OKIM6295_set_frequency(0, ATARI_CLOCK_3MHz/3 / ((data & 8) ? 132 : 165));
+			if (has_oki6295) OKIM6295_set_pin7(0, data & 8);
 			break;
 
 		case 0x206:		/* /MIX */
@@ -499,8 +499,9 @@ static WRITE8_HANDLER( jsa3_io_w )
 			*/
 
 			/* update the OKI bank */
+
 			oki6295_bank_base = (0x40000 * ((data >> 1) & 1)) | (oki6295_bank_base & 0x80000);
-			OKIM6295_set_bank_base(0, oki6295_bank_base);
+			if (has_oki6295) OKIM6295_set_bank_base(0, oki6295_bank_base);
 
 			/* update the bank */
 			memcpy(bank_base, &bank_source_data[0x1000 * ((data >> 6) & 3)], 0x1000);
@@ -511,7 +512,7 @@ static WRITE8_HANDLER( jsa3_io_w )
 			coin_counter_w(0, (data >> 4) & 1);
 
 			/* update the OKI frequency */
-			OKIM6295_set_frequency(0, ATARI_CLOCK_3MHz/3 / ((data & 8) ? 132 : 165));
+			if (has_oki6295) OKIM6295_set_pin7(0, data & 8);
 			break;
 
 		case 0x206:		/* /MIX */
@@ -525,7 +526,7 @@ static WRITE8_HANDLER( jsa3_io_w )
 
 			/* update the OKI bank */
 			oki6295_bank_base = (0x80000 * ((data >> 4) & 1)) | (oki6295_bank_base & 0x40000);
-			OKIM6295_set_bank_base(0, oki6295_bank_base);
+			if (has_oki6295) OKIM6295_set_bank_base(0, oki6295_bank_base);
 
 			/* update the volumes */
 			ym2151_volume = ((data >> 1) & 7) * 100 / 7;
@@ -652,8 +653,8 @@ static WRITE8_HANDLER( jsa3s_io_w )
 			coin_counter_w(0, (data >> 4) & 1);
 
 			/* update the OKI frequency */
-			OKIM6295_set_frequency(0, ATARI_CLOCK_3MHz/3 / ((data & 8) ? 132 : 165));
-			OKIM6295_set_frequency(1, ATARI_CLOCK_3MHz/3 / ((data & 8) ? 132 : 165));
+			OKIM6295_set_pin7(0, data & 8);
+			OKIM6295_set_pin7(1, data & 8);
 			break;
 
 		case 0x206:		/* /MIX */
@@ -736,37 +737,24 @@ ADDRESS_MAP_START( atarijsa2_writemem, ADDRESS_SPACE_PROGRAM, 8 )
 ADDRESS_MAP_END
 
 
-ADDRESS_MAP_START( atarijsa3_readmem, ADDRESS_SPACE_PROGRAM, 8 )
-	AM_RANGE(0x0000, 0x1fff) AM_READ(MRA8_RAM)
-	AM_RANGE(0x2000, 0x2001) AM_READ(YM2151_status_port_0_r)
-	AM_RANGE(0x2800, 0x2bff) AM_READ(jsa3_io_r)
-	AM_RANGE(0x3000, 0xffff) AM_READ(MRA8_ROM)
+/* full map verified from schematics and Batman GALs */
+ADDRESS_MAP_START( atarijsa3_map, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x1fff) AM_RAM
+	AM_RANGE(0x2000, 0x2000) AM_MIRROR(0x07fe) AM_WRITE(YM2151_register_port_0_w)
+	AM_RANGE(0x2001, 0x2001) AM_MIRROR(0x07fe) AM_WRITE(YM2151_data_port_0_w)
+	AM_RANGE(0x2000, 0x2001) AM_MIRROR(0x07fe) AM_READ(YM2151_status_port_0_r)
+	AM_RANGE(0x2800, 0x2fff) AM_READWRITE(jsa3_io_r, jsa3_io_w)
+	AM_RANGE(0x3000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
 
-ADDRESS_MAP_START( atarijsa3_writemem, ADDRESS_SPACE_PROGRAM, 8 )
-	AM_RANGE(0x0000, 0x1fff) AM_WRITE(MWA8_RAM)
-	AM_RANGE(0x2000, 0x2000) AM_WRITE(YM2151_register_port_0_w)
-	AM_RANGE(0x2001, 0x2001) AM_WRITE(YM2151_data_port_0_w)
-	AM_RANGE(0x2800, 0x2bff) AM_WRITE(jsa3_io_w)
-	AM_RANGE(0x3000, 0xffff) AM_WRITE(MWA8_ROM)
-ADDRESS_MAP_END
-
-
-ADDRESS_MAP_START( atarijsa3s_readmem, ADDRESS_SPACE_PROGRAM, 8 )
-	AM_RANGE(0x0000, 0x1fff) AM_READ(MRA8_RAM)
-	AM_RANGE(0x2000, 0x2001) AM_READ(YM2151_status_port_0_r)
-	AM_RANGE(0x2800, 0x2bff) AM_READ(jsa3s_io_r)
-	AM_RANGE(0x3000, 0xffff) AM_READ(MRA8_ROM)
-ADDRESS_MAP_END
-
-
-ADDRESS_MAP_START( atarijsa3s_writemem, ADDRESS_SPACE_PROGRAM, 8 )
-	AM_RANGE(0x0000, 0x1fff) AM_WRITE(MWA8_RAM)
-	AM_RANGE(0x2000, 0x2000) AM_WRITE(YM2151_register_port_0_w)
-	AM_RANGE(0x2001, 0x2001) AM_WRITE(YM2151_data_port_0_w)
-	AM_RANGE(0x2800, 0x2bff) AM_WRITE(jsa3s_io_w)
-	AM_RANGE(0x3000, 0xffff) AM_WRITE(MWA8_ROM)
+ADDRESS_MAP_START( atarijsa3s_map, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x1fff) AM_RAM
+	AM_RANGE(0x2000, 0x2000) AM_MIRROR(0x07fe) AM_WRITE(YM2151_register_port_0_w)
+	AM_RANGE(0x2001, 0x2001) AM_MIRROR(0x07fe) AM_WRITE(YM2151_data_port_0_w)
+	AM_RANGE(0x2000, 0x2001) AM_MIRROR(0x07fe) AM_READ(YM2151_status_port_0_r)
+	AM_RANGE(0x2800, 0x2fff) AM_READWRITE(jsa3s_io_r, jsa3s_io_w)
+	AM_RANGE(0x3000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
 
@@ -796,7 +784,7 @@ MACHINE_DRIVER_START( jsa_i_stereo )
 	/* basic machine hardware */
 	MDRV_CPU_ADD_TAG("jsa", M6502, ATARI_CLOCK_3MHz/2)
 	MDRV_CPU_PROGRAM_MAP(atarijsa1_readmem,atarijsa1_writemem)
-	MDRV_CPU_PERIODIC_INT(atarigen_6502_irq_gen,(UINT32)(1000000000.0/((double)ATARI_CLOCK_3MHz/4/16/16/14)))
+	MDRV_CPU_PERIODIC_INT(atarigen_6502_irq_gen,TIME_IN_HZ((double)ATARI_CLOCK_3MHz/4/16/16/14))
 	
 	/* sound hardware */
 	MDRV_SPEAKER_STANDARD_STEREO("left", "right")
@@ -841,7 +829,7 @@ MACHINE_DRIVER_START( jsa_i_mono_speech )
 	/* basic machine hardware */
 	MDRV_CPU_ADD_TAG("jsa", M6502, ATARI_CLOCK_3MHz/2)
 	MDRV_CPU_PROGRAM_MAP(atarijsa1_readmem,atarijsa1_writemem)
-	MDRV_CPU_PERIODIC_INT(atarigen_6502_irq_gen,(UINT32)(1000000000.0/((double)ATARI_CLOCK_3MHz/4/16/16/14)))
+	MDRV_CPU_PERIODIC_INT(atarigen_6502_irq_gen,TIME_IN_HZ((double)ATARI_CLOCK_3MHz/4/16/16/14))
 	
 	/* sound hardware */
 	MDRV_SPEAKER_STANDARD_MONO("mono")
@@ -862,7 +850,7 @@ MACHINE_DRIVER_START( jsa_ii_mono )
 	/* basic machine hardware */
 	MDRV_CPU_ADD_TAG("jsa", M6502, ATARI_CLOCK_3MHz/2)
 	MDRV_CPU_PROGRAM_MAP(atarijsa2_readmem,atarijsa2_writemem)
-	MDRV_CPU_PERIODIC_INT(atarigen_6502_irq_gen,(UINT32)(1000000000.0/((double)ATARI_CLOCK_3MHz/4/16/16/14)))
+	MDRV_CPU_PERIODIC_INT(atarigen_6502_irq_gen,TIME_IN_HZ((double)ATARI_CLOCK_3MHz/4/16/16/14))
 	
 	/* sound hardware */
 	MDRV_SPEAKER_STANDARD_MONO("mono")
@@ -872,8 +860,8 @@ MACHINE_DRIVER_START( jsa_ii_mono )
 	MDRV_SOUND_ROUTE(0, "mono", 0.60)
 	MDRV_SOUND_ROUTE(1, "mono", 0.60)
 
-	MDRV_SOUND_ADD(OKIM6295, ATARI_CLOCK_3MHz/3/132)
-	MDRV_SOUND_CONFIG(okim6295_interface_region_1)
+	MDRV_SOUND_ADD_TAG("adpcm", OKIM6295, ATARI_CLOCK_3MHz/3)
+	MDRV_SOUND_CONFIG(okim6295_interface_region_1_pin7high)
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.75)
 MACHINE_DRIVER_END
 
@@ -884,7 +872,7 @@ MACHINE_DRIVER_START( jsa_iii_mono )
 	/* basic machine hardware */
 	MDRV_IMPORT_FROM(jsa_ii_mono)
 	MDRV_CPU_MODIFY("jsa")
-	MDRV_CPU_PROGRAM_MAP(atarijsa3_readmem,atarijsa3_writemem)
+	MDRV_CPU_PROGRAM_MAP(atarijsa3_map,0)
 MACHINE_DRIVER_END
 
 
@@ -904,8 +892,8 @@ MACHINE_DRIVER_START( jsa_iiis_stereo )
 	
 	/* basic machine hardware */
 	MDRV_CPU_ADD_TAG("jsa", M6502, ATARI_CLOCK_3MHz/2)
-	MDRV_CPU_PROGRAM_MAP(atarijsa3s_readmem,atarijsa3s_writemem)
-	MDRV_CPU_PERIODIC_INT(atarigen_6502_irq_gen,(UINT32)(1000000000.0/((double)ATARI_CLOCK_3MHz/4/16/16/14)))
+	MDRV_CPU_PROGRAM_MAP(atarijsa3s_map,0)
+	MDRV_CPU_PERIODIC_INT(atarigen_6502_irq_gen,TIME_IN_HZ((double)ATARI_CLOCK_3MHz/4/16/16/14))
 	
 	/* sound hardware */
 	MDRV_SPEAKER_STANDARD_STEREO("left", "right")
@@ -915,11 +903,11 @@ MACHINE_DRIVER_START( jsa_iiis_stereo )
 	MDRV_SOUND_ROUTE(0, "left", 0.60)
 	MDRV_SOUND_ROUTE(1, "right", 0.60)
 
-	MDRV_SOUND_ADD(OKIM6295, ATARI_CLOCK_3MHz/3/132)
-	MDRV_SOUND_CONFIG(okim6295_interface_region_1)
+	MDRV_SOUND_ADD(OKIM6295, ATARI_CLOCK_3MHz/3)
+	MDRV_SOUND_CONFIG(okim6295_interface_region_1_pin7high)
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "left", 0.75)
 
-	MDRV_SOUND_ADD(OKIM6295, ATARI_CLOCK_3MHz/3/132)
-	MDRV_SOUND_CONFIG(okim6295_interface_region_1)
+	MDRV_SOUND_ADD(OKIM6295, ATARI_CLOCK_3MHz/3)
+	MDRV_SOUND_CONFIG(okim6295_interface_region_1_pin7high)
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "right", 0.75)
 MACHINE_DRIVER_END

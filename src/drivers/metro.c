@@ -2682,7 +2682,7 @@ INPUT_PORTS_END
 /* Same as 'ladykill' but NO "Nudity" Dip Switch */
 INPUT_PORTS_START( moegonta )
 	LKILL_COMMON1
-	
+
 	PORT_START_TAG("IN2")	// $400006
 	PORT_DIPNAME( 0x0003, 0x0003, DEF_STR( Lives ) )
 	PORT_DIPSETTING(      0x0001, "1" )
@@ -2704,7 +2704,7 @@ INPUT_PORTS_START( moegonta )
 	PORT_DIPNAME( 0x0080, 0x0000, DEF_STR( Demo_Sounds ) )
 	PORT_DIPSETTING(      0x0080, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	
+
 	LKILL_COMMON2
 	INPUT_PORTS_END
 
@@ -2730,7 +2730,7 @@ INPUT_PORTS_START( moegonta )
 
 INPUT_PORTS_START( lastfort )
 	LFORT_COMMON
-	
+
 	PORT_START_TAG("IN4")// $c0000c
 	PORT_DIPNAME( 0x0003, 0x0003, DEF_STR( Difficulty ) )		// Timer speed
 	PORT_DIPSETTING(      0x0000, "Easiest" )				//   Slowest
@@ -3596,8 +3596,8 @@ static MACHINE_DRIVER_START( daitorid )
 	MDRV_SOUND_ROUTE(0, "left", 0.80)
 	MDRV_SOUND_ROUTE(1, "right", 0.80)
 
-	MDRV_SOUND_ADD(OKIM6295, 1200000/128)
-	MDRV_SOUND_CONFIG(okim6295_interface_region_1)
+	MDRV_SOUND_ADD(OKIM6295, 1200000)
+	MDRV_SOUND_CONFIG(okim6295_interface_region_1_pin7high) // was /128.. so pin 7 not verified
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "left", 0.40)
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "right", 0.40)
 MACHINE_DRIVER_END
@@ -3634,8 +3634,8 @@ static MACHINE_DRIVER_START( dharma )
 	/* sound hardware */
 	MDRV_SPEAKER_STANDARD_STEREO("left", "right")
 
-	MDRV_SOUND_ADD(OKIM6295, 1200000/128)
-	MDRV_SOUND_CONFIG(okim6295_interface_region_1)
+	MDRV_SOUND_ADD(OKIM6295, 1200000)
+	MDRV_SOUND_CONFIG(okim6295_interface_region_1_pin7high) // was /128.. so pin 7 not verified
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "left", 0.10)
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "right", 0.10)
 
@@ -3676,8 +3676,8 @@ static MACHINE_DRIVER_START( karatour )
 	/* sound hardware */
 	MDRV_SPEAKER_STANDARD_STEREO("left", "right")
 
-	MDRV_SOUND_ADD(OKIM6295, 1200000/128)
-	MDRV_SOUND_CONFIG(okim6295_interface_region_1)
+	MDRV_SOUND_ADD(OKIM6295, 1200000)
+	MDRV_SOUND_CONFIG(okim6295_interface_region_1_pin7high) // was /128.. so pin 7 not verified
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "left", 0.10)
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "right", 0.10)
 
@@ -3718,8 +3718,8 @@ static MACHINE_DRIVER_START( 3kokushi )
 	/* sound hardware */
 	MDRV_SPEAKER_STANDARD_STEREO("left", "right")
 
-	MDRV_SOUND_ADD(OKIM6295, 1200000/128)
-	MDRV_SOUND_CONFIG(okim6295_interface_region_1)
+	MDRV_SOUND_ADD(OKIM6295, 1200000)
+	MDRV_SOUND_CONFIG(okim6295_interface_region_1_pin7high) // was /128.. so pin 7 not verified
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "left", 0.10)
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "right", 0.10)
 
@@ -3760,8 +3760,8 @@ static MACHINE_DRIVER_START( lastfort )
 	/* sound hardware */
 	MDRV_SPEAKER_STANDARD_STEREO("left", "right")
 
-	MDRV_SOUND_ADD(OKIM6295, 1200000/128)
-	MDRV_SOUND_CONFIG(okim6295_interface_region_1)
+	MDRV_SOUND_ADD(OKIM6295, 1200000)
+	MDRV_SOUND_CONFIG(okim6295_interface_region_1_pin7high) // was /128.. so pin 7 not verified
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "left", 0.10)
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "right", 0.10)
 
@@ -3801,8 +3801,8 @@ static MACHINE_DRIVER_START( lastforg )
 	/* sound hardware */
 	MDRV_SPEAKER_STANDARD_STEREO("left", "right")
 
-	MDRV_SOUND_ADD(OKIM6295, 1200000/128)
-	MDRV_SOUND_CONFIG(okim6295_interface_region_1)
+	MDRV_SOUND_ADD(OKIM6295, 1200000)
+	MDRV_SOUND_CONFIG(okim6295_interface_region_1_pin7high) // was /128.. so pin 7 not verified
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "left", 0.10)
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "right", 0.10)
 
@@ -3836,8 +3836,8 @@ static MACHINE_DRIVER_START( dokyusei )
 	/* sound hardware */
 	MDRV_SPEAKER_STANDARD_STEREO("left", "right")
 
-	MDRV_SOUND_ADD(OKIM6295, 8000)
-	MDRV_SOUND_CONFIG(okim6295_interface_region_1)
+	MDRV_SOUND_ADD(OKIM6295, 1056000)
+	MDRV_SOUND_CONFIG(okim6295_interface_region_1_pin7high) // clock frequency & pin 7 not verified
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "left", 0.50)
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "right", 0.50)
 
@@ -3886,8 +3886,8 @@ static MACHINE_DRIVER_START( dokyusp )
 	/* sound hardware */
 	MDRV_SPEAKER_STANDARD_STEREO("left", "right")
 
-	MDRV_SOUND_ADD(OKIM6295, 16000)
-	MDRV_SOUND_CONFIG(okim6295_interface_region_1)
+	MDRV_SOUND_ADD(OKIM6295, 2112000)
+	MDRV_SOUND_CONFIG(okim6295_interface_region_1_pin7high) // clock frequency & pin 7 not verified
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "left", 0.50)
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "right", 0.50)
 
@@ -3923,8 +3923,8 @@ static MACHINE_DRIVER_START( gakusai )
 	/* sound hardware */
 	MDRV_SPEAKER_STANDARD_STEREO("left", "right")
 
-	MDRV_SOUND_ADD(OKIM6295, 16000)
-	MDRV_SOUND_CONFIG(okim6295_interface_region_1)
+	MDRV_SOUND_ADD(OKIM6295, 2112000)
+	MDRV_SOUND_CONFIG(okim6295_interface_region_1_pin7high) // clock frequency & pin 7 not verified
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "left", 0.50)
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "right", 0.50)
 
@@ -3960,8 +3960,8 @@ static MACHINE_DRIVER_START( gakusai2 )
 	/* sound hardware */
 	MDRV_SPEAKER_STANDARD_STEREO("left", "right")
 
-	MDRV_SOUND_ADD(OKIM6295, 16000)
-	MDRV_SOUND_CONFIG(okim6295_interface_region_1)
+	MDRV_SOUND_ADD(OKIM6295, 2112000)
+	MDRV_SOUND_CONFIG(okim6295_interface_region_1_pin7high) // clock frequency & pin 7 not verified
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "left", 0.50)
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "right", 0.50)
 
@@ -4002,8 +4002,8 @@ static MACHINE_DRIVER_START( pangpoms )
 	/* sound hardware */
 	MDRV_SPEAKER_STANDARD_STEREO("left", "right")
 
-	MDRV_SOUND_ADD(OKIM6295, 1200000/128)
-	MDRV_SOUND_CONFIG(okim6295_interface_region_1)
+	MDRV_SOUND_ADD(OKIM6295, 1200000)
+	MDRV_SOUND_CONFIG(okim6295_interface_region_1_pin7high) // was /128.. so pin 7 not verified
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "left", 0.10)
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "right", 0.10)
 
@@ -4044,8 +4044,8 @@ static MACHINE_DRIVER_START( poitto )
 	/* sound hardware */
 	MDRV_SPEAKER_STANDARD_STEREO("left", "right")
 
-	MDRV_SOUND_ADD(OKIM6295, 1200000/128)
-	MDRV_SOUND_CONFIG(okim6295_interface_region_1)
+	MDRV_SOUND_ADD(OKIM6295, 1200000)
+	MDRV_SOUND_CONFIG(okim6295_interface_region_1_pin7high) // was /128.. so pin 7 not verified
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "left", 0.10)
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "right", 0.10)
 
@@ -4091,8 +4091,8 @@ static MACHINE_DRIVER_START( pururun )
 	MDRV_SOUND_ROUTE(0, "left", 0.80)
 	MDRV_SOUND_ROUTE(1, "right", 0.80)
 
-	MDRV_SOUND_ADD(OKIM6295, 1200000/128)
-	MDRV_SOUND_CONFIG(okim6295_interface_region_1)
+	MDRV_SOUND_ADD(OKIM6295, 1200000)
+	MDRV_SOUND_CONFIG(okim6295_interface_region_1_pin7high) // was /128.. so pin 7 not verified
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "left", 0.40)
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "right", 0.40)
 MACHINE_DRIVER_END
@@ -4129,8 +4129,8 @@ static MACHINE_DRIVER_START( skyalert )
 	/* sound hardware */
 	MDRV_SPEAKER_STANDARD_STEREO("left", "right")
 
-	MDRV_SOUND_ADD(OKIM6295, 1200000/128)
-	MDRV_SOUND_CONFIG(okim6295_interface_region_1)
+	MDRV_SOUND_ADD(OKIM6295, 1200000)
+	MDRV_SOUND_CONFIG(okim6295_interface_region_1_pin7high) // was /128.. so pin 7 not verified
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "left", 0.10)
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "right", 0.10)
 
@@ -4171,8 +4171,8 @@ static MACHINE_DRIVER_START( toride2g )
 	/* sound hardware */
 	MDRV_SPEAKER_STANDARD_STEREO("left", "right")
 
-	MDRV_SOUND_ADD(OKIM6295, 1200000/128)
-	MDRV_SOUND_CONFIG(okim6295_interface_region_1)
+	MDRV_SOUND_ADD(OKIM6295, 1200000)
+	MDRV_SOUND_CONFIG(okim6295_interface_region_1_pin7high) // was /128.. so pin 7 not verified
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "left", 0.10)
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "right", 0.10)
 
@@ -4206,8 +4206,8 @@ static MACHINE_DRIVER_START( mouja )
 
 	/* sound hardware */
 	MDRV_SPEAKER_STANDARD_STEREO("left", "right")
-	MDRV_SOUND_ADD(OKIM6295, 1200000/128)
-	MDRV_SOUND_CONFIG(okim6295_interface_region_1)
+	MDRV_SOUND_ADD(OKIM6295, 16000000/1024*132)
+	MDRV_SOUND_CONFIG(okim6295_interface_region_1_pin7high) // clock frequency & pin 7 not verified
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "left", 0.10)
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "right", 0.10)
 
