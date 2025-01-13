@@ -2173,117 +2173,231 @@ V-V                           TP-027
 
 
 	/* Capcom CPS1 games */
-	DRIVER( forgottn )	/*  7/1988 (c) 1988 (US) */
-	DRIVER( lostwrld )	/*  7/1988 (c) 1988 (Japan) */
-	DRIVER( ghouls )	/* 12/1988 (c) 1988 (World) */
-	DRIVER( ghoulsu )	/* 12/1988 (c) 1988 (US) */
-	DRIVER( daimakai )	/* 12/1988 (c) 1988 (Japan) */
-	DRIVER( strider )	/*  3/1989 (c) 1989 (not explicitly stated but should be US) */
-	DRIVER( stridrua )	/*  3/1989 (c) 1989 (not explicitly stated but should be US) */
-	DRIVER( striderj )	/*  3/1989 (c) 1989 */
-	DRIVER( stridrja )	/*  3/1989 (c) 1989 */
-	DRIVER( dynwar )	/*  4/1989 (c) 1989 (World) */
-	DRIVER( dynwarj )	/*  4/1989 (c) 1989 (Japan) */
-	DRIVER( willow )	/*  6/1989 (c) 1989 (US) */
-	DRIVER( willowj )	/*  6/1989 (c) 1989 (Japan) */
-	DRIVER( willowje )	/*  6/1989 (c) 1989 (Japan) */
-	DRIVER( unsquad )	/*  8/1989 (c) 1989 */
-	DRIVER( area88 )	/*  8/1989 (c) 1989 */
-	DRIVER( ffight )	/* 12/1989 (c) (World) */
-	DRIVER( ffightu )	/* 12/1989 (c) (US)    */
-	DRIVER( ffightj )	/* 12/1989 (c) (Japan) */
-	DRIVER( ffightj1 )	/* 12/1989 (c) (Japan) */
-	DRIVER( 1941 )		/*  2/1990 (c) 1990 (World) */
-	DRIVER( 1941j )		/*  2/1990 (c) 1990 (Japan) */
-	DRIVER( mercs )		/* 02/03/1990 (c) 1990 (World) */
-	DRIVER( mercsu )	/* 02/03/1990 (c) 1990 (US)    */
-	DRIVER( mercsua )	/* 08/06/1990 (c) 1990 (US)    */
-	DRIVER( mercsj )	/* 02/03/1990 (c) 1990 (Japan) */
-	DRIVER( mtwins )	/* 19/06/1990 (c) 1990 (World) */
-	DRIVER( chikij )	/* 19/06/1990 (c) 1990 (Japan) */
-	DRIVER( msword )	/* 25/07/1990 (c) 1990 (World) */
-	DRIVER( mswordr1 )	/* 23/06/1990 (c) 1990 (World) */
-	DRIVER( mswordu )	/* 25/07/1990 (c) 1990 (US)    */
-	DRIVER( mswordj )	/* 23/06/1990 (c) 1990 (Japan) */
-	DRIVER( cawing )	/* 12/10/1990 (c) 1990 (World) */
-	DRIVER( cawingu )	/* 12/10/1990 (c) 1990 (US) */
-	DRIVER( cawingj )	/* 12/10/1990 (c) 1990 (Japan) */
-	DRIVER( nemo )		/* 30/11/1990 (c) 1990 (World) */
-	DRIVER( nemoj )		/* 20/11/1990 (c) 1990 (Japan) */
-	DRIVER( sf2 )		/* 22/05/1991 (c) 1991 (World) */
-	DRIVER( sf2eb )		/* 14/02/1991 (c) 1991 (World) */
-	DRIVER( sf2ua )		/* 06/02/1991 (c) 1991 (US)    */
-	DRIVER( sf2ub )		/* 14/02/1991 (c) 1991 (US)    */
-	DRIVER( sf2ud )		/* 18/03/1991 (c) 1991 (US)    */
-	DRIVER( sf2ue )		/* 28/02/1991 (c) 1991 (US)    */
-	DRIVER( sf2uf )		/* 11/04/1991 (c) 1991 (US)    */
-	DRIVER( sf2ui )		/* 22/05/1991 (c) 1991 (US)    */
-	DRIVER( sf2uk )		/* 01/11/1991 (c) 1991 (US)    */
-	DRIVER( sf2j )		/* 10/12/1991 (c) 1991 (Japan) */
-	DRIVER( sf2ja )		/* 14/02/1991 (c) 1991 (Japan) */
-	DRIVER( sf2jc )		/* 06/03/1991 (c) 1991 (Japan) */
-	DRIVER( 3wonders )	/* 20/05/1991 (c) 1991 (World) */
-	DRIVER( 3wonderu )	/* 20/05/1991 (c) 1991 (US)    */
-	DRIVER( wonder3 )	/* 20/05/1991 (c) 1991 (Japan) */
-	DRIVER( kod )		/* 11/07/1991 (c) 1991 (World) */
-	DRIVER( kodu )		/* 10/09/1991 (c) 1991 (US)    */
-	DRIVER( kodj )		/* 05/08/1991 (c) 1991 (Japan) */
-	DRIVER( kodb )		/* bootleg */
-	DRIVER( captcomm )	/* 14/10/1991 (c) 1991 (World) */
-	DRIVER( captcomu )	/* 28/ 9/1991 (c) 1991 (US)    */
-	DRIVER( captcomj )	/* 02/12/1991 (c) 1991 (Japan) */
-	DRIVER( knights )	/* 27/11/1991 (c) 1991 (World) */
-	DRIVER( knightsu )	/* 27/11/1991 (c) 1991 (US)    */
-	DRIVER( knightsj )	/* 27/11/1991 (c) 1991 (Japan) */
-	DRIVER( sf2ce )		/* 13/03/1992 (c) 1992 (World) */
-	DRIVER( sf2ceua )	/* 13/03/1992 (c) 1992 (US)    */
-	DRIVER( sf2ceub )	/* 13/05/1992 (c) 1992 (US)    */
-	DRIVER( sf2ceuc )	/* 03/08/1992 (c) 1992 (US)    */
-	DRIVER( sf2cej )	/* 13/05/1992 (c) 1992 (Japan) */
-	DRIVER( sf2rb )		/* hack */
-	DRIVER( sf2rb2 )	/* hack */
-	DRIVER( sf2red )	/* hack */
-	DRIVER( sf2v004 )	/* hack */
-	DRIVER( sf2accp2 )	/* hack */
-	DRIVER( sf2m1 )		/* hack */
-	DRIVER( sf2m2 )		/* hack */
-	DRIVER( sf2m3 )		/* hack */
-	DRIVER( sf2m4 )		/* hack */
-	DRIVER( sf2m5 )		/* hack */
-	DRIVER( sf2m6 )		/* hack */
-	DRIVER( sf2m7 )		/* hack */
-	DRIVER( sf2yyc )	/* hack */
-	DRIVER( sf2koryu )	/* hack */
-	DRIVER( varth )		/* 12/06/1992 (c) 1992 (World) */
-	DRIVER( varthu )	/* 12/06/1992 (c) 1992 (US) */
-	DRIVER( varthj )	/* 14/07/1992 (c) 1992 (Japan) */
-	DRIVER( cworld2j )	/* 11/06/1992 (QUIZ 5) (c) 1992 (Japan) */
-	DRIVER( wof )		/* 02/10/1992 (c) 1992 (World) (CPS1 + QSound) */
-	DRIVER( wofa )		/* 05/10/1992 (c) 1992 (Asia)  (CPS1 + QSound) */
-	DRIVER( wofu )		/* 31/10/1992 (c) 1992 (US) (CPS1 + QSound) */
-	DRIVER( wofj )		/* 31/10/1992 (c) 1992 (Japan) (CPS1 + QSound) */
-	DRIVER( sf2hf )		/* 09/12/1992 (c) 1992 (World) */
-	DRIVER( sf2t )		/* 09/12/1992 (c) 1992 (US)    */
-	DRIVER( sf2tj )		/* 09/12/1992 (c) 1992 (Japan) */
-	DRIVER( dino )		/* 01/02/1993 (c) 1993 (World) (CPS1 + QSound) */
-	DRIVER( dinou )		/* 01/02/1993 (c) 1993 (US)    (CPS1 + QSound) */
-	DRIVER( dinoj )		/* 01/02/1993 (c) 1993 (Japan) (CPS1 + QSound) */
-	DRIVER( punisher )	/* 22/04/1993 (c) 1993 (World) (CPS1 + QSound) */
-	DRIVER( punishru )	/* 22/04/1993 (c) 1993 (US)    (CPS1 + QSound) */
-	DRIVER( punishrj )	/* 22/04/1993 (c) 1993 (Japan) (CPS1 + QSound) */
-	DRIVER( slammast )	/* 13/07/1993 (c) 1993 (World) (CPS1 + QSound) */
-	DRIVER( slammasu )	/* 13/07/1993 (c) 1993 (US)    (CPS1 + QSound) */
-	DRIVER( mbomberj )	/* 13/07/1993 (c) 1993 (Japan) (CPS1 + QSound) */
-	DRIVER( mbombrd )	/* 06/12/1993 (c) 1993 (World) (CPS1 + QSound) */
-	DRIVER( mbombrdj )	/* 06/12/1993 (c) 1993 (Japan) (CPS1 + QSound) */
-	DRIVER( pnickj )	/* 08/06/1994 (c) 1994 Compile + Capcom license (Japan) not listed on Capcom's site */
-	DRIVER( qad )		/* 01/07/1992 (c) 1992 (US)    */
-	DRIVER( qadj )		/* 21/09/1994 (c) 1994 (Japan) */
-	DRIVER( qtono2 )	/* 23/01/1995 (c) 1995 (Japan) */
-	DRIVER( pang3 )		/* 11/05/1995 (c) 1995 Mitchell (Euro) not listed on Capcom's site */
-	DRIVER( pang3j )	/* 11/05/1995 (c) 1995 Mitchell (Japan) not listed on Capcom's site */
-	DRIVER( megaman )	/* 06/10/1995 (c) 1995 (Asia)  */
-	DRIVER( rockmanj )	/* 22/09/1995 (c) 1995 (Japan) */
+	DRIVER( forgottn )
+	DRIVER( forgottna )
+	DRIVER( forgottnu )
+	DRIVER( forgottnue )
+	DRIVER( forgottnuc )
+	DRIVER( forgottnua )
+	DRIVER( forgottnuaa )
+	//DRIVER( forgottnj )
+	DRIVER( lostwrld )
+	DRIVER( lostwrldo )
+	DRIVER( ghouls )
+	DRIVER( ghoulsu )
+	DRIVER( daimakai )
+	DRIVER( daimakair )
+	DRIVER( strider )
+	DRIVER( striderua )
+	DRIVER( strideruc )
+	DRIVER( striderj )
+	DRIVER( striderjr )
+	DRIVER( dynwar )
+	DRIVER( dynwara )
+	DRIVER( dynwarj )
+	DRIVER( dynwarjr )
+	DRIVER( willow )
+	DRIVER( willowu )
+	DRIVER( willowuo )
+	DRIVER( willowj )
+	DRIVER( unsquad )
+	DRIVER( area88 )
+	DRIVER( area88r )
+	DRIVER( ffight )
+	DRIVER( ffighta )
+	DRIVER( ffightu )
+	DRIVER( ffightu1 )
+	DRIVER( ffightua )
+	DRIVER( ffightub )
+	DRIVER( ffightuc )
+	DRIVER( ffightj )
+	DRIVER( ffightj1 )
+	DRIVER( ffightj2 )
+	DRIVER( ffightj3 )
+	DRIVER( ffightj4 )
+	DRIVER( ffightjh )
+	DRIVER( ffightae )
+	DRIVER( 1941 )
+	DRIVER( 1941r1 )
+	DRIVER( 1941u )
+	DRIVER( 1941j )
+	DRIVER( mercs )
+	DRIVER( mercsu )
+	DRIVER( mercsur1 )
+	DRIVER( mercsj )
+	DRIVER( mtwins )
+	DRIVER( chikij )
+	DRIVER( msword )
+	DRIVER( mswordr1 )
+	DRIVER( mswordu )
+	DRIVER( mswordj )
+	DRIVER( cawing )
+	DRIVER( cawingr1 )
+	DRIVER( cawingu )
+	DRIVER( cawingur1 )
+	DRIVER( cawingj )
+	DRIVER( nemo )
+	DRIVER( nemor1 )
+	DRIVER( nemoj )
+	DRIVER( nemoja )
+	DRIVER( sf2 )
+	DRIVER( sf2ea )
+	DRIVER( sf2eb )
+	DRIVER( sf2ed )
+	DRIVER( sf2ee )
+	DRIVER( sf2ef )
+	DRIVER( sf2em )
+	DRIVER( sf2en )
+	DRIVER( sf2ua )
+	DRIVER( sf2ub )
+	DRIVER( sf2uc )
+	DRIVER( sf2ud )
+	DRIVER( sf2ue )
+	DRIVER( sf2uf )
+	DRIVER( sf2ug )
+	DRIVER( sf2uh )
+	DRIVER( sf2ui )
+	DRIVER( sf2uk )
+	DRIVER( sf2um )
+	DRIVER( sf2j )
+	DRIVER( sf2j17 )
+	DRIVER( sf2ja )
+	DRIVER( sf2jc )
+	DRIVER( sf2jf )
+	DRIVER( sf2jh )
+	DRIVER( sf2jl )
+	DRIVER( sf2ebbl )
+	DRIVER( sf2ebbl2 )
+	DRIVER( sf2ebbl3 )
+	DRIVER( sf2stt )
+	DRIVER( sf2rk )
+	DRIVER( sf2qp1 )
+	DRIVER( sf2qp2 )
+	DRIVER( sf2thndr )
+	DRIVER( sf2thndr2 )
+	DRIVER( sf2rules )
+	DRIVER( 3wonders )
+	DRIVER( 3wondersr1 )
+	DRIVER( 3wondersu )
+	DRIVER( wonder3 )
+	DRIVER( 3wondersb )
+	DRIVER( 3wondersh )
+	DRIVER( kod )
+	DRIVER( kodr1 )
+	DRIVER( kodr2 )
+	DRIVER( kodu )
+	DRIVER( kodj )
+	DRIVER( kodja )
+	DRIVER( captcomm )
+	DRIVER( captcommr1 )
+	DRIVER( captcommu )
+	DRIVER( captcommj )
+	DRIVER( captcommjr1 )
+	DRIVER( captcommb )
+	DRIVER( knights )
+	DRIVER( knightsu )
+	DRIVER( knightsj )
+	DRIVER( knightsja )
+	DRIVER( knightsb2 )
+	DRIVER( sf2ce )
+	DRIVER( sf2ceea )
+	DRIVER( sf2ceec )
+	DRIVER( sf2ceua )
+	DRIVER( sf2ceub )
+	DRIVER( sf2ceuc )
+	DRIVER( sf2cet )
+	DRIVER( sf2ceja )
+	DRIVER( sf2cejb )
+	DRIVER( sf2cejc )
+	DRIVER( sf2bhh )
+	DRIVER( sf2cebltw )
+	DRIVER( sf2rb )
+	DRIVER( sf2rb2 )
+	DRIVER( sf2rb3 )
+	DRIVER( sf2red )
+	DRIVER( sf2reda )
+	DRIVER(sf2redp2 )
+	DRIVER( sf2v004 )
+	DRIVER( sf2acc )
+	DRIVER( sf2acca )
+	DRIVER( sf2accp2 )
+	DRIVER( sf2amf )
+	DRIVER( sf2amf2 )
+	DRIVER( sf2amf3 )
+	DRIVER( sf2dkot2 )
+	DRIVER( sf2level )
+	DRIVER( sf2ceblp )
+	DRIVER( sf2m2 )
+	DRIVER( sf2m3 )
+	//DRIVER( sf2m4 )
+	DRIVER( sf2m5 )
+	DRIVER( sf2m6 )
+	DRIVER( sf2m7 )
+	DRIVER( sf2m8 )
+	//DRIVER( sf2m10 )
+	DRIVER( sf2yyc )
+	DRIVER( sf2koryu )
+	DRIVER( sf2dongb )
+	//DRIVER( sf2ceupl )
+	//DRIVER( sf2cems6a )
+	//DRIVER( sf2cems6b )
+	//DRIVER( sf2cems6c )
+	//DRIVER( sf2ceds6 )
+	DRIVER( sf2re )
+	DRIVER( sf2mkot )
+	DRIVER( cworld2j )
+	DRIVER( cworld2ja )
+	DRIVER( cworld2jb )
+	DRIVER( varth )
+	DRIVER( varthr1 )
+	DRIVER( varthu )
+	DRIVER( varthj )
+	DRIVER( varthjr )
+	//DRIVER( varthb2 )
+	//DRIVER( varthb3 )
+	DRIVER( qad )
+	//DRIVER( qadjr )
+	DRIVER( wof )
+	DRIVER( wofr1 )
+	DRIVER( wofu )
+	DRIVER( wofa )
+	DRIVER( wofj )
+	//DRIVER( wofhfh )
+	DRIVER( sf2hf )
+	DRIVER( sf2hfu )
+	DRIVER( sf2hfj )
+	DRIVER( dino )
+	DRIVER( dinou )
+	DRIVER( dinoa )
+	DRIVER( dinoj )
+	//DRIVER( dinohunt )
+	DRIVER( punisher )
+	DRIVER( punisheru )
+	DRIVER( punisherh )
+	DRIVER( punisherj )
+	//DRIVER( punisherbz )
+	DRIVER( slammast )
+	DRIVER( slammastu )
+	DRIVER( mbomberj )
+	DRIVER( mbombrd )
+	DRIVER( mbombrdj )
+	//DRIVER( gulunpa )
+	DRIVER( pnickj )
+	//DRIVER( qtono2j )
+	DRIVER( megaman )
+	DRIVER( megamana )
+	DRIVER( rockmanj )
+	//DRIVER( pmonster )
+	//DRIVER( ganbare )
+	DRIVER( pokonyan )
+	DRIVER( mpumpkin )
+	DRIVER( pang3 )
+	DRIVER( pang3r1 )
+	DRIVER( pang3b )
+	DRIVER( pang3b2 )
+	DRIVER( pang3b3 )
+	DRIVER( pang3b4 )
+	DRIVER( pang3b5 )
 
 	/* Capcom CPS2 games */
 	/* list completed by CPS2Shock */
@@ -2560,7 +2674,8 @@ V-V                           TP-027
 	DRIVER( progear )    /* Cave (Capcom license), Progear (USA 010117) */
 	DRIVER( progearj )   /* Cave (Capcom license), Progear no Arashi (Japan 010117) */
 	DRIVER( progeara )   /* Cave (Capcom license), Progear (Asia 010117) */
-	#if defined(CPS2_BOOTLEG)
+
+//	#if defined(CPS2_BOOTLEG)
 	DRIVER( ddtodd )     /* bootleg, Dungeons & Dragons: Tower of Doom (Euro 940412 Phoenix Edition) (bootleg) */
 	DRIVER( ecofghtrd )  /* bootleg, Eco Fighters (World 931203 Phoenix Edition) (bootleg) */
 	DRIVER( ssf2ud )     /* bootleg, Super Street Fighter II: The New Challengers (USA 930911 Phoenix Edition) (bootleg) */
@@ -2607,8 +2722,7 @@ V-V                           TP-027
 	DRIVER( progearjbl ) /* bootleg, Progear no Arashi (Japan 010117) (decrypted bootleg) */
 	DRIVER( pzloop2jd )  /* bootleg, Puzz Loop 2 (Japan 010226 Phoenix Edition) (bootleg) */
 	DRIVER( hsf2d )      /* bootleg, Hyper Street Fighter II: The Anniversary Edition (Asia 040202 Phoenix Edition) (bootleg)  */
-	#endif
-
+//#endif 
 	/* Capcom CPS3 games */
 	DRIVER( warzard )	/* 10/1996 Warzard */
 	DRIVER( sfiii )		/* 02/1997 Street Fighter III - New Generation */

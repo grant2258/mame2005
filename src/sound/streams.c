@@ -68,7 +68,8 @@ struct _sound_stream
 	void *			tag;						/* tag (used for identification) */
 	
 	/* general information */
-	int				sample_rate;				/* sample rate of this stream */
+	INT32			sample_rate;				/* sample rate of this stream */
+	INT32			new_sample_rate;			/* newly-set sample rate for the stream */
 	UINT32			samples_per_frame_frac;		/* fractional samples per frame */
 
 	/* input information */
@@ -221,11 +222,23 @@ void streams_frame_update(void)
 							/* if this input is further behind, note it */
 							if (str->input[inputnum].source_frac < min_source_frac)
 								min_source_frac = str->input[inputnum].source_frac;
+
+							/* if the stream has changed sample rate, update things */
+							if (stream->new_sample_rate != 0)
+								str->input[inputnum].step_frac = ((UINT64)stream->new_sample_rate << FRAC_BITS) / str->sample_rate;
 						}
 				
 				/* update the in position to the minimum source frac */
 				output->cur_out_pos = min_source_frac >> FRAC_BITS;
 			}
+		}
+
+		/* update the sample rate */
+		if (stream->new_sample_rate)
+		{
+			stream->sample_rate = stream->new_sample_rate;
+			stream->samples_per_frame_frac = (UINT32)((double)stream->sample_rate * (double)(1 << FRAC_BITS) / Machine->drv->frames_per_second);
+			stream->new_sample_rate = 0;
 		}
 	}
 }
@@ -237,6 +250,13 @@ void streams_frame_update(void)
  *	Create a new stream
  *
  *************************************/
+
+static void stream_postload(void *param)
+{
+	sound_stream *stream = param;
+	stream->new_sample_rate = stream->sample_rate;
+}
+
 
 sound_stream *stream_create(int inputs, int outputs, int sample_rate, void *param, stream_callback callback)
 {
@@ -448,9 +468,24 @@ void stream_set_output_gain(sound_stream *stream, int output, float gain)
 
 /*************************************
  *
- *	Return a pointer to the output
- *	buffer for a stream with the
- *	requested number of samples
+ *  Set the sample rate on a given
+ *  stream
+ *
+ *************************************/
+
+void stream_set_sample_rate(sound_stream *stream, int sample_rate)
+{
+	/* we update this at the end of the current frame */
+	stream->new_sample_rate = sample_rate;
+}
+
+
+
+/*************************************
+ *
+ *  Return a pointer to the output
+ *  buffer for a stream with the
+ *  requested number of samples
  *
  *************************************/
 
@@ -546,6 +581,13 @@ static void stream_generate_samples(sound_stream *stream, int samples)
 	
 	/* okay, all the inputs are up-to-date ... call the callback */
 	VPRINTF(("  callback(%p, %d)\n", stream, samples));
+
+	/* aye, a bug is lurking here; sometimes we have extreme sample counts */
+	if (samples > stream->sample_rate)
+	{
+		logerror("samples > sample rate?! %d %d\n", samples, stream->sample_rate);
+		samples = stream->sample_rate;
+	}
 	(*stream->callback)(stream->param, stream->input_array, stream->output_array, samples);
 	VPRINTF(("  callback done\n"));
 }

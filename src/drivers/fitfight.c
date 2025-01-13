@@ -752,7 +752,7 @@ static MACHINE_DRIVER_START( fitfight )
 	MDRV_CPU_ADD_TAG("main",M68000, 12000000)
 	MDRV_CPU_PROGRAM_MAP(fitfight_main_map,0)
 	MDRV_CPU_VBLANK_INT(irq2_line_hold,1)
-	
+
 	MDRV_CPU_ADD(UPD7810, 12000000)
 	MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
 	MDRV_CPU_CONFIG(sound_cpu_config)
@@ -775,8 +775,8 @@ static MACHINE_DRIVER_START( fitfight )
 
 	MDRV_SPEAKER_STANDARD_MONO("mono")
 
-	MDRV_SOUND_ADD(OKIM6295, 1333333/165) // ~8080Hz ??? TODO: find out the real frequency
-	MDRV_SOUND_CONFIG(okim6295_interface_region_1)
+	MDRV_SOUND_ADD(OKIM6295, 1333333) // ~8080Hz ??? TODO: find out the real frequency
+	MDRV_SOUND_CONFIG(okim6295_interface_region_1_pin7low)
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
 MACHINE_DRIVER_END
 
@@ -800,8 +800,8 @@ static MACHINE_DRIVER_START( bbprot )
 
 	MDRV_SPEAKER_STANDARD_MONO("mono")
 
-	MDRV_SOUND_ADD(OKIM6295, 1333333/165) // ~8080Hz ??? TODO: find out the real frequency
-	MDRV_SOUND_CONFIG(okim6295_interface_region_1)
+	MDRV_SOUND_ADD(OKIM6295, 1333333) // ~8080Hz ??? TODO: find out the real frequency
+	MDRV_SOUND_CONFIG(okim6295_interface_region_1_pin7low)
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
 MACHINE_DRIVER_END
 
@@ -835,7 +835,7 @@ ROM_START( fitfight )
 	ROM_REGION( 0x01c000, REGION_CPU2, 0 ) /* Sound Program */
 	ROM_LOAD( "u23_ff1.bin",  0x000000, 0x004000, CRC(e2d6d768) SHA1(233e5501ffda8db48341fa66f16b630544803a89) )
 	ROM_CONTINUE(          0x010000, 0x00c000 )
-	
+
 	ROM_REGION( 0x100000, REGION_SOUND1, 0 ) /* OKI Samples? */
 	ROM_LOAD( "h7e_ff1.bin",  0x000000, 0x080000, CRC(3e12dfd8) SHA1(8f21abfc6a6aac9ad3fafe97d0279739c7b9fab9) ) //seems to be a merge of 2 0x040000 roms
 	ROM_LOAD( "h18e_ff1.bin", 0x080000, 0x080000, CRC(a7f36dbe) SHA1(206efb7f32d6123ed3e22790ff38dd0a8e1626d7) ) //seems to be a merge of 2 0x040000 roms

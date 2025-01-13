@@ -7,9 +7,9 @@
  *   Written by Buffoni Mirko in 08/06/97
  *   References: various sources and documents.
  *
- *	 HJB 08/31/98
- *	 modified to use an automatically selected oversampling factor
- *	 for the current Machine->sample_rate
+ *   HJB 08/31/98
+ *   modified to use an automatically selected oversampling factor
+ *   for the current Machine->sample_rate
  *
  *   Mish 21/7/99
  *   Updated to allow multiple OKI chips with different sample rates
@@ -28,12 +28,8 @@
 #include "driver.h"
 #include "state.h"
 #include "okim6295.h"
-
+#include "streams.h"
 #define MAX_SAMPLE_CHUNK	10000
-
-#define FRAC_BITS			14
-#define FRAC_ONE			(1 << FRAC_BITS)
-#define FRAC_MASK			(FRAC_ONE - 1)
 
 
 /* struct describing a single playing ADPCM voice */
@@ -45,14 +41,8 @@ struct ADPCMVoice
 	UINT32 sample;			/* current sample number */
 	UINT32 count;			/* total samples to play */
 
-	UINT32 signal;			/* current ADPCM signal */
-	UINT32 step;			/* current ADPCM step */
+	struct adpcm_state adpcm;/* current ADPCM state */
 	UINT32 volume;			/* output volume */
-
-	INT16 last_sample;		/* last sample output */
-	INT16 curr_sample;		/* current sample target */
-	UINT32 source_step;		/* step value for frequency conversion */
-	UINT32 source_pos;		/* current fractional position */
 };
 
 struct okim6295
@@ -63,6 +53,7 @@ struct okim6295
 	INT32 bank_offset;
 	UINT8 *region_base;		/* pointer to the base of the region */
 	sound_stream *stream;	/* which stream are we playing on? */
+	UINT32 master_clock;	/* master clock frequency */
 };
 
 /* step size index shift table */
@@ -74,12 +65,19 @@ static int diff_lookup[49*16];
 /* volume lookup table */
 static UINT32 volume_table[16];
 
-/* useful interfaces */
-const struct OKIM6295interface okim6295_interface_region_1 = { REGION_SOUND1 };
-const struct OKIM6295interface okim6295_interface_region_2 = { REGION_SOUND2 };
-const struct OKIM6295interface okim6295_interface_region_3 = { REGION_SOUND3 };
-const struct OKIM6295interface okim6295_interface_region_4 = { REGION_SOUND4 };
+/* tables computed? */
+static int tables_computed = 0;
 
+/* useful interfaces */
+const struct OKIM6295interface okim6295_interface_region_1_pin7high = { REGION_SOUND1, 1 };
+const struct OKIM6295interface okim6295_interface_region_2_pin7high = { REGION_SOUND2, 1 };
+const struct OKIM6295interface okim6295_interface_region_3_pin7high = { REGION_SOUND3, 1 };
+const struct OKIM6295interface okim6295_interface_region_4_pin7high = { REGION_SOUND4, 1 };
+
+const struct OKIM6295interface okim6295_interface_region_1_pin7low = { REGION_SOUND1, 0 };
+const struct OKIM6295interface okim6295_interface_region_2_pin7low = { REGION_SOUND2, 0 };
+const struct OKIM6295interface okim6295_interface_region_3_pin7low = { REGION_SOUND3, 0 };
+const struct OKIM6295interface okim6295_interface_region_4_pin7low = { REGION_SOUND4, 0 };
 
 /**********************************************************************************************
 
@@ -128,6 +126,56 @@ static void compute_tables(void)
 			out /= 1.412537545;	/* = 10 ^ (3/20) = 3dB */
 		volume_table[step] = (UINT32)out;
 	}
+
+	tables_computed = 1;
+}
+
+
+
+/**********************************************************************************************
+
+     reset_adpcm -- reset the ADPCM stream
+
+***********************************************************************************************/
+
+void reset_adpcm(struct adpcm_state *state)
+{
+	/* make sure we have our tables */
+	if (!tables_computed)
+		compute_tables();
+
+	/* reset the signal/step */
+	state->signal = -2;
+	state->step = 0;
+}
+
+
+
+/**********************************************************************************************
+
+     clock_adpcm -- clock the next ADPCM byte
+
+***********************************************************************************************/
+
+INT16 clock_adpcm(struct adpcm_state *state, UINT8 nibble)
+{
+	state->signal += diff_lookup[state->step * 16 + (nibble & 15)];
+
+	/* clamp to the maximum */
+	if (state->signal > 2047)
+		state->signal = 2047;
+	else if (state->signal < -2048)
+		state->signal = -2048;
+
+	/* adjust the step size and clamp */
+	state->step += index_shift[nibble & 7];
+	if (state->step > 48)
+		state->step = 48;
+	else if (state->step < 0)
+		state->step = 0;
+
+	/* return the signal scaled up to 32767 */
+	return state->signal << 4;
 }
 
 
@@ -145,33 +193,16 @@ static void generate_adpcm(struct okim6295 *chip, struct ADPCMVoice *voice, INT1
 	{
 		UINT8 *base = chip->region_base + chip->bank_offset + voice->base_offset;
 		int sample = voice->sample;
-		int signal = voice->signal;
 		int count = voice->count;
-		int step = voice->step;
-		int val;
 
 		/* loop while we still have samples to generate */
 		while (samples)
 		{
 			/* compute the new amplitude and update the current step */
-			val = base[sample / 2] >> (((sample & 1) << 2) ^ 4);
-			signal += diff_lookup[step * 16 + (val & 15)];
-
-			/* clamp to the maximum */
-			if (signal > 2047)
-				signal = 2047;
-			else if (signal < -2048)
-				signal = -2048;
-
-			/* adjust the step size and clamp */
-			step += index_shift[val & 7];
-			if (step > 48)
-				step = 48;
-			else if (step < 0)
-				step = 0;
+			int nibble = base[sample / 2] >> (((sample & 1) << 2) ^ 4);
 
 			/* output to the buffer, scaling by the volume */
-			*buffer++ = signal * voice->volume / 16;
+			*buffer++ = clock_adpcm(&voice->adpcm, nibble) * voice->volume / 256;
 			samples--;
 
 			/* next! */
@@ -184,8 +215,6 @@ static void generate_adpcm(struct okim6295 *chip, struct ADPCMVoice *voice, INT1
 
 		/* update the parameters */
 		voice->sample = sample;
-		voice->signal = signal;
-		voice->step = step;
 	}
 
 	/* fill the rest with silence */
@@ -197,19 +226,19 @@ static void generate_adpcm(struct okim6295 *chip, struct ADPCMVoice *voice, INT1
 
 /**********************************************************************************************
  *
- *	OKIM 6295 ADPCM chip:
+ *  OKIM 6295 ADPCM chip:
  *
- *	Command bytes are sent:
+ *  Command bytes are sent:
  *
- *		1xxx xxxx = start of 2-byte command sequence, xxxxxxx is the sample number to trigger
- *		abcd vvvv = second half of command; one of the abcd bits is set to indicate which voice
- *		            the v bits seem to be volumed
+ *      1xxx xxxx = start of 2-byte command sequence, xxxxxxx is the sample number to trigger
+ *      abcd vvvv = second half of command; one of the abcd bits is set to indicate which voice
+ *                  the v bits seem to be volumed
  *
- *		0abc d000 = stop playing; one or more of the abcd bits is set to indicate which voice(s)
+ *      0abc d000 = stop playing; one or more of the abcd bits is set to indicate which voice(s)
  *
- *	Status is read:
+ *  Status is read:
  *
- *		???? abcd = one bit per voice, set to 0 if nothing is playing, or 1 if it is active
+ *      ???? abcd = one bit per voice, set to 0 if nothing is playing, or 1 if it is active
  *
 ***********************************************************************************************/
 
@@ -224,71 +253,28 @@ static void okim6295_update(void *param, stream_sample_t **inputs, stream_sample
 {
 	struct okim6295 *chip = param;
 	int i;
-	
+
 	memset(outputs[0], 0, samples * sizeof(*outputs[0]));
-	
+
 	for (i = 0; i < OKIM6295_VOICES; i++)
 	{
 		struct ADPCMVoice *voice = &chip->voice[i];
-		INT16 sample_data[MAX_SAMPLE_CHUNK], *curr_data = sample_data;
-		INT16 prev = voice->last_sample, curr = voice->curr_sample;
-		UINT32 final_pos;
-		UINT32 new_samples;
 		stream_sample_t *buffer = outputs[0];
-		int length = samples;
+		INT16 sample_data[MAX_SAMPLE_CHUNK];
+		int remaining = samples;
 
-		/* finish off the current sample */
-		if (voice->source_pos > 0)
+		/* loop while we have samples remaining */
+		while (remaining)
 		{
-			/* interpolate */
-			while (length > 0 && voice->source_pos < FRAC_ONE)
-			{
-				*buffer++ += (((INT32)prev * (INT32)(FRAC_ONE - voice->source_pos)) + ((INT32)curr * (INT32)voice->source_pos)) >> FRAC_BITS;
-				voice->source_pos += voice->source_step;
-				length--;
-			}
+			int samples = (remaining > MAX_SAMPLE_CHUNK) ? MAX_SAMPLE_CHUNK : remaining;
+			int samp;
 
-			/* if we're over, continue; otherwise, we're done */
-			if (voice->source_pos >= FRAC_ONE)
-				voice->source_pos -= FRAC_ONE;
-			else
-				continue;
+			generate_adpcm(chip, voice, sample_data, samples);
+			for (samp = 0; samp < samples; samp++)
+				*buffer++ += sample_data[samp];
+
+			remaining -= samples;
 		}
-
-		/* compute how many new samples we need */
-		final_pos = voice->source_pos + length * voice->source_step;
-		new_samples = (final_pos + FRAC_ONE - 1) >> FRAC_BITS;
-		if (new_samples > MAX_SAMPLE_CHUNK)
-			new_samples = MAX_SAMPLE_CHUNK;
-
-		/* generate them into our buffer */
-		generate_adpcm(chip, voice, sample_data, new_samples);
-		prev = curr;
-		curr = *curr_data++;
-
-		/* then sample-rate convert with linear interpolation */
-		while (length > 0)
-		{
-			/* interpolate */
-			while (length > 0 && voice->source_pos < FRAC_ONE)
-			{
-				*buffer++ += (((INT32)prev * (INT32)(FRAC_ONE - voice->source_pos)) + ((INT32)curr * (INT32)voice->source_pos)) >> FRAC_BITS;
-				voice->source_pos += voice->source_step;
-				length--;
-			}
-
-			/* if we're over, grab the next samples */
-			if (voice->source_pos >= FRAC_ONE)
-			{
-				voice->source_pos -= FRAC_ONE;
-				prev = curr;
-				curr = *curr_data++;
-			}
-		}
-
-		/* remember the last samples */
-		voice->last_sample = prev;
-		voice->curr_sample = curr;
 	}
 }
 
@@ -306,18 +292,6 @@ static void adpcm_state_save_register(struct ADPCMVoice *voice, int i)
 
 	sprintf(buf,"ADPCM");
 
-	state_save_register_UINT8  (buf, i, "playing", &voice->playing, 1);
-	state_save_register_UINT32 (buf, i, "sample" , &voice->sample,  1);
-	state_save_register_UINT32 (buf, i, "count"  , &voice->count,   1);
-	state_save_register_UINT32 (buf, i, "signal" , &voice->signal,  1);
-	state_save_register_UINT32 (buf, i, "step"   , &voice->step,    1);
-	state_save_register_UINT32 (buf, i, "volume" , &voice->volume,  1);
-
-	state_save_register_INT16  (buf, i, "last_sample", &voice->last_sample, 1);
-	state_save_register_INT16  (buf, i, "curr_sample", &voice->curr_sample, 1);
-	state_save_register_UINT32 (buf, i, "source_step", &voice->source_step, 1);
-	state_save_register_UINT32 (buf, i, "source_pos" , &voice->source_pos,  1);
-	state_save_register_UINT32 (buf, i, "base_offset" , &voice->base_offset,  1);
 }
 
 static void okim6295_state_save_register(struct okim6295 *info, int sndindex)
@@ -327,8 +301,6 @@ static void okim6295_state_save_register(struct okim6295 *info, int sndindex)
 
 	sprintf(buf,"OKIM6295");
 
-	state_save_register_INT32  (buf, sndindex, "command", &info->command, 1);
-	state_save_register_INT32  (buf, sndindex, "bank_offset", &info->bank_offset, 1);
 	for (j = 0; j < OKIM6295_VOICES; j++)
 		adpcm_state_save_register(&info->voice[j], sndindex * 4 + j);
 }
@@ -346,6 +318,7 @@ static void *okim6295_start(int sndindex, int clock, const void *config)
 	const struct OKIM6295interface *intf = config;
 	struct okim6295 *info;
 	int voice;
+	int divisor = intf->pin7 ? 132 : 165;
 
 	info = auto_malloc(sizeof(*info));
 	memset(info, 0, sizeof(*info));
@@ -356,17 +329,17 @@ static void *okim6295_start(int sndindex, int clock, const void *config)
 	info->bank_offset = 0;
 	info->region_base = memory_region(intf->region);
 
+	info->master_clock = clock;
+
 	/* generate the name and create the stream */
-	info->stream = stream_create(0, 1, Machine->sample_rate, info, okim6295_update);
+	info->stream = stream_create(0, 1, clock/divisor, info, okim6295_update);
 
 	/* initialize the voices */
 	for (voice = 0; voice < OKIM6295_VOICES; voice++)
 	{
 		/* initialize the rest of the structure */
 		info->voice[voice].volume = 255;
-		info->voice[voice].signal = -2;
-		if (Machine->sample_rate)
-			info->voice[voice].source_step = (UINT32)((double)clock * (double)FRAC_ONE / (double)Machine->sample_rate);
+		reset_adpcm(&info->voice[voice].adpcm);
 	}
 
 	okim6295_state_save_register(info, sndindex);
@@ -413,24 +386,16 @@ void OKIM6295_set_bank_base(int which, int base)
 
 /**********************************************************************************************
 
-     OKIM6295_set_frequency -- dynamically adjusts the frequency of a given ADPCM voice
+     OKIM6295_set_pin7 -- adjust pin 7, which controls the internal clock division
 
 ***********************************************************************************************/
 
-void OKIM6295_set_frequency(int which, int frequency)
+void OKIM6295_set_pin7(int which, int pin7)
 {
 	struct okim6295 *info = sndti_token(SOUND_OKIM6295, which);
-	int channel;
+	int divisor = pin7 ? 132 : 165;
 
-	stream_update(info->stream, 0);
-	for (channel = 0; channel < OKIM6295_VOICES; channel++)
-	{
-		struct ADPCMVoice *voice = &info->voice[channel];
-
-		/* update the stream and set the new base */
-		if (Machine->sample_rate)
-			voice->source_step = (UINT32)((double)frequency * (double)FRAC_ONE / (double)Machine->sample_rate);
-	}
+	stream_set_sample_rate(info->stream, info->master_clock/divisor);
 }
 
 
@@ -507,8 +472,7 @@ static void OKIM6295_data_w(int num, int data)
 						voice->count = 2 * (stop - start + 1);
 
 						/* also reset the ADPCM parameters */
-						voice->signal = -2;
-						voice->step = 0;
+						reset_adpcm(&voice->adpcm);
 						voice->volume = volume_table[data & 0x0f];
 					}
 					else

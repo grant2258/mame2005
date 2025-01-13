@@ -4742,8 +4742,8 @@ static MACHINE_DRIVER_START( taito_f2 )
 	MDRV_CPU_ADD_TAG("main", M68000, 24000000/2)	/* 12 MHz */
 	MDRV_CPU_VBLANK_INT(taitof2_interrupt,1)
 
-	MDRV_CPU_ADD(Z80, 16000000/4)	/* 4 MHz */
-	MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
+	MDRV_CPU_ADD(Z80, 24000000/6)	/* 4 MHz */
+	/* audio CPU */
 	MDRV_CPU_PROGRAM_MAP(sound_readmem,sound_writemem)
 
 	MDRV_FRAMES_PER_SECOND(60)
@@ -4763,7 +4763,7 @@ static MACHINE_DRIVER_START( taito_f2 )
 	/* sound hardware */
 	MDRV_SPEAKER_STANDARD_STEREO("left", "right")
 
-	MDRV_SOUND_ADD(YM2610, 16000000/2)
+	MDRV_SOUND_ADD(YM2610, 24000000/3) /* Was 16000000/2, but only a 24Mhz OSC */
 	MDRV_SOUND_CONFIG(ym2610_interface)
 	MDRV_SOUND_ROUTE(0, "left",  0.25)
 	MDRV_SOUND_ROUTE(0, "right", 0.25)
@@ -5193,8 +5193,8 @@ static MACHINE_DRIVER_START( camltrua )
 	MDRV_CPU_PROGRAM_MAP(cameltry_readmem,cameltry_writemem)
 	MDRV_CPU_VBLANK_INT(taitof2_interrupt,1)
 
-	MDRV_CPU_ADD(Z80,16000000/4)
-	MDRV_CPU_FLAGS(CPU_AUDIO_CPU)	/* 4 MHz ??? */
+	MDRV_CPU_ADD(Z80,24000000/6)	/* 4 MHz */
+	/* audio CPU */
 	MDRV_CPU_PROGRAM_MAP(camltrua_sound_readmem,camltrua_sound_writemem)
 
 	MDRV_FRAMES_PER_SECOND(60)
@@ -5230,8 +5230,8 @@ static MACHINE_DRIVER_START( driveout )
 	MDRV_CPU_PROGRAM_MAP(driveout_readmem,driveout_writemem)
 	MDRV_CPU_VBLANK_INT(taitof2_interrupt,1)
 
-	MDRV_CPU_ADD(Z80,16000000/4)
-	MDRV_CPU_FLAGS(CPU_AUDIO_CPU)	/* 4 MHz */
+	MDRV_CPU_ADD(Z80,24000000/6)	/* 4 MHz */
+	/* audio CPU */
 	MDRV_CPU_PROGRAM_MAP(driveout_sound_readmem,driveout_sound_writemem)
 
 	MDRV_FRAMES_PER_SECOND(60)
@@ -5251,8 +5251,8 @@ static MACHINE_DRIVER_START( driveout )
 	/* sound hardware */
 	MDRV_SPEAKER_STANDARD_STEREO("left", "right")   /* does it ? */
 
-	MDRV_SOUND_ADD(OKIM6295, 8000)
-	MDRV_SOUND_CONFIG(okim6295_interface_region_1)
+	MDRV_SOUND_ADD(OKIM6295, 1056000)
+	MDRV_SOUND_CONFIG(okim6295_interface_region_1_pin7high) // clock frequency & pin 7 not verified
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "left", 1.0)
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "right", 1.0)
 MACHINE_DRIVER_END

@@ -171,7 +171,7 @@ static WRITE16_HANDLER( gaiden_sound_command_w )
 static WRITE16_HANDLER( drgnbowl_sound_command_w )
 {
 	if (ACCESSING_MSB)
-	{ 
+	{
 		soundlatch_w(0,data >> 8);
 		cpunum_set_input_line(1,0,PULSE_LINE);
 	}
@@ -1005,8 +1005,8 @@ static MACHINE_DRIVER_START( shadoww )
 	MDRV_SOUND_ROUTE(2, "mono", 0.15)
 	MDRV_SOUND_ROUTE(3, "mono", 0.60)
 
-	MDRV_SOUND_ADD(OKIM6295, 1000000/132)
-	MDRV_SOUND_CONFIG(okim6295_interface_region_1)
+	MDRV_SOUND_ADD(OKIM6295, 1000000)
+	MDRV_SOUND_CONFIG(okim6295_interface_region_1_pin7high)
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.20)
 MACHINE_DRIVER_END
 
@@ -1051,8 +1051,8 @@ static MACHINE_DRIVER_START( drgnbowl )
 	MDRV_SOUND_ROUTE(0, "mono", 1.0)
 	MDRV_SOUND_ROUTE(1, "mono", 1.0)
 
-	MDRV_SOUND_ADD(OKIM6295, 1000000/132)
-	MDRV_SOUND_CONFIG(okim6295_interface_region_1)
+	MDRV_SOUND_ADD(OKIM6295, 1000000)
+	MDRV_SOUND_CONFIG(okim6295_interface_region_1_pin7high)
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.20)
 MACHINE_DRIVER_END
 
@@ -1361,7 +1361,7 @@ Notes:
       68000 : Motorola MC68000P10 CPU running at 10.000MHz [20/2] (DIP64)
       Z80   : Goldstar Z8400B running at 6.000MHz [12/2] (DIP40)
       6295  : Oki M6295 running at 1.000MHz [12/12] (QFP44), sample rate = 1000000 / 132
-      3569  : Looks like YM3812 or YM3526 or some other YM compatible YM35xx DIP24 chip. 
+      3569  : Looks like YM3812 or YM3526 or some other YM compatible YM35xx DIP24 chip.
               Input clock is 4MHz on pin 24 and output clock is 2MHz on pin 23 (tied to DAC)
       7105  : Likely YM3012 compatible DAC (pin 2 has 2MHz clock)
       FPGA  : Unknown FPGA (x2, PLCC84)

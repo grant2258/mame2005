@@ -640,9 +640,10 @@ extern data16_t *cps2_output;
 extern size_t cps2_output_size;
 extern VIDEO_START( cps2 );
 
-extern int scanline1;
-extern int scanline2;
-extern int scancalls;
+extern int cps1_scanline1;
+extern int cps1_scanline2;
+extern int cps1_scancalls;
+
 void cps2_objram_latch(void);
 void cps2_set_sprite_priorities(void);
 
@@ -658,52 +659,52 @@ static INTERRUPT_GEN( cps2_interrupt )
 	if(scancount >= 261)
 	{
 		scancount = -1;
-		scancalls = 0;
+		cps1_scancalls = 0;
 	}
 	scancount++;
 
-	if(cps1_output[0x50/2] & 0x8000)
-		cps1_output[0x50/2] = cps1_output[0x50/2] & 0x1ff;
-	if(cps1_output[0x52/2] & 0x8000)
-		cps1_output[0x52/2] = cps1_output[0x52/2] & 0x1ff;
+	if(cps2_output[0x50/2] & 0x8000)
+		cps2_output[0x50/2] = cps2_output[0x50/2] & 0x1ff;
+	if(cps2_output[0x52/2] & 0x8000)
+		cps2_output[0x52/2] = cps2_output[0x52/2] & 0x1ff;
 
-//	usrintf_showmessage("%04x %04x - %04x %04x",scanline1,scanline2,cps1_output[0x50/2],cps1_output[0x52/2]);
+//	usrintf_showmessage("%04x %04x - %04x %04x",cps1_scanline1,cps1_scanline2,cps2_output[0x50/2],cps2_output[0x52/2]);
 
 	/* raster effects */
-	if(scanline1 == scancount || (scanline1 < scancount && !scancalls))
+	if(cps1_scanline1 == scancount || (cps1_scanline1 < scancount && !cps1_scancalls))
 	{
-		cps1_output[0x50/2] = 0;
+		cps2_output[0x50/2] = 0;
 		cpunum_set_input_line(0, 4, HOLD_LINE);
 		cps2_set_sprite_priorities();
 		force_partial_update(16 - 10 + scancount);	/* Machine->visible_area.min_y - [first visible line?] + scancount */
-		scancalls++;
+		cps1_scancalls++;
 //			usrintf_showmessage("IRQ4 scancounter = %04i",scancount);
 	}
 
 	/* raster effects */
-	if(scanline2 == scancount || (scanline2 < scancount && !scancalls))
+	if(cps1_scanline2 == scancount || (cps1_scanline2 < scancount && !cps1_scancalls))
 	{
-		cps1_output[0x52/2] = 0;
+		cps2_output[0x52/2] = 0;
 		cpunum_set_input_line(0, 4, HOLD_LINE);
 		cps2_set_sprite_priorities();
 		force_partial_update(16 - 10 + scancount);	/* Machine->visible_area.min_y - [first visible line?] + scancount */
-		scancalls++;
+		cps1_scancalls++;
 //			usrintf_showmessage("IRQ4 scancounter = %04i",scancount);
 	}
 
 	if(scancount == 256)  /* VBlank */
 	{
-		cps1_output[0x50/2] = scanline1;
-		cps1_output[0x52/2] = scanline2;
+		cps2_output[0x50/2] = cps1_scanline1;
+		cps2_output[0x52/2] = cps1_scanline2;
 		cpunum_set_input_line(0, 2, HOLD_LINE);
-		if(scancalls)
+		if(cps1_scancalls)
 		{
 			cps2_set_sprite_priorities();
 			force_partial_update(256);
 		}
 		cps2_objram_latch();
 	}
-	//usrintf_showmessage("Raster calls = %i",scancalls);
+	//usrintf_showmessage("Raster calls = %i",cps1_scancalls);
 }
 
 
@@ -846,13 +847,13 @@ static ADDRESS_MAP_START( cps2_readmem, ADDRESS_SPACE_PROGRAM, 16 )
 	AM_RANGE(0x70a000, 0x70bfff) AM_READ(cps2_objram2_r)			/* mirror */
 	AM_RANGE(0x70c000, 0x70dfff) AM_READ(cps2_objram2_r)			/* mirror */
 	AM_RANGE(0x70e000, 0x70ffff) AM_READ(cps2_objram2_r)			/* mirror */
-	AM_RANGE(0x800100, 0x8001ff) AM_READ(cps1_output_r)			/* Output ports mirror (sfa) */
+	AM_RANGE(0x800140, 0x80017f) AM_READ(cps1_cps_b_r) 				/* mirror (sfa) */
 	AM_RANGE(0x804000, 0x804001) AM_READ(input_port_0_word_r)		/* IN0 */
 	AM_RANGE(0x804010, 0x804011) AM_READ(input_port_1_word_r)		/* IN1 */
 	AM_RANGE(0x804020, 0x804021) AM_READ(cps2_eeprom_port_r)		/* IN2 + EEPROM */
 	AM_RANGE(0x804030, 0x804031) AM_READ(cps2_qsound_volume_r)		/* Master volume. Also when bit 14=0 addon memory is present, when bit 15=0 network adapter present. */
 	AM_RANGE(0x8040b0, 0x8040b3) AM_READ(kludge_r)  				/* unknown (xmcotaj hangs if this is 0) */
-	AM_RANGE(0x804100, 0x8041ff) AM_READ(cps1_output_r)			/* CPS1 Output ports */
+	AM_RANGE(0x804140, 0x80417f) AM_READ(cps1_cps_b_r)              /* CPS-B custom */
 	AM_RANGE(0x900000, 0x92ffff) AM_READ(MRA16_RAM)				/* Video RAM */
 	AM_RANGE(0xff0000, 0xffffff) AM_READ(MRA16_RAM)				/* RAM */
 ADDRESS_MAP_END
@@ -871,16 +872,23 @@ static ADDRESS_MAP_START( cps2_writemem, ADDRESS_SPACE_PROGRAM, 16 )
 	AM_RANGE(0x70a000, 0x70bfff) AM_WRITE(cps2_objram2_w)			/* mirror */
 	AM_RANGE(0x70c000, 0x70dfff) AM_WRITE(cps2_objram2_w)			/* mirror */
 	AM_RANGE(0x70e000, 0x70ffff) AM_WRITE(cps2_objram2_w)			/* mirror */
-	AM_RANGE(0x800100, 0x8001ff) AM_WRITE(cps1_output_w)			/* Output ports mirror (sfa) */
+	AM_RANGE(0x800100, 0x80013f) AM_WRITE(cps1_cps_a_w) AM_BASE(&cps1_cps_a_regs)	/* mirror (sfa) */
+	AM_RANGE(0x800140, 0x80017f) AM_WRITE(cps1_cps_b_w) AM_BASE(&cps1_cps_b_regs)	/* mirror (sfa) */
 	AM_RANGE(0x804040, 0x804041) AM_WRITE(cps2_eeprom_port_w)		/* EEPROM */
 	AM_RANGE(0x8040a0, 0x8040a1) AM_WRITE(MWA16_NOP)				/* Unknown (reset once on startup) */
 	AM_RANGE(0x8040e0, 0x8040e1) AM_WRITE(cps2_objram_bank_w)		/* bit 0 = Object ram bank swap */
-	AM_RANGE(0x804100, 0x8041ff) AM_WRITE(cps1_output_w) AM_BASE(&cps1_output) AM_SIZE(&cps1_output_size)  /* Output ports */
+	AM_RANGE(0x804100, 0x80413f) AM_WRITE(cps1_cps_a_w) AM_BASE(&cps1_cps_a_regs)	/* CPS-A custom */
+	AM_RANGE(0x804140, 0x80417f) AM_WRITE(cps1_cps_b_w) AM_BASE(&cps1_cps_b_regs)	/* CPS-B custom */
 	AM_RANGE(0x900000, 0x92ffff) AM_WRITE(cps1_gfxram_w) AM_BASE(&cps1_gfxram) AM_SIZE(&cps1_gfxram_size)
 	AM_RANGE(0xff0000, 0xffffff) AM_WRITE(MWA16_RAM)				/* RAM */
 ADDRESS_MAP_END
 
 
+/*************************************
+ *
+ *  Generic port definitions
+ *
+ *************************************/
 
 // 4 players and 4 buttons
 static INPUT_PORTS_START( cps2_4p4b )
@@ -1271,17 +1279,32 @@ static DRIVER_INIT ( puzloop2 )
 	init_cps2();
 	memory_install_read16_handler(0, ADDRESS_SPACE_PROGRAM, 0x804000, 0x804001, 0, 0, pl2_port_0_word_r);
 }
+/*************************************
+ *
+ *  Graphics layouts
+ *
+ *************************************/
 
-static struct GfxLayout layout8x8 =
+static struct GfxLayout cps1_layout8x8 =
 {
 	8,8,
 	RGN_FRAC(1,1),
 	4,
-	{ GFX_RAW },
-	{ 4*8 },	/* org displacement - 8x8 tiles are taken from the RIGHT side of the 16x16 tile
-				   (fixes cawing which uses character 0x0002 as space, typo instead of 0x20?) */
-	{ 8*8 },	/* line modulo */
-	64*8		/* char modulo */
+	{ 0, 1, 2, 3 },
+	{ 1*4, 0*4, 3*4, 2*4, 5*4, 4*4, 7*4, 6*4 },
+	{ 0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64 },
+	64*8
+};
+
+static struct GfxLayout cps1_layout8x8_2 =
+{
+	8,8,
+	RGN_FRAC(1,1),
+	4,
+	{ 0, 1, 2, 3 },
+	{ 9*4, 8*4, 11*4, 10*4, 13*4, 12*4, 15*4, 14*4 },
+	{ 0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64 },
+	64*8
 };
 
 static struct GfxLayout layout16x16 =
@@ -1306,11 +1329,12 @@ static struct GfxLayout layout32x32 =
 	512*8		/* char modulo */
 };
 
-static struct GfxDecodeInfo gfxdecodeinfo[] =
+static struct GfxDecodeInfo  cps2[] =
 {
-	{ REGION_GFX1, 0, &layout8x8,   0, 0x100 },
-	{ REGION_GFX1, 0, &layout16x16, 0, 0x100 },
-	{ REGION_GFX1, 0, &layout32x32, 0, 0x100 },
+	{ REGION_GFX1, 0, &cps1_layout8x8, 		0, 0x100 },
+	{ REGION_GFX1, 0, &cps1_layout8x8_2,	0, 0x100 },
+	{ REGION_GFX1, 0, &layout16x16, 		0, 0x100 },
+	{ REGION_GFX1, 0, &layout32x32, 		0, 0x100 },
 	{ -1 }
 };
 
@@ -1331,9 +1355,11 @@ static MACHINE_DRIVER_START( cps2 )
 	MDRV_CPU_VBLANK_INT(cps2_interrupt,262)	// 262  /* ??? interrupts per frame */
 
 	MDRV_CPU_ADD(Z80, 8000000)
-	MDRV_CPU_PROGRAM_MAP(qsound_readmem,qsound_writemem)
-	MDRV_CPU_PERIODIC_INT(irq0_line_hold,251)	/* 251 is good (see 'mercy mercy mercy'section of sgemf attract mode for accurate sound sync */
-
+	//MDRV_CPU_PROGRAM_MAP(qsound_readmem,qsound_writemem)
+	//MDRV_CPU_PERIODIC_INT(irq0_line_hold,251)	/* 251 is good (see 'mercy mercy mercy'section of sgemf attract mode for accurate sound sync */
+	MDRV_CPU_PROGRAM_MAP(qsound_sub_map,0)
+	MDRV_CPU_PERIODIC_INT(irq0_line_hold,250)	/* ?? */
+	
 	MDRV_FRAMES_PER_SECOND(59.633333)
 	MDRV_VBLANK_DURATION(0)
 //	MDRV_INTERLEAVE(262)  /* 262 scanlines, for raster effects */
@@ -1344,8 +1370,9 @@ static MACHINE_DRIVER_START( cps2 )
 	MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER | VIDEO_NEEDS_6BITS_PER_GUN | VIDEO_UPDATE_BEFORE_VBLANK)
 	MDRV_SCREEN_SIZE(64*8, 32*8)
 	MDRV_VISIBLE_AREA(8*8, (64-8)*8-1, 2*8, 30*8-1 )
-	MDRV_GFXDECODE(gfxdecodeinfo)
-	MDRV_PALETTE_LENGTH(4096)
+
+	MDRV_GFXDECODE(cps2)
+	MDRV_PALETTE_LENGTH(0xc00)
 
 	MDRV_VIDEO_START(cps2)
 	MDRV_VIDEO_EOF(cps1)

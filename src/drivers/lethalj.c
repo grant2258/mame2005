@@ -15,7 +15,7 @@
 	Even though Egg Venture looks like it has a few extra scanlines at
 	the bottom, the video hardware is explicitly programmed to only
 	display 236 lines. Altering this will lead to bad flickering.
-	
+
 ****************************************************************************
 
          EU21     EU18     EU20   32.000MHz
@@ -86,7 +86,7 @@ INPUT_PORTS_START( lethalj )
 	PORT_BIT( 0x0003, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
 	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_UNKNOWN )		/* ??? Seems to be rigged up to the auto scroll, and acts as a fast forward*/
-	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1) 
+	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
 	PORT_BIT( 0xffe0, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START
@@ -170,8 +170,8 @@ INPUT_PORTS_START( eggventr )
 	PORT_DIPSETTING(      0x0800, DEF_STR( Medium ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( Hard ) )
 	PORT_DIPNAME( 0x1000, 0x1000, "Slot Machine" ) // Verified Correct - Unused for the Deluxe version?? Yes, the slot machine
-	PORT_DIPSETTING(      0x0000, DEF_STR( Off ) ) // is present in the code as a 'bonus stage' (when the egg reaches Vegas?), 
-	PORT_DIPSETTING(      0x1000, DEF_STR( On ) ) // but not actually called (EC). 
+	PORT_DIPSETTING(      0x0000, DEF_STR( Off ) ) // is present in the code as a 'bonus stage' (when the egg reaches Vegas?),
+	PORT_DIPSETTING(      0x1000, DEF_STR( On ) ) // but not actually called (EC).
 	PORT_BIT( 0xe000, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START
@@ -297,16 +297,16 @@ MACHINE_DRIVER_START( lethalj )
 	/* sound hardware */
 	MDRV_SPEAKER_STANDARD_MONO("mono")
 
-	MDRV_SOUND_ADD(OKIM6295, 2000000/132)
-	MDRV_SOUND_CONFIG(okim6295_interface_region_1)
+	MDRV_SOUND_ADD(OKIM6295, 2000000)
+	MDRV_SOUND_CONFIG(okim6295_interface_region_1_pin7high)
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.75)
 
-	MDRV_SOUND_ADD(OKIM6295, 2000000/132)
-	MDRV_SOUND_CONFIG(okim6295_interface_region_2)
+	MDRV_SOUND_ADD(OKIM6295, 2000000)
+	MDRV_SOUND_CONFIG(okim6295_interface_region_2_pin7high)
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.75)
 
-	MDRV_SOUND_ADD(OKIM6295, 2000000/132)
-	MDRV_SOUND_CONFIG(okim6295_interface_region_3)
+	MDRV_SOUND_ADD(OKIM6295, 2000000)
+	MDRV_SOUND_CONFIG(okim6295_interface_region_3_pin7high)
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.75)
 MACHINE_DRIVER_END
 

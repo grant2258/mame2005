@@ -461,6 +461,7 @@ struct InputPort
 	/* valid if type is IPT_DIPSWITCH_SETTING */
 	struct
 	{
+		const char *tag;		/* port tag to use for condition */
 		UINT8	portnum;		/* portnumber to use for condition */
 		UINT8	condition;		/* condition to use */
 		UINT32	mask;			/* mask to apply to the portnum */
@@ -608,6 +609,12 @@ struct InputPort
 #define PORT_DIPCONDITION(port_,mask_,condition_,value_)			\
 	port->dipsetting.portnum = (port_);								\
 	port->dipsetting.mask = (mask_);								\
+	port->dipsetting.condition = (condition_);						\
+	port->dipsetting.value = (value_);								\
+
+#define PORT_CONDITION_TAG(tag_,mask_,condition_,value_)			\
+	port->dipsetting.tag = (tag_);									\
+	port->dipsetting.mask = (mask_);									\
 	port->dipsetting.condition = (condition_);						\
 	port->dipsetting.value = (value_);								\
 

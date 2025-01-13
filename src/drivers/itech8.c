@@ -1399,8 +1399,8 @@ static MACHINE_DRIVER_START( itech8_core_lo )
 	/* sound hardware */
 	MDRV_SPEAKER_STANDARD_MONO("mono")
 
-	MDRV_SOUND_ADD_TAG("oki", OKIM6295, CLOCK_8MHz/8/128)
-	MDRV_SOUND_CONFIG(okim6295_interface_region_1)
+	MDRV_SOUND_ADD_TAG("oki", OKIM6295, CLOCK_8MHz/8) // was /128??
+	MDRV_SOUND_CONFIG(okim6295_interface_region_1_pin7high) // was /128, not /132, so unsure so pin 7 not verified
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.75)
 MACHINE_DRIVER_END
 
@@ -1493,8 +1493,6 @@ static MACHINE_DRIVER_START( arlingtn )
 	MDRV_VISIBLE_AREA(16, 389, 0, 239)
 
 	/* sound hardware */
-	MDRV_SOUND_REPLACE("oki", OKIM6295, CLOCK_8MHz/8/165)
-	MDRV_SOUND_CONFIG(okim6295_interface_region_1)
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.75)
 MACHINE_DRIVER_END
 
@@ -1989,7 +1987,7 @@ ROM_START( pokrdice )
 	ROM_LOAD( "pd-srom.0", 0x00000, 0x10000, CRC(f85dbd6f) SHA1(fce53019432e4a84e52f0ae1996b2e0d94b32bc0) )
 ROM_END
 
-       
+
 ROM_START( hstennis )
 	ROM_REGION( 0x1c000, REGION_CPU1, 0 )
 	ROM_LOAD( "tenbim.v11", 0x04000, 0x4000, CRC(faffab5c) SHA1(4de525f6adb16205c47788b78aecdebd57008295) )

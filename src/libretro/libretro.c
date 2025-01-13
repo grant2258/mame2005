@@ -135,8 +135,8 @@ static int getDriverIndex(const char* aPath)
           return i;
        }
     }
-
-    return -1;
+	log_cb(RETRO_LOG_ERROR, "Game Driver:%s not found.\n", driverName);
+    return 0;
 }
 
 static char* peelPathItem(char* aPath)
@@ -485,11 +485,10 @@ bool retro_load_game(const struct retro_game_info *game)
         // Boot the emulator
         return run_game(driverIndex) == 0;
     }
+    
     else
-    {
-	    printf("we got a flase return\n");
-        return false;
-    }
+       return false;
+    
 }
 
 void retro_unload_game(void)
