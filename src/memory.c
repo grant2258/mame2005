@@ -1191,12 +1191,20 @@ static int populate_memory(void)
 		for (spacenum = 0; spacenum < ADDRESS_SPACES; spacenum++)
 			if (cpudata[cpunum].spacemask & (1 << spacenum))
 			{
+				int cputype = Machine->drv->cpu[cpunum].cpu_type;
 				struct addrspace_data_t *space = &cpudata[cpunum].space[spacenum];
 				const struct address_map_t *map;
 
 				/* install the handlers, using the original, unadjusted memory map */
 				if (space->map)
 				{
+					if (cputype == CPU_Z80 || cputype == CPU_Z180)
+						if (!(Machine->drv->cpu[cpunum].cpu_flags & CPU_16BIT_PORT))
+							if (spacenum==ADDRESS_SPACE_IO && cpudata[cpunum].space[ADDRESS_SPACE_IO].mask != 0xff )
+							{
+								cpudata[cpunum].space[ADDRESS_SPACE_IO].mask = 0xff;
+								usrintf_showmessage_secs(7, "Z80/Z180 needs IO needs to be set at 8 patching for now");
+							}
 					/* first find the end */
 					for (map = space->map; !IS_AMENTRY_END(map); map++) ;
 
@@ -1302,15 +1310,15 @@ static void install_mem_handler(struct addrspace_data_t *space, int iswrite, int
 			if (hmirrorcount != 0 && prev_entry == tabledata->table[cur_index])
 			{
 				VPRINTF(("Quick mapping subtable at %08X to match subtable at %08X\n", cur_index << LEVEL2_BITS, prev_index << LEVEL2_BITS));
-				
+
 				/* release the subtable if the old value was a subtable */
 				if (tabledata->table[cur_index] >= SUBTABLE_BASE)
 					release_subtable(tabledata, tabledata->table[cur_index]);
-				
+
 				/* reallocate the subtable if the new value is a subtable */
 				if (tabledata->table[prev_index] >= SUBTABLE_BASE)
 					reallocate_subtable(tabledata, tabledata->table[prev_index]);
-				
+
 				/* set the new value and short-circuit the mapping step */
 				tabledata->table[cur_index] = tabledata->table[prev_index];
 				continue;

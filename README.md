@@ -36,8 +36,9 @@ This is just a core for my personal use no real plans for it, there is no affili
 * Virtua Formula
 
 
-# cps2 
+# cps1 and cps2 
 * updated all cps2 sets 
+* most of the updates are done. Still need to add a few hacks and some inputs need fixed some sf2 hacks are running fast because of this.
 
 # ssv driver ( backports from mame0114)
 * Change Air Blade (Japan)
