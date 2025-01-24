@@ -70,3 +70,6 @@ This is just a core for my personal use no real plans for it, there is no affili
 * Visco / Datt Japan", "Monster Slider (Japan)
 
 
+# other fixes
+* Fixed 64street attract mode
+* Fixed Vaportra game over screen

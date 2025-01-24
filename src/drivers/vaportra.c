@@ -95,7 +95,8 @@ static ADDRESS_MAP_START( vaportra_writemem, ADDRESS_SPACE_PROGRAM, 16 )
 	AM_RANGE(0x304000, 0x3049ff) AM_WRITE(vaportra_palette_24bit_b_w) AM_BASE(&paletteram16_2)
 	AM_RANGE(0x308000, 0x308001) AM_WRITE(MWA16_NOP)
 	AM_RANGE(0x30c000, 0x30c001) AM_WRITE(buffer_spriteram16_w)
-	AM_RANGE(0xff8000, 0xff87ff) AM_WRITE(MWA16_RAM) AM_BASE(&spriteram16) AM_SIZE(&spriteram_size)
+	AM_RANGE(0x318000, 0x3187ff) AM_MIRROR(0xce0000) AM_WRITE(MWA16_RAM) AM_BASE(&spriteram16) AM_SIZE(&spriteram_size)
+	
 	AM_RANGE(0xffc000, 0xffffff) AM_WRITE(MWA16_RAM)
 ADDRESS_MAP_END
 

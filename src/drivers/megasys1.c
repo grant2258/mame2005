@@ -203,6 +203,22 @@ INTERRUPT_GEN( interrupt_A_iganinju )
 	}
 }
 
+WRITE16_HANDLER(ms1_ram_w )
+{
+// logerror("%x \n",mem_mask);
+	if (!ACCESSING_MSB)
+	{
+		megasys1_ram[offset] = (data & 0x00ff) |  ((data & 0x00ff)<<8);
+	}
+	else if (!ACCESSING_LSB)
+	{
+		megasys1_ram[offset] = (data & 0xff00) |  ((data & 0xff00)>>8);
+	}
+	else
+	{
+		megasys1_ram[offset] = data;
+	}
+}
 
 
 
@@ -335,32 +351,19 @@ ADDRESS_MAP_END
 #define INTERRUPT_NUM_C	INTERRUPT_NUM_B
 #define interrupt_C		interrupt_B
 
-static ADDRESS_MAP_START( readmem_C, ADDRESS_SPACE_PROGRAM, 16 )
+static ADDRESS_MAP_START( megasys1C_map, ADDRESS_SPACE_PROGRAM, 16 )
 	ADDRESS_MAP_FLAGS( AMEF_ABITS(21) )
-	AM_RANGE(0x000000, 0x07ffff) AM_READ(MRA16_ROM)
-	AM_RANGE(0x0c0000, 0x0cffff) AM_READ(megasys1_vregs_C_r)
-	AM_RANGE(0x0d2000, 0x0d3fff) AM_READ(MRA16_RAM)
-	AM_RANGE(0x0e0000, 0x0e3fff) AM_READ(MRA16_RAM)
-	AM_RANGE(0x0e8000, 0x0ebfff) AM_READ(MRA16_RAM)
-	AM_RANGE(0x0f0000, 0x0f3fff) AM_READ(MRA16_RAM)
-	AM_RANGE(0x0f8000, 0x0f87ff) AM_READ(paletteram16_word_r)
-	AM_RANGE(0x0d8000, 0x0d8001) AM_READ(ip_select_r)
-	AM_RANGE(0x1f0000, 0x1fffff) AM_READ(MRA16_RAM)
-ADDRESS_MAP_END
-
-static ADDRESS_MAP_START( writemem_C, ADDRESS_SPACE_PROGRAM, 16 )
-	ADDRESS_MAP_FLAGS( AMEF_ABITS(21) )
- 	AM_RANGE(0x000000, 0x07ffff) AM_WRITE(MWA16_ROM)
-	AM_RANGE(0x0c0000, 0x0cffff) AM_WRITE(megasys1_vregs_C_w) AM_BASE(&megasys1_vregs)
-	AM_RANGE(0x0d2000, 0x0d3fff) AM_WRITE(MWA16_RAM) AM_BASE(&megasys1_objectram)
-	AM_RANGE(0x0e0000, 0x0e3fff) AM_WRITE(megasys1_scrollram_0_w) AM_BASE(&megasys1_scrollram_0)
-	AM_RANGE(0x0e8000, 0x0ebfff) AM_WRITE(megasys1_scrollram_1_w) AM_BASE(&megasys1_scrollram_1)
-	AM_RANGE(0x0f0000, 0x0f3fff) AM_WRITE(megasys1_scrollram_2_w) AM_BASE(&megasys1_scrollram_2)
+	AM_RANGE(0x000000, 0x07ffff) AM_ROM
+	AM_RANGE(0x0c0000, 0x0cffff) AM_READWRITE(megasys1_vregs_C_r,megasys1_vregs_C_w) AM_SHARE(1) AM_BASE(&megasys1_vregs)
+	AM_RANGE(0x0d2000, 0x0d3fff) AM_RAM AM_SHARE(2) AM_BASE(&megasys1_objectram)
+	AM_RANGE(0x0d8000, 0x0d8001) AM_READWRITE(ip_select_r,ip_select_w)
+	// 64th Street actively uses 0xe4*** for breakable objects.
+	AM_RANGE(0x0e0000, 0x0e3fff) AM_MIRROR(0x4000) AM_RAM AM_WRITE(megasys1_scrollram_0_w) AM_SHARE(3) AM_BASE(&megasys1_scrollram_0)
+	AM_RANGE(0x0e8000, 0x0ebfff) AM_MIRROR(0x4000) AM_RAM AM_WRITE(megasys1_scrollram_1_w) AM_SHARE(4) AM_BASE(&megasys1_scrollram_1)
+	AM_RANGE(0x0f0000, 0x0f3fff) AM_MIRROR(0x4000) AM_RAM AM_WRITE(megasys1_scrollram_2_w) AM_SHARE(5) AM_BASE(&megasys1_scrollram_2)
 	AM_RANGE(0x0f8000, 0x0f87ff) AM_WRITE(paletteram16_RRRRGGGGBBBBRGBx_word_w) AM_BASE(&paletteram16)
-	AM_RANGE(0x0d8000, 0x0d8001) AM_WRITE(ip_select_w)
-	AM_RANGE(0x1f0000, 0x1fffff) AM_WRITE(MWA16_RAM) AM_BASE(&megasys1_ram)
+	AM_RANGE(0x1c0000, 0x1cffff) AM_MIRROR(0x30000) AM_RAM  AM_WRITE(ms1_ram_w) AM_SHARE(6) AM_BASE(&megasys1_ram)
 ADDRESS_MAP_END
-
 
 
 
@@ -720,7 +723,7 @@ static MACHINE_DRIVER_START( system_C )
 	/* basic machine hardware */
 	MDRV_IMPORT_FROM(system_A)
 	MDRV_CPU_MODIFY("main")
-	MDRV_CPU_PROGRAM_MAP(readmem_C,writemem_C)
+	MDRV_CPU_PROGRAM_MAP(megasys1C_map,0)
 	MDRV_CPU_VBLANK_INT(interrupt_C,INTERRUPT_NUM_C)
 
 	MDRV_CPU_MODIFY("sound")
