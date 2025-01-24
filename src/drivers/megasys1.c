@@ -361,7 +361,7 @@ static ADDRESS_MAP_START( megasys1C_map, ADDRESS_SPACE_PROGRAM, 16 )
 	AM_RANGE(0x0e0000, 0x0e3fff) AM_MIRROR(0x4000) AM_RAM AM_WRITE(megasys1_scrollram_0_w) AM_SHARE(3) AM_BASE(&megasys1_scrollram_0)
 	AM_RANGE(0x0e8000, 0x0ebfff) AM_MIRROR(0x4000) AM_RAM AM_WRITE(megasys1_scrollram_1_w) AM_SHARE(4) AM_BASE(&megasys1_scrollram_1)
 	AM_RANGE(0x0f0000, 0x0f3fff) AM_MIRROR(0x4000) AM_RAM AM_WRITE(megasys1_scrollram_2_w) AM_SHARE(5) AM_BASE(&megasys1_scrollram_2)
-	AM_RANGE(0x0f8000, 0x0f87ff) AM_WRITE(paletteram16_RRRRGGGGBBBBRGBx_word_w) AM_BASE(&paletteram16)
+	AM_RANGE(0x0f8000, 0x0f87ff) AM_READWRITE(paletteram16_word_r,paletteram16_RRRRGGGGBBBBRGBx_word_w) AM_BASE(&paletteram16)
 	AM_RANGE(0x1c0000, 0x1cffff) AM_MIRROR(0x30000) AM_RAM  AM_WRITE(ms1_ram_w) AM_SHARE(6) AM_BASE(&megasys1_ram)
 ADDRESS_MAP_END
 

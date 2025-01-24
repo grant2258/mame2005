@@ -12,16 +12,17 @@ This is just a core for my personal use no real plans for it, there is no affili
 * added mb86233 cpu core from mame0114
 
 # audio cores
-*update rf5c68 soundcore to mame096u4
+* update rf5c68 soundcore to mame096u4
+* update okim6295.c to 111u3 for pin support also added stream_set_sample_rate and updated all drivers using it.
 
 # porting notes
 * removed the need cpuintrf_temp_str() in cpu interface
 * added BITMAP_ADDR8, BITMAP_ADDR16, BITMAP_ADDR32 macros
-
+* added ROM_IGNORE a while back fixed it so its working properly
 
 # games now working (added or updated to working status)
 
-# added 
+# added
 * top roller
 
 # sega system18
@@ -36,8 +37,8 @@ This is just a core for my personal use no real plans for it, there is no affili
 * Virtua Formula
 
 
-# cps1 and cps2 
-* updated all cps2 sets 
+# cps1 and cps2
+* updated all cps2 sets
 * most of the updates are done. Still need to add a few hacks and some inputs need fixed some sf2 hacks are running fast because of this.
 
 # ssv driver ( backports from mame0114)
