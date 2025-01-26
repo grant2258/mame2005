@@ -43,7 +43,7 @@ int stricmp(const char *string1, const char *string2)
 
 void mame_frame(void);
 void mame_done(void);
-int convert_analog_scale(int input);
+INT32 convert_analog_scale(INT32 input);
 
 #if defined(__CELLOS_LV2__) || defined(GEKKO) || defined(_XBOX)
 unsigned activate_dcs_speedhack = 1;
