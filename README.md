@@ -25,6 +25,8 @@ This is just a core for my personal use no real plans for it, there is no affili
 # added
 * top roller
 
+# updated all pengo sets
+
 # sega system18
 * hammer away prototype
 

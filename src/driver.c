@@ -125,13 +125,15 @@ const struct GameDriver *drivers[] =
 	DRIVER( 8bpm )  /* (c) 1985 Seatongrove Ltd (Magic Eletronics USA licence) */
 	DRIVER( porky )  /* (c) 1985 Shinkai Inc. (Magic Eletronics Inc. licence) */
 
-	DRIVER( pengo )  /* 834-0386 (c) 1982 Sega */
-	DRIVER( pengo2 ) /* 834-0386 (c) 1982 Sega */
-	DRIVER( pengo2u ) /* 834-0386 (c) 1982 Sega */
-	DRIVER( pengo3u ) /* 834-0386 (c) 1982 Sega */
-	DRIVER( pengo4 ) /* 834-0386 (c) 1982 Sega */
-	DRIVER( pengob ) /* bootleg */
-	DRIVER( penta )  /* bootleg */
+	DRIVER( pengo )
+	DRIVER( pengoa )
+	DRIVER( pengob )
+	DRIVER( pengoc )
+	DRIVER( pengoj )
+	DRIVER( pengoja )
+	DRIVER( pengojb )
+	DRIVER( pengojbl )
+	DRIVER( penta)
 	DRIVER( jrpacmbl ) /* bootleg on Pengo HW */
 
 	DRIVER( jrpacman ) /* (c) 1983 Midway */
