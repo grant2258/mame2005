@@ -834,53 +834,28 @@ static READ16_HANDLER( kludge_r )
 }
 
 
-static ADDRESS_MAP_START( cps2_readmem, ADDRESS_SPACE_PROGRAM, 16 )
-	AM_RANGE(0x000000, 0x3fffff) AM_READ(MRA16_ROM)				/* 68000 ROM */
-	AM_RANGE(0x400000, 0x40000b) AM_READ(MRA16_RAM)				/* CPS2 object output */
-	AM_RANGE(0x618000, 0x619fff) AM_READ(qsound_sharedram1_r)		/* Q RAM */
-	AM_RANGE(0x662000, 0x662001) AM_READ(MRA16_RAM)				/* Network adapter related, accessed in SSF2TB */
-	AM_RANGE(0x662008, 0x662009) AM_READ(MRA16_RAM)				/* Network adapter related, accessed in SSF2TB */
-	AM_RANGE(0x662020, 0x662021) AM_READ(MRA16_RAM)				/* Network adapter related, accessed in SSF2TB */
-	AM_RANGE(0x660000, 0x663fff) AM_READ(MRA16_RAM)				/* When bit 14 of 0x804030 equals 0 this space is available. Many games store highscores and other info here if available. */
-	AM_RANGE(0x664000, 0x664001) AM_READ(MRA16_RAM)				/* Unknown - Only used if 0x660000-0x663fff available (could be RAM enable?) */
-	AM_RANGE(0x708000, 0x709fff) AM_READ(cps2_objram2_r)			/* Object RAM */
-	AM_RANGE(0x70a000, 0x70bfff) AM_READ(cps2_objram2_r)			/* mirror */
-	AM_RANGE(0x70c000, 0x70dfff) AM_READ(cps2_objram2_r)			/* mirror */
-	AM_RANGE(0x70e000, 0x70ffff) AM_READ(cps2_objram2_r)			/* mirror */
-	AM_RANGE(0x800140, 0x80017f) AM_READ(cps1_cps_b_r) 				/* mirror (sfa) */
+static ADDRESS_MAP_START( cps2_map, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x3fffff) AM_ROM																					/* 68000 ROM */
+	AM_RANGE(0x400000, 0x40000b) AM_RAM AM_BASE(&cps2_output) AM_SIZE(&cps2_output_size)								/* CPS2 object output */
+	AM_RANGE(0x618000, 0x619fff) AM_READWRITE(qsound_sharedram1_r, qsound_sharedram1_w)       							/* Q RAM */
+	AM_RANGE(0x660000, 0x663fff) AM_RAM	                                                                                // When bit 14 of 0x804030 equals 0 this space is available. Many games store highscores and other info here if available.
+	AM_RANGE(0x664000, 0x664001) AM_RAM	                                                                                                    // Unknown - Only used if 0x660000-0x663fff available (could be RAM enable?)
+	AM_RANGE(0x700000, 0x701fff) AM_RAM AM_WRITE(cps2_objram1_w) AM_BASE(&cps2_objram1)     							/* Object RAM, no game seems to use it directly */
+	AM_RANGE(0x708000, 0x709fff) AM_MIRROR(0x006000) AM_READWRITE(cps2_objram2_r, cps2_objram2_w) AM_BASE(&cps2_objram2)/* Object RAM */
+	AM_RANGE(0x800100, 0x80013f) AM_WRITE(cps1_cps_a_w) AM_BASE(&cps1_cps_a_regs)										/* mirror (sfa) */
+	AM_RANGE(0x800140, 0x80017f) AM_READWRITE(cps1_cps_b_r, cps1_cps_b_w) AM_BASE(&cps1_cps_b_regs) 					/* mirror (sfa) */
 	AM_RANGE(0x804000, 0x804001) AM_READ(input_port_0_word_r)		/* IN0 */
 	AM_RANGE(0x804010, 0x804011) AM_READ(input_port_1_word_r)		/* IN1 */
 	AM_RANGE(0x804020, 0x804021) AM_READ(cps2_eeprom_port_r)		/* IN2 + EEPROM */
 	AM_RANGE(0x804030, 0x804031) AM_READ(cps2_qsound_volume_r)		/* Master volume. Also when bit 14=0 addon memory is present, when bit 15=0 network adapter present. */
-	AM_RANGE(0x8040b0, 0x8040b3) AM_READ(kludge_r)  				/* unknown (xmcotaj hangs if this is 0) */
-	AM_RANGE(0x804140, 0x80417f) AM_READ(cps1_cps_b_r)              /* CPS-B custom */
-	AM_RANGE(0x900000, 0x92ffff) AM_READ(MRA16_RAM)				/* Video RAM */
-	AM_RANGE(0xff0000, 0xffffff) AM_READ(MRA16_RAM)				/* RAM */
-ADDRESS_MAP_END
-
-static ADDRESS_MAP_START( cps2_writemem, ADDRESS_SPACE_PROGRAM, 16 )
-	AM_RANGE(0x000000, 0x3fffff) AM_WRITE(MWA16_ROM)				/* ROM */
-	AM_RANGE(0x400000, 0x40000b) AM_WRITE(MWA16_RAM) AM_BASE(&cps2_output) AM_SIZE(&cps2_output_size)	/* CPS2 output */
-	AM_RANGE(0x618000, 0x619fff) AM_WRITE(qsound_sharedram1_w)		/* Q RAM */
-	AM_RANGE(0x662000, 0x662001) AM_WRITE(MWA16_RAM)				/* Network adapter related, accessed in SSF2TB */
-	AM_RANGE(0x662008, 0x662009) AM_WRITE(MWA16_RAM)				/* Network adapter related, accessed in SSF2TB (not sure if this port is write only yet)*/
-	AM_RANGE(0x662020, 0x662021) AM_WRITE(MWA16_RAM)				/* Network adapter related, accessed in SSF2TB */
-	AM_RANGE(0x660000, 0x663fff) AM_WRITE(MWA16_RAM)				/* When bit 14 of 0x804030 equals 0 this space is available. Many games store highscores and other info here if available. */
-	AM_RANGE(0x664000, 0x664001) AM_WRITE(MWA16_RAM)				/* Unknown - Only used if 0x660000-0x663fff available (could be RAM enable?) */
-	AM_RANGE(0x700000, 0x701fff) AM_WRITE(cps2_objram1_w) AM_BASE(&cps2_objram1)	/* Object RAM, no game seems to use it directly */
-	AM_RANGE(0x708000, 0x709fff) AM_WRITE(cps2_objram2_w) AM_BASE(&cps2_objram2)	/* Object RAM */
-	AM_RANGE(0x70a000, 0x70bfff) AM_WRITE(cps2_objram2_w)			/* mirror */
-	AM_RANGE(0x70c000, 0x70dfff) AM_WRITE(cps2_objram2_w)			/* mirror */
-	AM_RANGE(0x70e000, 0x70ffff) AM_WRITE(cps2_objram2_w)			/* mirror */
-	AM_RANGE(0x800100, 0x80013f) AM_WRITE(cps1_cps_a_w) AM_BASE(&cps1_cps_a_regs)	/* mirror (sfa) */
-	AM_RANGE(0x800140, 0x80017f) AM_WRITE(cps1_cps_b_w) AM_BASE(&cps1_cps_b_regs)	/* mirror (sfa) */
 	AM_RANGE(0x804040, 0x804041) AM_WRITE(cps2_eeprom_port_w)		/* EEPROM */
-	AM_RANGE(0x8040a0, 0x8040a1) AM_WRITE(MWA16_NOP)				/* Unknown (reset once on startup) */
+	AM_RANGE(0x8040a0, 0x8040a1) AM_WRITENOP                  															/* Unknown (reset once on startup) */
+	AM_RANGE(0x8040b0, 0x8040b2) AM_READ(kludge_r)																		/* unknown (xmcotaj hangs if this is 0) */
 	AM_RANGE(0x8040e0, 0x8040e1) AM_WRITE(cps2_objram_bank_w)		/* bit 0 = Object ram bank swap */
 	AM_RANGE(0x804100, 0x80413f) AM_WRITE(cps1_cps_a_w) AM_BASE(&cps1_cps_a_regs)	/* CPS-A custom */
-	AM_RANGE(0x804140, 0x80417f) AM_WRITE(cps1_cps_b_w) AM_BASE(&cps1_cps_b_regs)	/* CPS-B custom */
-	AM_RANGE(0x900000, 0x92ffff) AM_WRITE(cps1_gfxram_w) AM_BASE(&cps1_gfxram) AM_SIZE(&cps1_gfxram_size)
-	AM_RANGE(0xff0000, 0xffffff) AM_WRITE(MWA16_RAM)				/* RAM */
+	AM_RANGE(0x804140, 0x80417f) AM_READWRITE(cps1_cps_b_r, cps1_cps_b_w)              									/* CPS-B custom */
+	AM_RANGE(0x900000, 0x92ffff) AM_RAM AM_WRITE(cps1_gfxram_w) AM_BASE(&cps1_gfxram) AM_SIZE(&cps1_gfxram_size)		/* Video RAM */
+	AM_RANGE(0xff0000, 0xffffff) AM_RAM																					/* RAM */
 ADDRESS_MAP_END
 
 
@@ -1279,64 +1254,6 @@ static DRIVER_INIT ( puzloop2 )
 	init_cps2();
 	memory_install_read16_handler(0, ADDRESS_SPACE_PROGRAM, 0x804000, 0x804001, 0, 0, pl2_port_0_word_r);
 }
-/*************************************
- *
- *  Graphics layouts
- *
- *************************************/
-
-static struct GfxLayout cps1_layout8x8 =
-{
-	8,8,
-	RGN_FRAC(1,1),
-	4,
-	{ 0, 1, 2, 3 },
-	{ 1*4, 0*4, 3*4, 2*4, 5*4, 4*4, 7*4, 6*4 },
-	{ 0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64 },
-	64*8
-};
-
-static struct GfxLayout cps1_layout8x8_2 =
-{
-	8,8,
-	RGN_FRAC(1,1),
-	4,
-	{ 0, 1, 2, 3 },
-	{ 9*4, 8*4, 11*4, 10*4, 13*4, 12*4, 15*4, 14*4 },
-	{ 0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64 },
-	64*8
-};
-
-static struct GfxLayout layout16x16 =
-{
-	16,16,
-	RGN_FRAC(1,1),
-	4,
-	{ GFX_RAW },
-	{ 0 },		/* org displacement */
-	{ 8*8 },	/* line modulo */
-	128*8		/* char modulo */
-};
-
-static struct GfxLayout layout32x32 =
-{
-	32,32,
-	RGN_FRAC(1,1),
-	4,
-	{ GFX_RAW },
-	{ 0 },		/* org displacement */
-	{ 16*8 },	/* line modulo */
-	512*8		/* char modulo */
-};
-
-static struct GfxDecodeInfo  cps2[] =
-{
-	{ REGION_GFX1, 0, &cps1_layout8x8, 		0, 0x100 },
-	{ REGION_GFX1, 0, &cps1_layout8x8_2,	0, 0x100 },
-	{ REGION_GFX1, 0, &layout16x16, 		0, 0x100 },
-	{ REGION_GFX1, 0, &layout32x32, 		0, 0x100 },
-	{ -1 }
-};
 
 
 
@@ -1351,7 +1268,7 @@ static MACHINE_DRIVER_START( cps2 )
 	/* basic machine hardware */
 	MDRV_CPU_ADD(M68000, 11800000)
 	MDRV_CPU_CONFIG(cps2_encryption)
-	MDRV_CPU_PROGRAM_MAP(cps2_readmem,cps2_writemem)
+	MDRV_CPU_PROGRAM_MAP(cps2_map,0)
 	MDRV_CPU_VBLANK_INT(cps2_interrupt,262)	// 262  /* ??? interrupts per frame */
 
 	MDRV_CPU_ADD(Z80, 8000000)
@@ -1371,7 +1288,7 @@ static MACHINE_DRIVER_START( cps2 )
 	MDRV_SCREEN_SIZE(64*8, 32*8)
 	MDRV_VISIBLE_AREA(8*8, (64-8)*8-1, 2*8, 30*8-1 )
 
-	MDRV_GFXDECODE(cps2)
+	MDRV_GFXDECODE(cps1_gfx)
 	MDRV_PALETTE_LENGTH(0xc00)
 
 	MDRV_VIDEO_START(cps2)

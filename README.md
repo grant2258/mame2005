@@ -13,12 +13,14 @@ This is just a core for my personal use no real plans for it, there is no affili
 
 # audio cores
 * update rf5c68 soundcore to mame096u4
-* update okim6295.c to 111u3 for pin support also added stream_set_sample_rate and updated all drivers using it.
+* update okim6295.c to 111u3 for pin support also added stream_set_sample_rate and updated all drivers using it also updated qsound core.
 
 # porting notes
 * removed the need cpuintrf_temp_str() in cpu interface
 * added BITMAP_ADDR8, BITMAP_ADDR16, BITMAP_ADDR32 macros
 * added ROM_IGNORE a while back fixed it so its working properly
+* added STEP2 and STEP32 macros
+* BITNEW macro
 
 # games now working (added or updated to working status)
 

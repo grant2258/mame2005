@@ -3749,58 +3749,65 @@ of the 8x8 tilemap alternate between sides of the 16x16 tile resulting
 in a corrupt WDUD screen (see ffightua)
 */
 
+/*************************************
+ *
+ *  Graphics layouts
+ *
+ *************************************/
+
 static struct GfxLayout cps1_layout8x8 =
 {
 	8,8,
 	RGN_FRAC(1,1),
 	4,
-	{ 0, 1, 2, 3 },
-	{ 1*4, 0*4, 3*4, 2*4, 5*4, 4*4, 7*4, 6*4 },
-	{ 0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64 },
+	{ 24, 16, 8, 0 },
+	{ STEP8(0, 1) },
+	{ STEP8(0, 4*16) },
 	64*8
 };
 
- struct GfxLayout cps1_layout8x8_2 =
+static struct GfxLayout cps1_layout8x8_2 =
 {
 	8,8,
 	RGN_FRAC(1,1),
 	4,
-	{ 0, 1, 2, 3 },
-	{ 9*4, 8*4, 11*4, 10*4, 13*4, 12*4, 15*4, 14*4 },
-	{ 0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64 },
+	{ 24, 16, 8, 0 },
+	{ STEP8(32, 1) },
+	{ STEP8(0, 4*16) },
 	64*8
 };
 
- struct GfxLayout cps1_layout16x16 =
+static struct GfxLayout cps1_layout16x16 =
 {
 	16,16,
 	RGN_FRAC(1,1),
 	4,
-	{ GFX_RAW },
-	{ 0 },		/* org displacement */
-	{ 8*8 },	/* line modulo */
-	128*8		/* char modulo */
+	{ 24, 16, 8, 0 },
+	{ STEP8(0, 1), STEP8(32, 1) },
+	{ STEP16(0, 4*16) },
+	4*16*16
 };
 
-  struct GfxLayout cps1_layout32x32 =
+static struct GfxLayout cps1_layout32x32 =
 {
 	32,32,
 	RGN_FRAC(1,1),
 	4,
-	{ GFX_RAW },
-	{ 0 },		/* org displacement */
-	{ 16*8 },	/* line modulo */
-	512*8		/* char modulo */
+	{ 24, 16, 8, 0 },
+	{ STEP8(0, 1), STEP8(32, 1), STEP8(64, 1), STEP8(96, 1) },
+	{ STEP32(0, 4*32) },
+	4*32*32
 };
 
- struct GfxDecodeInfo cps1[] =
+struct GfxDecodeInfo  cps1_gfx[] =
 {
-	{ REGION_GFX1, 0, &cps1_layout8x8,   0, 0x100 },
-	{ REGION_GFX1, 0, &cps1_layout8x8_2, 0, 0x100 },
-	{ REGION_GFX1, 0, &cps1_layout16x16, 0, 0x100 },
-	{ REGION_GFX1, 0, &cps1_layout32x32, 0, 0x100 },
+	{ REGION_GFX1, 0, &cps1_layout8x8, 		0, 0x100 },
+	{ REGION_GFX1, 0, &cps1_layout8x8_2,	0, 0x100 },
+	{ REGION_GFX1, 0, &cps1_layout16x16, 		0, 0x100 },
+	{ REGION_GFX1, 0, &cps1_layout32x32, 		0, 0x100 },
 	{ -1 }
 };
+
 
 
 
@@ -3843,7 +3850,7 @@ MACHINE_DRIVER_START( cps1_10MHz )
 	MDRV_SCREEN_SIZE(64*8, 32*8)
 	MDRV_VISIBLE_AREA(8*8, (64-8)*8-1, 2*8, 30*8-1 )
 
-	MDRV_GFXDECODE(cps1)
+	MDRV_GFXDECODE(cps1_gfx)
 	MDRV_PALETTE_LENGTH(0xc00)
 
 	MDRV_VIDEO_START(cps1)
@@ -3897,7 +3904,7 @@ MACHINE_DRIVER_START( sf2m3 )
 	MDRV_SCREEN_SIZE(64*8, 32*8)
 	MDRV_VISIBLE_AREA(8*8, (64-8)*8-1, 2*8, 30*8-1 )
 
-	MDRV_GFXDECODE(cps1)
+	MDRV_GFXDECODE(cps1_gfx)
 	MDRV_PALETTE_LENGTH(0xc00)
 
 	MDRV_VIDEO_START(cps1)

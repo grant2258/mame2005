@@ -2374,42 +2374,6 @@ INLINE int cps2_port(int offset)
     return cps2_output[offset/2];
 }
 
-
-
-
-static void cps1_gfx_decode(void)
-{
-	int size=memory_region_length(REGION_GFX1);
-	int i,j,gfxsize;
-	UINT8 *cps1_gfx = memory_region(REGION_GFX1);
-
-
-	gfxsize=size/4;
-
-	for (i = 0;i < gfxsize;i++)
-	{
-		UINT32 src = cps1_gfx[4*i] + (cps1_gfx[4*i+1]<<8) + (cps1_gfx[4*i+2]<<16) + (cps1_gfx[4*i+3]<<24);
-		UINT32 dwval = 0;
-
-		for (j = 0;j < 8;j++)
-		{
-			int n = 0;
-			UINT32 mask = (0x80808080 >> j) & src;
-
-			if (mask & 0x000000ff) n |= 1;
-			if (mask & 0x0000ff00) n |= 2;
-			if (mask & 0x00ff0000) n |= 4;
-			if (mask & 0xff000000) n |= 8;
-
-			dwval |= n << (j * 4);
-		}
-		cps1_gfx[4*i  ] = dwval>>0;
-		cps1_gfx[4*i+1] = dwval>>8;
-		cps1_gfx[4*i+2] = dwval>>16;
-		cps1_gfx[4*i+3] = dwval>>24;
-	}
-}
-
 static void unshuffle(UINT64 *buf,int len)
 {
 	int i;
@@ -2440,20 +2404,16 @@ void cps2_gfx_decode(void)
 
 	for (i = 0;i < size;i += banksize)
 		unshuffle((UINT64 *)(memory_region(REGION_GFX1) + i),banksize/8);
-
-	cps1_gfx_decode();
 }
 
 
 DRIVER_INIT( cps1 )
 {
-	cps1_gfx_decode();
 	cps1_scanline1 = 0;
 	cps1_scanline2 = 0;
 	cps1_scancalls = 0;
 	cps1_last_sprite_offset = 0;
 }
-
 
 DRIVER_INIT( cps2_video )
 {
@@ -2463,7 +2423,6 @@ DRIVER_INIT( cps2_video )
 	cps1_scanline2 = 262;
 	cps1_scancalls = 0;
 }
-
 
 void cps1_get_video_base(void )
 {

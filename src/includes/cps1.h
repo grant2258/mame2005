@@ -60,6 +60,8 @@ extern UINT16 *cps2_objram1,*cps2_objram2;
 extern UINT16 *cps2_output;
 extern size_t cps2_output_size;
 
+extern struct GfxDecodeInfo  cps1_gfx[];
+
 WRITE16_HANDLER( cps1_cps_a_w );
 WRITE16_HANDLER( cps1_cps_b_w );
 READ16_HANDLER( cps1_cps_b_r );
