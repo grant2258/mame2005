@@ -170,6 +170,7 @@ Changes:
 #include "sound/samples.h"
 #include "sound/nes_apu.h"
 #include <math.h>
+#include "machine/eeprom.h"
 
 static int page = 0,mcustatus;
 static int p[8] = { 255,255,255,255,255,255,255,255 };
@@ -320,6 +321,96 @@ static READ8_HANDLER( epos_decrypt_rom )
 	return 0;
 }
 
+/*************************************
+ *
+ *  Braze Tech Addon boards
+ *
+ *************************************/
+
+static int banks = 99;
+
+static struct EEPROM_interface braze_eeprom_intf =
+{
+	7,				/* address bits */
+	8,				/* data bits */
+	"*110",			/* read command */
+	"*101",			/* write command */
+	0,				/* erase command */
+	"*10000xxxxx",	/* lock command */
+	"*10011xxxxx",	/* unlock command */
+};
+
+NVRAM_HANDLER( braze )
+{
+	if (read_or_write)
+		EEPROM_save(file);
+	else
+	{
+		EEPROM_init(&braze_eeprom_intf);
+
+		if (file) EEPROM_load(file);
+	}
+}
+
+static READ8_HANDLER( braze_eeprom_r )
+{
+	return EEPROM_read_bit();
+}
+
+static WRITE8_HANDLER( braze_a15_w )
+{
+
+		banks = data & 1;
+		//printf("banks:%d\n",banks);
+
+		if(banks)
+		{
+			cpu_setbank(1, memory_region(REGION_USER1) + 0x18000);
+			cpu_setbank(2, memory_region(REGION_USER1) + 0x18000);
+		}
+		else
+		{
+			cpu_setbank(1, memory_region(REGION_USER1) + 0x10000);
+			cpu_setbank(2, memory_region(REGION_USER1) + 0x10000);
+		}
+
+}
+
+static WRITE8_HANDLER( braze_eeprom_w )
+{
+	EEPROM_write_bit(data & 0x01);
+	EEPROM_set_cs_line(data & 0x04 ? CLEAR_LINE : ASSERT_LINE);
+	EEPROM_set_clock_line(data & 0x02 ? ASSERT_LINE : CLEAR_LINE);
+}
+
+static void braze_decrypt_rom(UINT8 *dest)
+{
+	UINT8 oldbyte,newbyte;
+	UINT8 *ROM;
+	UINT32 mem;
+	UINT32 newmem;
+
+	ROM = memory_region(REGION_USER1);
+
+	for (mem=0;mem<0x10000;mem++)
+	{
+		oldbyte = ROM[mem];
+
+		newmem = ((BITSWAP8((mem >> 8),7,2,3,1,0,6,4,5))<<8) | (mem & 0xff);
+		newbyte = BITSWAP8(oldbyte, 1,4,5,7,6,0,3,2);
+
+		dest[newmem] = newbyte;
+	}
+}
+
+
+static READ8_HANDLER( dkremix_in2_r )
+{
+
+	return input_port_2_r(offset) | (mcustatus << 6);
+}
+
+
 
 static ADDRESS_MAP_START( readmem, ADDRESS_SPACE_PROGRAM, 8 )
 	AM_RANGE(0x0000, 0x5fff) AM_READ(MRA8_ROM)	/* DK: 0000-3fff */
@@ -344,6 +435,59 @@ static ADDRESS_MAP_START( dkong3_readmem, ADDRESS_SPACE_PROGRAM, 8 )
 	AM_RANGE(0x7d80, 0x7d80) AM_READ(input_port_3_r)	/* DSW1 */
 	AM_RANGE(0x8000, 0x9fff) AM_READ(MRA8_ROM)	/* DK3 and bootleg DKjr only */
 ADDRESS_MAP_END
+
+
+static ADDRESS_MAP_START( dkremix_readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x5fff) AM_READ(MRA8_BANK1)	/* DK: 0000-3fff */
+	AM_RANGE(0x6000, 0x6fff) AM_READ(MRA8_RAM)	/* including sprites RAM */
+	AM_RANGE(0x7400, 0x77ff) AM_READ(MRA8_RAM)	/* video RAM */
+	AM_RANGE(0x7c00, 0x7c00) AM_READ(input_port_0_r)	/* IN0 */
+	AM_RANGE(0x7c80, 0x7c80) AM_READ(input_port_1_r)	/* IN1 */
+	AM_RANGE(0x7d00, 0x7d00) AM_READ(dkremix_in2_r)	/* IN2/DSW2 */
+	AM_RANGE(0x7d80, 0x7d80) AM_READ(input_port_3_r)	/* DSW1 */
+	AM_RANGE(0x8000, 0xffff) AM_READ(MRA8_BANK2)	/* DK3 and bootleg DKjr only */
+	AM_RANGE(0xc800, 0xc800) AM_READ(braze_eeprom_r)
+ADDRESS_MAP_END
+
+
+
+static ADDRESS_MAP_START( dkong2_readmem , ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x5fff) AM_READ(MRA8_BANK1)	/* DK: 0000-3fff */
+	AM_RANGE(0x6000, 0x6fff) AM_READ(MRA8_RAM)	/* including sprites RAM */
+	AM_RANGE(0x7400, 0x77ff) AM_READ(MRA8_RAM)	/* video RAM */
+	AM_RANGE(0x7c00, 0x7c00) AM_READ(input_port_0_r)	/* IN0 */
+	AM_RANGE(0x7c80, 0x7c80) AM_READ(input_port_1_r)	/* IN1 */
+	AM_RANGE(0x7d00, 0x7d00) AM_READ(dkremix_in2_r)	/* IN2/DSW2 */
+	AM_RANGE(0x7d80, 0x7d80) AM_READ(input_port_3_r)	/* DSW1 */
+//	AM_RANGE(0x8000, 0xffff) AM_READ(MRA8_BANK2)	/* DK3 and bootleg DKjr only */
+	AM_RANGE(0xc800, 0xc800) AM_READ(braze_eeprom_r)
+ADDRESS_MAP_END
+
+static ADDRESS_MAP_START(  dkong2_writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x5fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0x6000, 0x68ff) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0x6900, 0x6a7f) AM_WRITE(MWA8_RAM) AM_BASE(&spriteram) AM_SIZE(&spriteram_size)
+	AM_RANGE(0x6a80, 0x6fff) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0x7000, 0x73ff) AM_WRITE(MWA8_RAM)    /* ???? */
+	AM_RANGE(0x7400, 0x77ff)  AM_WRITE(dkong_videoram_w) AM_BASE(&videoram)
+	AM_RANGE(0x7800, 0x7803) AM_WRITE(MWA8_RAM)	/* ???? */
+	AM_RANGE(0x7808, 0x7808) AM_WRITE(MWA8_RAM)	/* ???? */
+	AM_RANGE(0x7c00, 0x7c00) AM_WRITE(dkong_sh_tuneselect_w) /*	{ 0x7c80, 0x7c80,  },*/
+	AM_RANGE(0x7d00, 0x7d02) AM_WRITE(dkong_sh1_w)	/* walk/jump/boom sample trigger */
+	AM_RANGE(0x7d03, 0x7d03) AM_WRITE(dkong_sh_sound3_w)
+	AM_RANGE(0x7d04, 0x7d04) AM_WRITE(dkong_sh_sound4_w)
+	AM_RANGE(0x7d05, 0x7d05) AM_WRITE(dkong_sh_sound5_w)
+	AM_RANGE(0x7d80, 0x7d80) AM_WRITE(dkong_sh_w)
+	AM_RANGE(0x7d81, 0x7d81) AM_WRITE(MWA8_RAM)	/* ???? */
+	AM_RANGE(0x7d82, 0x7d82) AM_WRITE(dkong_flipscreen_w)
+	AM_RANGE(0x7d83, 0x7d83) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0x7d84, 0x7d84) AM_WRITE(interrupt_enable_w)
+	AM_RANGE(0x7d85, 0x7d85) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0x7d86, 0x7d87) AM_WRITE(dkong_palettebank_w)
+	AM_RANGE(0xe000, 0xe000) AM_WRITE(braze_a15_w)
+	AM_RANGE(0xc800, 0xc800) AM_WRITE(braze_eeprom_w)
+ADDRESS_MAP_END
+
 
 static ADDRESS_MAP_START( radarscp_writemem, ADDRESS_SPACE_PROGRAM, 8 )
 	AM_RANGE(0x0000, 0x5fff) AM_WRITE(MWA8_ROM)
@@ -1457,6 +1601,66 @@ INPUT_PORTS_START( strtheat )
 	PORT_DIPSETTING(    0x80, DEF_STR( Cocktail ) )
 INPUT_PORTS_END
 
+INPUT_PORTS_START( dkongx )
+	PORT_START      /* IN0 */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_4WAY
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  ) PORT_4WAY
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP    ) PORT_4WAY
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN  ) PORT_4WAY
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON1 )
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+
+	PORT_START      /* IN1 */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_4WAY PORT_COCKTAIL
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  ) PORT_4WAY PORT_COCKTAIL
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP    ) PORT_4WAY PORT_COCKTAIL
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN  ) PORT_4WAY PORT_COCKTAIL
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_COCKTAIL
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+
+	PORT_START      /* IN2 */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SERVICE ) PORT_NAME(DEF_STR( Service_Mode )) PORT_CODE(KEYCODE_F2)
+/*	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Service_Mode ) )*/
+/*	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )*/
+/*	PORT_DIPSETTING(    0x01, DEF_STR( On ) )*/
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_START1 )
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_START2 )
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_SPECIAL )	/* status from sound cpu */
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_COIN1 )
+
+	PORT_START      /* DSW0 */
+	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Lives ) )
+	PORT_DIPSETTING(    0x00, "3" )
+	PORT_DIPSETTING(    0x01, "4" )
+	PORT_DIPSETTING(    0x02, "5" )
+	PORT_DIPSETTING(    0x03, "6" )
+	PORT_DIPNAME( 0x0c, 0x00, DEF_STR( Bonus_Life ) )
+	PORT_DIPSETTING(    0x00, "7000" )
+	PORT_DIPSETTING(    0x04, "10000" )
+	PORT_DIPSETTING(    0x08, "15000" )
+	PORT_DIPSETTING(    0x0c, "20000" )
+	PORT_DIPNAME( 0x70, 0x00, DEF_STR( Coinage ) )
+	PORT_DIPSETTING(    0x70, DEF_STR( 5C_1C ) )
+	PORT_DIPSETTING(    0x50, DEF_STR( 4C_1C ) )
+	PORT_DIPSETTING(    0x30, DEF_STR( 3C_1C ) )
+	PORT_DIPSETTING(    0x10, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x20, DEF_STR( 1C_2C ) )
+	PORT_DIPSETTING(    0x40, DEF_STR( 1C_3C ) )
+	PORT_DIPSETTING(    0x60, DEF_STR( 1C_4C ) )
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Cabinet ) )
+	PORT_DIPSETTING(    0x80, DEF_STR( Upright ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Cocktail ) )
+INPUT_PORTS_END
+
+
 static struct GfxLayout charlayout =
 {
 	8,8,	/* 8*8 characters */
@@ -1869,7 +2073,112 @@ static MACHINE_DRIVER_START( dkong3 )
 	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
 MACHINE_DRIVER_END
 
+#define MASTER_CLOCK            61440000
+#define CLOCK_1H                (MASTER_CLOCK / 5 / 4)
+#define CLOCK_16H               (CLOCK_1H / 16)
+#define CLOCK_1VF               ((CLOCK_16H) / 12 / 2)
+#define CLOCK_2VF               ((CLOCK_1VF) / 2)
 
+#define PIXEL_CLOCK             (MASTER_CLOCK/10)
+#define HTOTAL                  (384)
+#define HBSTART                 (256)
+#define HBEND                   (0)
+#define VTOTAL                  (264)
+#define VBSTART                 (240)
+#define VBEND                   (16)
+
+/*need the old  valuse for the flip to work
+ * I plan on doing some updates this will make its easier
+ * */
+
+#define OLD_HTOTAL                  (32*8)
+#define OLD_HBSTART                 (32*8)
+#define OLD_HBEND                   (0)
+#define OLD_VTOTAL                  (32*8)
+#define OLD_VBSTART                 (30*8)
+#define OLD_VBEND                   (2*8)
+
+#define DK2B_PALETTE_LENGTH     (256+256+8+1) /*  (256) */
+
+static MACHINE_DRIVER_START( dkremix )
+
+	/* basic machine hardware */
+	MDRV_CPU_ADD(Z80, 3072000)	/* 3.072 MHz (?) */
+	MDRV_CPU_PROGRAM_MAP(dkremix_readmem,dkong2_writemem)
+	MDRV_CPU_VBLANK_INT(nmi_line_pulse,1)
+
+	MDRV_CPU_ADD(I8035,6000000/15)
+	MDRV_CPU_FLAGS(CPU_AUDIO_CPU)	/* 6MHz crystal */
+	MDRV_CPU_PROGRAM_MAP(readmem_sound,writemem_sound)
+	MDRV_CPU_IO_MAP(readport_sound,writeport_sound)
+
+	MDRV_NVRAM_HANDLER(braze)
+
+	MDRV_FRAMES_PER_SECOND(60)
+	MDRV_VBLANK_DURATION(DEFAULT_60HZ_VBLANK_DURATION)
+
+	/* video hardware */
+	MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER)
+	MDRV_SCREEN_SIZE(OLD_HTOTAL, OLD_VTOTAL)
+	MDRV_VISIBLE_AREA(OLD_HBEND, OLD_HBSTART-1, OLD_VBEND, OLD_VBSTART -1)
+	MDRV_GFXDECODE(gfxdecodeinfo)
+	MDRV_PALETTE_LENGTH(DK2B_PALETTE_LENGTH)
+	MDRV_COLORTABLE_LENGTH(DK2B_PALETTE_LENGTH)
+
+	MDRV_PALETTE_INIT(dkong)
+	MDRV_VIDEO_START(dkong)
+	MDRV_VIDEO_UPDATE(dkong)
+
+	/* sound hardware */
+	MDRV_SPEAKER_STANDARD_MONO("mono")
+
+	MDRV_SOUND_ADD_TAG("samples", SAMPLES, 0)
+	MDRV_SOUND_CONFIG(dkong_samples_interface)
+	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.25)
+
+	MDRV_SOUND_ADD(DAC, 0)
+	//MDRV_SOUND_ADD(DAC, dkong_dac_interface)
+MACHINE_DRIVER_END
+
+static MACHINE_DRIVER_START( braze )
+
+	/* basic machine hardware */
+	MDRV_CPU_ADD(Z80, 3072000)	/* 3.072 MHz (?) */
+	MDRV_CPU_PROGRAM_MAP(dkong2_readmem,dkong2_writemem)
+	MDRV_CPU_VBLANK_INT(nmi_line_pulse,1)
+
+	MDRV_CPU_ADD(I8035,6000000/15)
+	MDRV_CPU_FLAGS(CPU_AUDIO_CPU)	/* 6MHz crystal */
+	MDRV_CPU_PROGRAM_MAP(readmem_sound,writemem_sound)
+	MDRV_CPU_IO_MAP(readport_sound,writeport_sound)
+
+	MDRV_NVRAM_HANDLER(braze)
+
+	MDRV_FRAMES_PER_SECOND(60)
+	MDRV_VBLANK_DURATION(DEFAULT_60HZ_VBLANK_DURATION)
+
+	/* video hardware */
+	MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER)
+	MDRV_SCREEN_SIZE(OLD_HTOTAL, OLD_VTOTAL)
+	MDRV_VISIBLE_AREA(OLD_HBEND, OLD_HBSTART-1, OLD_VBEND, OLD_VBSTART -1)
+	MDRV_GFXDECODE(gfxdecodeinfo)
+	MDRV_PALETTE_LENGTH(DK2B_PALETTE_LENGTH)
+	MDRV_COLORTABLE_LENGTH(DK2B_PALETTE_LENGTH)
+
+	MDRV_PALETTE_INIT(dkong)
+	MDRV_VIDEO_START(dkong)
+	MDRV_VIDEO_UPDATE(dkong)
+
+	/* sound hardware */
+	MDRV_SPEAKER_STANDARD_MONO("mono")
+
+	MDRV_SOUND_ADD_TAG("samples", SAMPLES, 0)
+	MDRV_SOUND_CONFIG(dkong_samples_interface)
+	MDRV_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.25)
+
+	MDRV_SOUND_ADD(DAC, 0)
+	//MDRV_SOUND_ADD(DAC, dkong_dac_interface)
+MACHINE_DRIVER_END
 
 /***************************************************************************
 
@@ -2709,6 +3018,102 @@ ROM_START( shootgal )
 	ROM_LOAD( "sg-01-2n",    0x0200, 0x0200, CRC(e08ed788) SHA1(6982f6bcc70dbf4c75ff538a5df70da11bc89bb4) )
 ROM_END
 
+ROM_START( dkongx )
+	ROM_REGION( 0x10000, REGION_CPU1, 0 )
+	ROM_LOAD( "c_5et_g.bin",  0x0000, 0x1000, CRC(ba70b88b) SHA1(d76ebecfea1af098d843ee7e578e480cd658ac1a) )
+	ROM_LOAD( "c_5ct_g.bin",  0x1000, 0x1000, CRC(5ec461ec) SHA1(acb11a8fbdbb3ab46068385fe465f681e3c824bd) )
+	ROM_LOAD( "c_5bt_g.bin",  0x2000, 0x1000, CRC(1c97d324) SHA1(c7966261f3a1d3296927e0b6ee1c58039fc53c1f) )
+	ROM_LOAD( "c_5at_g.bin",  0x3000, 0x1000, CRC(b9005ac0) SHA1(3fe3599f6fa7c496f782053ddf7bacb453d197c4) )
+	/* space for diagnostic ROM */
+
+	ROM_REGION( 0x20000, REGION_USER1, 0 )
+	ROM_LOAD( "d2k12.bin",  0x0000, 0x10000,  CRC(6e95ca0d) SHA1(c058add0f146d577e3df0ba60828fe1734e78d01) ) /* Version 1.2 */
+
+	ROM_REGION( 0x1800, REGION_CPU2, 0 )	/* sound */
+	ROM_LOAD( "s_3i_b.bin",   0x0000, 0x0800, CRC(45a4ed06) SHA1(144d24464c1f9f01894eb12f846952290e6e32ef) )
+	ROM_LOAD( "s_3j_b.bin",   0x0800, 0x0800, CRC(4743fe92) SHA1(6c82b57637c0212a580591397e6a5a1718f19fd2) )
+
+	ROM_REGION( 0x1000, REGION_GFX1, 0 )
+	ROM_LOAD( "v_5h_b.bin",   0x0000, 0x0800, CRC(12c8c95d) SHA1(a57ff5a231c45252a63b354137c920a1379b70a3) )
+	ROM_LOAD( "v_3pt.bin",    0x0800, 0x0800, CRC(15e9c5e9) SHA1(976eb1e18c74018193a35aa86cff482ebfc5cc4e) )
+
+	ROM_REGION( 0x2000, REGION_GFX2, 0 )
+	ROM_LOAD( "l_4m_b.bin",   0x0000, 0x0800, CRC(59f8054d) SHA1(793dba9bf5a5fe76328acdfb90815c243d2a65f1) )
+	ROM_LOAD( "l_4n_b.bin",   0x0800, 0x0800, CRC(672e4714) SHA1(92e5d379f4838ac1fa44d448ce7d142dae42102f) )
+	ROM_LOAD( "l_4r_b.bin",   0x1000, 0x0800, CRC(feaa59ee) SHA1(ecf95db5a20098804fc8bd59232c66e2e0ed3db4) )
+	ROM_LOAD( "l_4s_b.bin",   0x1800, 0x0800, CRC(20f2ef7e) SHA1(3bc482a38bf579033f50082748ee95205b0f673d) )
+
+	ROM_REGION( 0x0300, REGION_PROMS, 0 )
+	ROM_LOAD( "c-2k.bpr",     0x0000, 0x0100, CRC(e273ede5) SHA1(b50ec9e1837c00c20fb2a4369ec7dd0358321127) ) /* palette low 4 bits (inverted) */
+	ROM_LOAD( "c-2j.bpr",     0x0100, 0x0100, CRC(d6412358) SHA1(f9c872da2fe8e800574ae3bf483fb3ccacc92eb3) ) /* palette high 4 bits (inverted) */
+	ROM_LOAD( "v-5e.bpr",     0x0200, 0x0100, CRC(b869b8f5) SHA1(c2bdccbf2654b64ea55cd589fd21323a9178a660) ) /* character color codes on a per-column basis */
+ROM_END
+
+ROM_START( dkremix )
+	ROM_REGION( 0x10000, REGION_CPU1, 0 )
+	ROM_LOAD( "c_5et_g.bin",  0x0000, 0x1000, CRC(ba70b88b) SHA1(d76ebecfea1af098d843ee7e578e480cd658ac1a) )
+	ROM_LOAD( "c_5ct_g.bin",  0x1000, 0x1000, CRC(5ec461ec) SHA1(acb11a8fbdbb3ab46068385fe465f681e3c824bd) )
+	ROM_LOAD( "c_5bt_g.bin",  0x2000, 0x1000, CRC(1c97d324) SHA1(c7966261f3a1d3296927e0b6ee1c58039fc53c1f) )
+	ROM_LOAD( "c_5at_g.bin",  0x3000, 0x1000, CRC(b9005ac0) SHA1(3fe3599f6fa7c496f782053ddf7bacb453d197c4) )
+	/* space for diagnostic ROM */
+
+	ROM_REGION( 0x20000, REGION_USER1, 0 )
+	ROM_LOAD( "dkremix.bin",  0x0000, 0x10000, CRC(f47c13aa) SHA1(c8516e27028d371a1f7b198f6d91f6a10bf99d3f) )
+
+	ROM_REGION( 0x1800, REGION_CPU2, 0 )	/* sound */
+	ROM_LOAD( "s_3i_b.bin",   0x0000, 0x0800, CRC(45a4ed06) SHA1(144d24464c1f9f01894eb12f846952290e6e32ef) )
+	ROM_LOAD( "s_3j_b.bin",   0x0800, 0x0800, CRC(4743fe92) SHA1(6c82b57637c0212a580591397e6a5a1718f19fd2) )
+
+	ROM_REGION( 0x1000, REGION_GFX1, 0 )
+	ROM_LOAD( "dkremix.5h",   0x0000, 0x0800, CRC(fc82b069) SHA1(ae78e6de0b50149a55f10f480c522f7a147ea106) )
+	ROM_LOAD( "dkremix.3pt",  0x0800, 0x0800, CRC(fe32ee33) SHA1(6723190916e1eab713ad945fc942f47e2c6a6892) )
+
+	ROM_REGION( 0x2000, REGION_GFX2, 0 )
+	ROM_LOAD( "dkremix.4m",   0x0000, 0x0800, CRC(3d9784d7) SHA1(98958b27d7be8c2df1e0dc882930aada457fb788) )
+	ROM_LOAD( "dkremix.4n",   0x0800, 0x0800, CRC(084c960a) SHA1(f5f5f0c4da2bd3a0c07dafadf4649d505b24c98e) )
+	ROM_LOAD( "dkremix.4r",   0x1000, 0x0800, CRC(9ac5d874) SHA1(3064434d8ee154feba89006c7ac28a3816524509) )
+	ROM_LOAD( "dkremix.4s",   0x1800, 0x0800, CRC(74a5d517) SHA1(0d9830e49488f85be43a9c8f8c60bcb7f9f46baf) )
+
+	ROM_REGION( 0x0300, REGION_PROMS, 0 )
+	ROM_LOAD( "c-2k.bpr",     0x0000, 0x0100, CRC(e273ede5) SHA1(b50ec9e1837c00c20fb2a4369ec7dd0358321127) ) /* palette low 4 bits (inverted) */
+	ROM_LOAD( "c-2j.bpr",     0x0100, 0x0100, CRC(d6412358) SHA1(f9c872da2fe8e800574ae3bf483fb3ccacc92eb3) ) /* palette high 4 bits (inverted) */
+	ROM_LOAD( "v-5e.bpr",     0x0200, 0x0100, CRC(b869b8f5) SHA1(c2bdccbf2654b64ea55cd589fd21323a9178a660) ) /* character color codes on a per-column basis */
+ROM_END
+
+ROM_START( dkchrmx )
+	ROM_REGION( 0x10000, REGION_CPU1, 0 )
+	ROM_LOAD( "c_5et_g.bin",    0x0000, 0x1000, CRC(ba70b88b) SHA1(d76ebecfea1af098d843ee7e578e480cd658ac1a) )
+	ROM_LOAD( "c_5ct_g.bin",    0x1000, 0x1000, CRC(5ec461ec) SHA1(acb11a8fbdbb3ab46068385fe465f681e3c824bd) )
+	ROM_LOAD( "c_5bt_g.bin",    0x2000, 0x1000, CRC(1c97d324) SHA1(c7966261f3a1d3296927e0b6ee1c58039fc53c1f) )
+	ROM_LOAD( "c_5at_g.bin",    0x3000, 0x1000, CRC(b9005ac0) SHA1(3fe3599f6fa7c496f782053ddf7bacb453d197c4) )
+
+	ROM_REGION( 0x20000, REGION_USER1, 0 )
+	ROM_LOAD( "dkchrmx.bin",    0x0000, 0x10000, CRC(e5273cee) SHA1(c440d47e7e3ca356ae1d748cc673393efb2b6c4a) )
+
+	ROM_REGION( 0x1800, REGION_CPU2, 0 )	/* sound */
+	ROM_LOAD( "s_3i_b.bin",     0x0000, 0x0800, CRC(45a4ed06) SHA1(144d24464c1f9f01894eb12f846952290e6e32ef) )
+//	ROM_RELOAD(                 0x0800, 0x0800 )
+	ROM_LOAD( "s_3j_b.bin",     0x0800, 0x0800, CRC(4743fe92) SHA1(6c82b57637c0212a580591397e6a5a1718f19fd2) )
+
+	ROM_REGION( 0x1000, REGION_GFX1, 0 )
+	ROM_LOAD( "v_5h_b.ch",      0x0000, 0x0800, CRC(0b92cc7a) SHA1(cd217c2b45a86744c2fc7df8a3b624489e07f01f) )
+	ROM_LOAD( "v_3pt.ch",       0x0800, 0x0800, CRC(6a04f93f) SHA1(b78342f89186c3d2b83fff6fd208afaba4584a5c) )
+
+	ROM_REGION( 0x2000, REGION_GFX2, 0 )
+	ROM_LOAD( "l_4m_b.ch",      0x0000, 0x0800, CRC(c6ddc85f) SHA1(4f19be0904460ec8494bad13b3b55292889e7400) )
+	ROM_LOAD( "l_4n_b.ch",      0x0800, 0x0800, CRC(2cd9cfdf) SHA1(fd9b0b75084661441680188ef3faf233579ceeb7) )
+	ROM_LOAD( "l_4r_b.ch",      0x1000, 0x0800, CRC(c1ea6688) SHA1(3509bb96d2da1f364d0cb4c60636933cdd42f6e3) )
+	ROM_LOAD( "l_4s_b.ch",      0x1800, 0x0800, CRC(9473d658) SHA1(2c5acf47c0ab8bd2e863e9bdea018d17ac4c96c8) )
+
+	ROM_REGION( 0x0300, REGION_PROMS, 0 )
+	ROM_LOAD( "c-2k.ch",        0x0000, 0x0100, CRC(c6cee97e) SHA1(6590b6815a0cb19b800bce0f504494217977ae44) )
+	ROM_LOAD( "c-2j.ch",        0x0100, 0x0100, CRC(1f64ac3d) SHA1(0591495a75a301772856c121f34299da4f9df341) )
+	ROM_LOAD( "v-5e.ch",        0x0200, 0x0100, CRC(5a8ca805) SHA1(8e711af73ddb20ed62a9a8b53f1150feab1dc051) )
+ROM_END
+
+
+
+
 
 static DRIVER_INIT( herodk )
 {
@@ -2742,7 +3147,16 @@ static DRIVER_INIT( radarscp )
 	RAM[0x1e9d] = 0xbd;
 }
 
+static DRIVER_INIT( dkongx )
+{
+	braze_decrypt_rom(memory_region(REGION_USER1) + 0x10000);
 
+	cpu_setbank(1, memory_region(REGION_USER1) + 0x10000);
+	cpu_setbank(2, memory_region(REGION_USER1) + 0x10000);
+	memory_install_write8_handler(0, ADDRESS_SPACE_PROGRAM, 0xe000, 0xe000, 0, 0, braze_a15_w);
+	memory_install_write8_handler(0, ADDRESS_SPACE_PROGRAM, 0xc800, 0xc800, 0, 0, braze_eeprom_w);
+	memory_install_read8_handler (0, ADDRESS_SPACE_PROGRAM, 0xc800, 0xc800, 0, 0, braze_eeprom_r);
+}
 
 GAMEX(1980, radarscp, 0,        radarscp, dkong,    radarscp, ROT90, "Nintendo", "Radar Scope", GAME_IMPERFECT_SOUND | GAME_IMPERFECT_GRAPHICS )
 
@@ -2783,3 +3197,8 @@ GAMEX(1985, spcfrcii, 0,		spclforc, spclforc, 0,        ROT90, "Senko Industries
 
 GAMEX(1984, drakton,  0,        drakton,  drakton,  drakton,  ROT90, "Epos Corporation", "Drakton", GAME_NO_SOUND )
 GAMEX(1985, strtheat, 0,        strtheat, strtheat, strtheat, ROT90, "Epos Corporation", "Street Heat - Cardinal Amusements", GAME_NO_SOUND )
+
+
+GAME (2008, dkongx,    dkong,    braze,    dkongx,   dkongx,   ROT90, "bootleg",  "Donkey Kong II - Jumpman Returns (Hack V1.2)" )
+GAME (2015, dkremix,   dkong,    dkremix,  dkongx,   dkongx,   ROT90, "bootleg",  "Donkey Kong Remix" )
+GAME( 2017, dkchrmx,   dkong,    braze,    dkongx,   dkongx,   ROT90, "John Kowalski", "Donkey Kong Christmas Remix" )

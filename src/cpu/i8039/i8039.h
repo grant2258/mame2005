@@ -1,8 +1,8 @@
 /**************************************************************************
  *                      Intel 8039 Portable Emulator                      *
  *                                                                        *
- *                   Copyright (C) 1997 by Mirko Buffoni                  *
- *  Based on the original work (C) 1997 by Dan Boris, an 8048 emulator    *
+ *                   Copyright Mirko Buffoni                              *
+ *  Based on the original work Copyright Dan Boris, an 8048 emulator      *
  *     You are not allowed to distribute this software commercially       *
  *        Please, notify me, if you make any changes to this file         *
  **************************************************************************/
@@ -18,20 +18,18 @@
 
 
 /**************************************************************************
-	Internal Clock divisor
+    Internal Clock divisor
 
-	External Clock is divided internally by 3 to produce the machine state
-	generator. This is then divided by 5 for the instruction cycle times.
-	(Each instruction cycle passes through 5 machine states).
+    External Clock is divided internally by 3 to produce the machine state
+    generator. This is then divided by 5 for the instruction cycle times.
+    (Each instruction cycle passes through 5 machine states).
 */
-
-#define I8039_CLOCK_DIVIDER		(3*5)
-
 
 
 enum { I8039_PC=1, I8039_SP, I8039_PSW, I8039_A,  I8039_TC,
 	   I8039_P1,   I8039_P2, I8039_R0,  I8039_R1, I8039_R2,
-	   I8039_R3,   I8039_R4, I8039_R5,  I8039_R6, I8039_R7
+	   I8039_R3,   I8039_R4, I8039_R5,  I8039_R6, I8039_R7,
+	   I8039_EA
 };
 
 extern void i8039_get_info(UINT32 state, union cpuinfo *info);
@@ -49,6 +47,9 @@ extern void i8039_get_info(UINT32 state, union cpuinfo *info);
 #define  I8039_p7	0x107
 #define  I8039_t0	0x110
 #define  I8039_t1	0x111
+/* EA is activelow input on real hardware. It is treated
+ * as active high here to remain compatible with existing drivers! */
+#define  I8039_ea	0x112
 #define  I8039_bus	0x120
 
 /**************************************************************************
@@ -71,7 +72,6 @@ extern void i8039_get_info(UINT32 state, union cpuinfo *info);
 #define I8035_R6				I8039_R6
 #define I8035_R7				I8039_R7
 
-#define I8035_CLOCK_DIVIDER		I8039_CLOCK_DIVIDER
 #define i8035_ICount			i8039_ICount
 
 extern void i8035_get_info(UINT32 state, union cpuinfo *info);
@@ -97,10 +97,34 @@ extern void i8035_get_info(UINT32 state, union cpuinfo *info);
 #define I8048_R6				I8039_R6
 #define I8048_R7				I8039_R7
 
-#define I8048_CLOCK_DIVIDER		I8039_CLOCK_DIVIDER
 #define i8048_ICount			i8039_ICount
 
 extern void i8048_get_info(UINT32 state, union cpuinfo *info);
+#endif
+
+/**************************************************************************
+ * I8749 section
+ **************************************************************************/
+#if (HAS_I8749)
+#define I8749_PC				I8039_PC
+#define I8749_SP				I8039_SP
+#define I8749_PSW				I8039_PSW
+#define I8749_A 				I8039_A
+#define I8749_TC				I8039_TC
+#define I8749_P1				I8039_P1
+#define I8749_P2				I8039_P2
+#define I8749_R0				I8039_R0
+#define I8749_R1				I8039_R1
+#define I8749_R2				I8039_R2
+#define I8749_R3				I8039_R3
+#define I8749_R4				I8039_R4
+#define I8749_R5				I8039_R5
+#define I8749_R6				I8039_R6
+#define I8749_R7				I8039_R7
+
+#define i8749_ICount			i8039_ICount
+
+extern void i8749_get_info(UINT32 state, union cpuinfo *info);
 #endif
 
 /**************************************************************************
@@ -123,34 +147,81 @@ extern void i8048_get_info(UINT32 state, union cpuinfo *info);
 #define N7751_R6				I8039_R6
 #define N7751_R7				I8039_R7
 
-#define N7751_CLOCK_DIVIDER		I8039_CLOCK_DIVIDER
 #define n7751_ICount			i8039_ICount
 
 extern void n7751_get_info(UINT32 state, union cpuinfo *info);
 #endif
 
-#include "memory.h"
+/**************************************************************************
+ * MB8884 section
+ **************************************************************************/
+#if (HAS_MB8884)
+#define MB8884_PC				I8039_PC
+#define MB8884_SP				I8039_SP
+#define MB8884_PSW				I8039_PSW
+#define MB8884_A 				I8039_A
+#define MB8884_TC				I8039_TC
+#define MB8884_P1				I8039_P1
+#define MB8884_P2				I8039_P2
+#define MB8884_R0				I8039_R0
+#define MB8884_R1				I8039_R1
+#define MB8884_R2				I8039_R2
+#define MB8884_R3				I8039_R3
+#define MB8884_R4				I8039_R4
+#define MB8884_R5				I8039_R5
+#define MB8884_R6				I8039_R6
+#define MB8884_R7				I8039_R7
+
+#define mb8884_ICount			i8039_ICount
+
+extern void mb8884_get_info(UINT32 state, union cpuinfo *info);
+#endif
+
+/**************************************************************************
+ * M58715 section
+ **************************************************************************/
+#if (HAS_M58715)
+#define M58715_PC				I8039_PC
+#define M58715_SP				I8039_SP
+#define M58715_PSW				I8039_PSW
+#define M58715_A 				I8039_A
+#define M58715_TC				I8039_TC
+#define M58715_P1				I8039_P1
+#define M58715_P2				I8039_P2
+#define M58715_R0				I8039_R0
+#define M58715_R1				I8039_R1
+#define M58715_R2				I8039_R2
+#define M58715_R3				I8039_R3
+#define M58715_R4				I8039_R4
+#define M58715_R5				I8039_R5
+#define M58715_R6				I8039_R6
+#define M58715_R7				I8039_R7
+
+#define m58715_ICount			i8039_ICount
+
+extern void m58715_get_info(UINT32 state, cpuinfo *info);
+#endif
 
 /*
- *	 Input a UINT8 from given I/O port
+ *   Input a UINT8 from given I/O port
  */
 #define I8039_In(Port) ((UINT8)io_read_byte_8(Port))
 
 
 /*
- *	 Output a UINT8 to given I/O port
+ *   Output a UINT8 to given I/O port
  */
 #define I8039_Out(Port,Value) (io_write_byte_8(Port,Value))
 
 
 /*
- *	 Read a UINT8 from given memory location
+ *   Read a UINT8 from given memory location
  */
 #define I8039_RDMEM(A) ((unsigned)program_read_byte_8(A))
 
 
 /*
- *	 Write a UINT8 to given memory location
+ *   Write a UINT8 to given memory location
  */
 #define I8039_WRMEM(A,V) (program_write_byte_8(A,V))
 

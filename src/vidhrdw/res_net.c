@@ -1,49 +1,56 @@
-/* res_net.c */
-
 /*****************************************************************************
 
- Compute weights for resistors networks.
+    resnet.c
 
- Function can evaluate from one to three networks at a time.
+    Compute weights for resistors networks.
 
- The output weights can either be scaled with automatically calculated scaler
- or scaled with a 'scaler' provided on entry.
+    Copyright Nicola Salmoria and the MAME Team.
+    Visit http://mamedev.org for licensing and usage restrictions.
 
- On entry
- --------
+******************************************************************************
 
- 'minval','maxval' specify the range of output signals (sum of weights).
- 'scaler'          if negative, function will calculate proper scaler,
-                   otherwise it will use the one provided here.
- 'count_x'         is the number of resistors in this network
- 'resistances_x'   is the pointer to a table containing the resistances
- 'weights_x'       is the pointer to a table to be filled with the weights
-                   (it can contain negative values if 'minval' is below zero).
- 'pulldown_x'      is the resistance of a pulldown resistor (0 means there's no pulldown resistor)
- 'pullup_x'        is the resistance of a pullup resistor (0 means there's no pullup resistor)
+    Function can evaluate from one to three networks at a time.
 
+    The output weights can either be scaled with automatically calculated scaler
+    or scaled with a 'scaler' provided on entry.
 
- Return value
- ------------
+    On entry
+    --------
 
- The value of the scaler that was used for fitting the output within the expected range.
- Note that if you provide your own scaler on entry it will be returned here.
-
-
- All resistances are expected in Ohms.
+    'minval','maxval' specify the range of output signals (sum of weights).
+    'scaler'          if negative, function will calculate proper scaler,
+                        otherwise it will use the one provided here.
+    'count_x'         is the number of resistors in this network
+    'resistances_x'   is the pointer to a table containing the resistances
+    'weights_x'       is the pointer to a table to be filled with the weights
+                        (it can contain negative values if 'minval' is below zero).
+    'pulldown_x'      is the resistance of a pulldown resistor (0 means there's no pulldown resistor)
+    'pullup_x'        is the resistance of a pullup resistor (0 means there's no pullup resistor)
 
 
- Hint
- ----
+    Return value
+    ------------
 
- If there is no need to calculate all three networks at a time, just specify '0'
- for the 'count_x' for unused network(s).
+    The value of the scaler that was used for fitting the output within the expected range.
+    Note that if you provide your own scaler on entry it will be returned here.
+
+
+    All resistances are expected in Ohms.
+
+
+    Hint
+    ----
+
+    If there is no need to calculate all three networks at a time, just specify '0'
+    for the 'count_x' for unused network(s).
 
 *****************************************************************************/
 
-
-#include "res_net.h"
 #include "driver.h"
+#include "res_net.h"
+
+#define VERBOSE 0
+
 
 double compute_resistor_weights(
 	int minval, int maxval, double scaler,
@@ -105,11 +112,10 @@ double compute_resistor_weights(
 		/* parameters validity check */
 		if (count > MAX_RES_PER_NET)
 		{
-			logerror(" ERROR: res_net.h: compute_resistor_weights(): too many resistors in net #%i. The maximum allowed is %i, the number requested was: %i\n",n, MAX_RES_PER_NET, count);
-			/* quit */
-			return (0.0);
+			/*zerror("compute_resistor_weights(): too many resistors in net #%i. The maximum allowed is %i, the number requested was: %i\n",n, MAX_RES_PER_NET, count); */
+			logerror("compute_resistor_weights(): too many resistors in net #%i. The maximum allowed is %i, the number requested was: %i\n",n, MAX_RES_PER_NET, count);
+			exit(0);
 		}
-
 
 		if (count > 0)
 		{
@@ -126,11 +132,10 @@ double compute_resistor_weights(
 	}
 	if (networks_no < 1)
 	{
-		/* error - no networks to anaylse */
-		logerror(" ERROR: res_net.h: compute_resistor_weights(): no input data\n");
-		return (0.0);
+		/*fatalerror("compute_resistor_weights(): no input data\n"); */
+		logerror("compute_resistor_weights(): no input data\n");
+		exit(0);
 	}
-
 	/* calculate outputs for all given networks */
 	for( i = 0; i < networks_no; i++ )
 	{
@@ -203,7 +208,8 @@ double compute_resistor_weights(
 	}
 
 /* debug code */
-#ifdef MAME_DEBUG
+if (VERBOSE)
+{
 	logerror("compute_resistor_weights():  scaler = %15.10f\n",scale);
 	logerror("min val :%i  max val:%i  Total number of networks :%i\n", minval, maxval, networks_no );
 
@@ -224,7 +230,7 @@ double compute_resistor_weights(
 		}
 		logerror("                              sum of scaled weights = %15.10f\n", sum  );
 	}
-#endif
+}
 /* debug end */
 
 	return (scale);
@@ -297,13 +303,10 @@ double compute_resistor_net_outputs(
 		/* parameters validity check */
 		if (count > MAX_RES_PER_NET)
 		{
-			logerror(" ERROR: res_net.h: compute_resistor_net_outputs(): too many resistors in net #%i. The maximum allowed is %i, the number requested was: %i\n",n, MAX_RES_PER_NET, count);
-			/* quit */
-			free(o);
-			free(os);
-			return (0.0);
+			/*fatalerror("compute_resistor_net_outputs(): too many resistors in net #%i. The maximum allowed is %i, the number requested was: %i\n",n, MAX_RES_PER_NET, count); */
+			logerror("compute_resistor_net_outputs(): too many resistors in net #%i. The maximum allowed is %i, the number requested was: %i\n",n, MAX_RES_PER_NET, count);
+			exit(0);
 		}
-
 		if (count > 0)
 		{
 			rescount[networks_no] = count;
@@ -320,13 +323,10 @@ double compute_resistor_net_outputs(
 
 	if (networks_no<1)
 	{
-		/* error - no networks to anaylse */
-		logerror(" ERROR: res_net.h: compute_resistor_net_outputs(): no input data\n");
-		free(o);
-		free(os);
-		return (0.0);
+		/*fatalerror("compute_resistor_net_outputs(): no input data\n"); */
+		logerror("compute_resistor_net_outputs(): no input data\n");
+		exit(0);
 	}
-
 	/* calculate outputs for all given networks */
 	for( i = 0; i < networks_no; i++ )
 	{
@@ -408,7 +408,8 @@ double compute_resistor_net_outputs(
 	}
 
 /* debug code */
-#ifdef MAME_DEBUG
+if (VERBOSE)
+{
 	logerror("compute_resistor_net_outputs():  scaler = %15.10f\n",scale);
 	logerror("min val :%i  max val:%i  Total number of networks :%i\n", minval, maxval, networks_no );
 
@@ -430,11 +431,322 @@ double compute_resistor_net_outputs(
 			logerror("   combination %2i  out=%10.5f (scaled = %15.10f)\n", n, o[i*(1<<MAX_RES_PER_NET)+n], os[i*(1<<MAX_RES_PER_NET)+n] );
 		}
 	}
-#endif
+}
 /* debug end */
 
 	free(o);
 	free(os);
 	return (scale);
 
+}
+
+/*****************************************************************************
+
+ New Interface
+
+*****************************************************************************/
+
+
+/* Datasheets give a maximum of 0.4V to 0.5V
+ * However in the circuit simulated here this will only
+ * occur if (rBias + rOutn) = 50 Ohm, rBias exists.
+ * This is highly unlikely. With the resistor values used
+ * in such circuits VOL is likely to be around 50mV.
+ */
+
+#define	TTL_VOL			(0.05)
+
+
+/* Likely, datasheets give a typical value of 3.4V to 3.6V
+ * for VOH. Modelling the TTL circuit however backs a value
+ * of 4V for typical currents involved in resistor networks.
+ */
+
+#define TTL_VOH			(4.0)
+
+int compute_res_net(int inputs, int channel, const res_net_info *di)
+{
+	double rTotal=0.0;
+	double v = 0;
+	int i;
+
+	double vBias = di->rgb[channel].vBias;
+	double vOH = di->vOH;
+	double vOL = di->vOL;
+	double minout = di->rgb[channel].minout;
+	double cut = di->rgb[channel].cut;
+	double vcc = di->vcc;
+	double ttlHRes = 0;
+	double rGnd = di->rgb[channel].rGnd;
+	UINT8  OpenCol = di->OpenCol;
+
+	/* Global options */
+
+	switch (di->options & RES_NET_AMP_MASK)
+	{
+		case RES_NET_AMP_USE_GLOBAL:
+			/* just ignore */
+			break;
+		case RES_NET_AMP_NONE:
+			minout = 0.0;
+			cut = 0.0;
+			break;
+		case RES_NET_AMP_DARLINGTON:
+			minout = 0.9;
+			cut = 0.0;
+			break;
+		case RES_NET_AMP_EMITTER:
+			minout = 0.0;
+			cut = 0.7;
+			break;
+		case RES_NET_AMP_CUSTOM:
+			/* Fall through */
+			break;
+		default:
+			/*fatalerror("compute_res_net: Unknown amplifier type"); */
+			logerror("compute_res_net: Unknown amplifier type");
+			exit(0);
+	}
+
+	switch (di->options & RES_NET_VCC_MASK)
+	{
+		case RES_NET_VCC_5V:
+			vcc = 5.0;
+			break;
+		case RES_NET_VCC_CUSTOM:
+			/* Fall through */
+			break;
+		default:
+			/*fatalerror("compute_res_net: Unknown vcc type"); */
+			logerror("compute_res_net: Unknown vcc type");
+			exit(0);
+
+	}
+
+	switch (di->options & RES_NET_VBIAS_MASK)
+	{
+		case RES_NET_VBIAS_USE_GLOBAL:
+			/* just ignore */
+			break;
+		case RES_NET_VBIAS_5V:
+			vBias = 5.0;
+			break;
+		case RES_NET_VBIAS_TTL:
+			vBias = TTL_VOH;
+			break;
+		case RES_NET_VBIAS_CUSTOM:
+			/* Fall through */
+			break;
+		default:
+			/*fatalerror("compute_res_net: Unknown vcc type"); */
+			logerror("compute_res_net: Unknown vcc type");
+			exit(0);
+	}
+
+	switch (di->options & RES_NET_VIN_MASK)
+	{
+		case RES_NET_VIN_OPEN_COL:
+			OpenCol = 1;
+			vOL = TTL_VOL;
+			break;
+		case RES_NET_VIN_VCC:
+			vOL = 0.0;
+			vOH = vcc;
+			OpenCol = 0;
+			break;
+		case RES_NET_VIN_TTL_OUT:
+			vOL = TTL_VOL;
+			vOH = TTL_VOH;
+			/* rough estimation from 82s129 (7052) datasheet and from various sources
+             * 1.4k / 30
+             */
+			ttlHRes = 50;
+			OpenCol = 0;
+			break;
+		case RES_NET_VIN_CUSTOM:
+			/* Fall through */
+			break;
+		default:
+			/*fatalerror("compute_res_net: Unknown vin type"); */
+			logerror("compute_res_net: Unknown vin type");
+			exit(0);
+
+	}
+
+	/* Per channel options */
+
+	switch (di->rgb[channel].options & RES_NET_AMP_MASK)
+	{
+		case RES_NET_AMP_USE_GLOBAL:
+			/* use global defaults */
+			break;
+		case RES_NET_AMP_NONE:
+			minout = 0.0;
+			cut = 0.0;
+			break;
+		case RES_NET_AMP_DARLINGTON:
+			minout = 0.7;
+			cut = 0.0;
+			break;
+		case RES_NET_AMP_EMITTER:
+			minout = 0.0;
+			cut = 0.7;
+			break;
+		case RES_NET_AMP_CUSTOM:
+			/* Fall through */
+			break;
+		default:
+			/*fatalerror("compute_res_net: Unknown amplifier type"); */
+			logerror("compute_res_net: Unknown amplifier type");
+			exit(0);
+
+	}
+
+	switch (di->rgb[channel].options & RES_NET_VBIAS_MASK)
+	{
+		case RES_NET_VBIAS_USE_GLOBAL:
+			/* use global defaults */
+			break;
+		case RES_NET_VBIAS_5V:
+			vBias = 5.0;
+			break;
+		case RES_NET_VBIAS_TTL:
+			vBias = TTL_VOH;
+			break;
+		case RES_NET_VBIAS_CUSTOM:
+			/* Fall through */
+			break;
+		default:
+			/*fatalerror("compute_res_net: Unknown vcc type"); */
+			logerror("compute_res_net: Unknown vcc type");
+			exit(0);
+
+	}
+
+	/* Input impedances */
+
+	switch (di->options & RES_NET_MONITOR_MASK)
+	{
+		case RES_NET_MONITOR_INVERT:
+		case RES_NET_MONITOR_SANYO_EZV20:
+			/* Nothing */
+			break;
+		case RES_NET_MONITOR_ELECTROHOME_G07:
+			if (rGnd != 0.0)
+				rGnd = rGnd * 5600 / (rGnd + 5600);
+			else
+				rGnd = 5600;
+			break;
+	}
+
+	/* compute here - pass a / low inputs */
+
+	for (i=0; i<di->rgb[channel].num; i++)
+	{
+		int level = ((inputs >> i) & 1);
+		if (di->rgb[channel].R[i] != 0.0 && !level)
+		{
+			if (OpenCol)
+			{
+				rTotal += 1.0 / di->rgb[channel].R[i];
+				v += vOL / di->rgb[channel].R[i];
+			}
+			else
+			{
+				rTotal += 1.0 / di->rgb[channel].R[i];
+				v += vOL / di->rgb[channel].R[i];
+			}
+		}
+	}
+
+	/* Mix in rbias and rgnd */
+	if ( di->rgb[channel].rBias != 0.0 )
+	{
+		rTotal += 1.0 / di->rgb[channel].rBias;
+		v += vBias / di->rgb[channel].rBias;
+	}
+	if (rGnd != 0.0)
+		rTotal += 1.0 / rGnd;
+
+	/* if the resulting voltage after application of all low inputs is
+     * greater than vOH, treat high inputs as open collector/high impedance
+     * There will be now current into/from the TTL gate
+     */
+
+	if ( (di->options & RES_NET_VIN_MASK)==RES_NET_VIN_TTL_OUT)
+	{
+		if (v / rTotal > vOH)
+			OpenCol = 1;
+	}
+
+	/* Second pass - high inputs */
+
+	for (i=0; i<di->rgb[channel].num; i++)
+	{
+		int level = ((inputs >> i) & 1);
+		if (di->rgb[channel].R[i] != 0.0 && level)
+		{
+			if (OpenCol)
+			{
+				rTotal += 0;
+				v += 0;
+			}
+			else
+			{
+				rTotal += 1.0 / (di->rgb[channel].R[i] + ttlHRes);
+				v += vOH / (di->rgb[channel].R[i] + ttlHRes);
+			}
+		}
+	}
+
+	rTotal = 1.0 / rTotal;
+	v *= rTotal;
+	v = MAX(minout, v - cut);
+
+	switch (di->options & RES_NET_MONITOR_MASK)
+	{
+		case RES_NET_MONITOR_INVERT:
+			v = vcc - v;
+			break;
+		case RES_NET_MONITOR_SANYO_EZV20:
+			v = vcc - v;
+			v = MAX(0, v-0.7);
+			v = MIN(v, vcc - 2 * 0.7);
+			v = v / (vcc-1.4);
+			v = v * vcc;
+			break;
+		case RES_NET_MONITOR_ELECTROHOME_G07:
+			/* Nothing */
+			break;
+	}
+
+	return (int) (v *255 / vcc + 0.4);
+}
+
+ rgb_t *compute_res_net_all(const UINT8 *prom, const res_net_decode_info *rdi, const res_net_info *di)
+{
+	UINT8 r,g,b;
+	int i,j,k;
+	rgb_t *rgb;
+
+	rgb = malloc((rdi->end - rdi->start + 1) * sizeof(rgb_t));
+	for (i=rdi->start; i<=rdi->end; i++)
+	{
+		UINT8 t[3] = {0,0,0};
+		int s;
+		for (j=0;j<rdi->numcomp;j++)
+			for (k=0; k<3; k++)
+			{
+				s = rdi->shift[3*j+k];
+				if (s>0)
+					t[k] = t[k] | ( (prom[i+rdi->offset[3*j+k]]>>s) & rdi->mask[3*j+k]);
+				else
+					t[k] = t[k] | ( (prom[i+rdi->offset[3*j+k]]<<(0-s)) & rdi->mask[3*j+k]);
+			}
+		r = compute_res_net(t[0], RES_NET_CHAN_RED, di);
+		g = compute_res_net(t[1], RES_NET_CHAN_GREEN, di);
+		b = compute_res_net(t[2], RES_NET_CHAN_BLUE, di);
+		rgb[i-rdi->start] = MAKE_RGB(r,g,b);
+	}
+	return rgb;
 }

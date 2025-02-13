@@ -872,6 +872,9 @@ const struct GameDriver *drivers[] =
 	DRIVER( helifira ) /* (c) 1980 Nintendo */
 	DRIVER( radarscp )	/* (c) 1980 Nintendo */
 	DRIVER( dkong )		/* (c) 1981 Nintendo of America */
+	DRIVER( dkongx )		/* (c) 1981 Nintendo of America */
+	DRIVER( dkremix )		/* (c) 1981 Nintendo of America */
+	DRIVER( dkchrmx )		/* (c) 1981 Nintendo of America */
 	DRIVER( dkongo )	/* (c) 1981 Nintendo */
 	DRIVER( dkongjp )	/* (c) 1981 Nintendo */
 	DRIVER( dkongjo )	/* (c) 1981 Nintendo */
