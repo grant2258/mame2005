@@ -121,7 +121,7 @@ extern struct mb86233_config model1_vr_tgp_config;
 static void mb86233_init(void)
 {
 	memset(&mb86233, 0, sizeof( MB86233_REGS ) );
-	
+
 	mb86233.RAM = auto_malloc(2 * 0x200 * sizeof(UINT32));		/* 2x 2KB */
 	memset( mb86233.RAM, 0, 2 * 0x200 * sizeof(UINT32) );
 	mb86233.ARAM = &mb86233.RAM[0];
@@ -131,13 +131,13 @@ static void mb86233_init(void)
 static void mb86233_reset(void *param)
 {
 	struct mb86233_config * _config = (struct mb86233_config *)param;
-		
+
 	if (param )
 	{
 		mb86233.fifo_read_cb = _config->fifo_read_cb;
 		mb86233.fifo_write_cb = _config->fifo_write_cb;
 	}
-	
+
 	/* zero registers and flags */
 	mb86233.pc = 0;
 	mb86233.sr = 0;
@@ -1495,7 +1495,7 @@ void mb86233_get_info(UINT32 state, union cpuinfo *info)
 		case CPUINFO_INT_INPUT_LINES:					info->i = 0;							break;
 		case CPUINFO_INT_DEFAULT_IRQ_VECTOR:			info->i = 0;							break;
 		case CPUINFO_INT_ENDIANNESS:					info->i = CPU_IS_LE;					break;
-		case CPUINFO_INT_CLOCK_DIVIDER:					info->i = 1;							break;
+		case CPUINFO_INT_CLOCK_DIVIDER:					info->i = 3;							break;
 		case CPUINFO_INT_MIN_INSTRUCTION_BYTES:			info->i = 4;							break;
 		case CPUINFO_INT_MAX_INSTRUCTION_BYTES:			info->i = 4;							break;
 		case CPUINFO_INT_MIN_CYCLES:					info->i = 1;							break;
@@ -1542,7 +1542,7 @@ void mb86233_get_info(UINT32 state, union cpuinfo *info)
 		case CPUINFO_INT_REGISTER + MB86233_R14:		info->i = GETGPR(14);					break;
 		case CPUINFO_INT_REGISTER + MB86233_R15:		info->i = GETGPR(15);					break;
 
-		/*      need to debug all these functions to see whats going wrong or missing   
+		/*      need to debug all these functions to see whats going wrong or missing
  		(*intf->get_info)(CPUINFO_PTR_SET_INFO,    &info);	intf->set_info = info.setinfo;
 		(*intf->get_info)(CPUINFO_PTR_GET_CONTEXT, &info);	intf->get_context = info.getcontext;
 		(*intf->get_info)(CPUINFO_PTR_SET_CONTEXT, &info);	intf->set_context = info.setcontext;
@@ -1567,12 +1567,12 @@ void mb86233_get_info(UINT32 state, union cpuinfo *info)
 		case CPUINFO_PTR_INSTRUCTION_COUNTER:			info->icount = &dummy_icount;			break;
 		case CPUINFO_PTR_REGISTER_LAYOUT:				info->p = NULL;							break;
 		case CPUINFO_PTR_WINDOW_LAYOUT:					info->p = default_win_layout;			break;
-		
+
 		enough for no looks llike it could be CPUINFO_PTR_REGISTER_LAYOUT missing
 		*/
-		
+
 		/* --- the following bits of info are returned as pointers to data or functions --- */
-		
+
 		case CPUINFO_PTR_SET_INFO:						info->setinfo = mb86233_set_info;		break;
 		case CPUINFO_PTR_GET_CONTEXT:					info->getcontext = mb86233_get_context;	break;
 		case CPUINFO_PTR_SET_CONTEXT:					info->setcontext = mb86233_set_context;	break;

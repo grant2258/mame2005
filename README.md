@@ -4,7 +4,7 @@ This is just a core for my personal use no real plans for it, there is no affili
 # todo
 * audiobuffer frameskip needs added
 * update all system16
-* find out why the analog controls are the wrong way wround in vr other drivers are fine probably driver related
+* hook up propper tgp for vr
 * add relative and abs mouse definitions problem is RA doesnt really provide this information look into it.
 
 # cpu cores
@@ -21,6 +21,7 @@ This is just a core for my personal use no real plans for it, there is no affili
 * added ROM_IGNORE a while back fixed it so its working properly
 * added STEP2 and STEP32 macros
 * BITNEW macro
+* hooked up cpu interface divider no idea why it wasnt hooked up.
 
 # games now working (added or updated to working status)
 

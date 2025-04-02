@@ -268,7 +268,7 @@ int cpu_init(void)
 		/* initialize the cpuinfo struct */
 		memset(&cpu[cpunum], 0, sizeof(cpu[cpunum]));
 		cpu[cpunum].suspend = SUSPEND_REASON_RESET;
-		cpu[cpunum].clock = Machine->drv->cpu[cpunum].cpu_clock;
+		cpu[cpunum].clock = Machine->drv->cpu[cpunum].cpu_clock / cputype_clock_divider(cputype) ;
 		cpu[cpunum].clockscale = 1.0;
 		cpu[cpunum].localtime = time_zero;
 
@@ -281,6 +281,7 @@ int cpu_init(void)
 		/* initialize this CPU */
 		if (cpuintrf_init_cpu(cpunum, cputype))
 			return 1;
+
 	}
 
 	/* compute the perfect interleave factor */
@@ -294,7 +295,8 @@ int cpu_init(void)
 	if (cpuint_init())
 		return 1;
 
-	return 0;
+	for (cpunum = 0; cpunum < MAX_CPU; cpunum++)
+		return 0;
 }
 
 
