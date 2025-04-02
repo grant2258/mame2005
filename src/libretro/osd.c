@@ -22,8 +22,8 @@
 //#define DEBUG_LOG
 
 FILE *logfile;
-static int errorlog=0; 
-static int erroroslog=1;
+static int errorlog=0;
+static int erroroslog=0;
 static char log_buffer[2048];
 extern char* systemDir;
 extern char* saveDir;
@@ -64,7 +64,7 @@ int osd_create_directory(const char *dir)
          mkdirok = _mkdir(dir);
 #elif defined(VITA) || defined(PSP)
          mkdirok = sceIoMkdir(dir, 0777);
-#else 
+#else
          mkdirok = mkdir(dir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 #endif
 
@@ -88,7 +88,7 @@ int osd_init(void)
 	osd_create_directory(buffer);
 	snprintf(buffer, 1024, "%s%c%s", systemDir, slash, parentDir);
 	osd_create_directory(buffer);
-	
+
 	if (errorlog && !logfile)
 			logfile = fopen("debug.log", "wa");
 	return 0;
@@ -119,7 +119,7 @@ int osd_start_audio_stream(int stereo)
   else
    Machine->sample_rate=44100;
 
- 
+
   delta_samples = 0.0f;
   usestereo = stereo ? 1 : 0;
 
@@ -131,7 +131,7 @@ int osd_start_audio_stream(int stereo)
 
   samples_buffer = (short *) calloc(samples_per_frame+16, 2 + usestereo * 2);
   if (!usestereo) conversion_buffer = (short *) calloc(samples_per_frame+16, 4);
-  
+
   return samples_per_frame;
 }
 
@@ -152,19 +152,19 @@ int osd_update_audio_stream(INT16 *buffer)
 				conversion_buffer[j++] = samples_buffer[i];
 		        }
          		audio_batch_cb(conversion_buffer,samples_per_frame);
-		}	
-		
-			
+		}
+
+
 		//process next frame
-			
+
 		if ( samples_per_frame  != orig_samples_per_frame ) samples_per_frame = orig_samples_per_frame;
-		
+
 		// dont drop any sample frames some games like mk will drift with time
 
 		delta_samples += (Machine->sample_rate / Machine->drv->frames_per_second) - orig_samples_per_frame;
 		if ( delta_samples >= 1.0f )
 		{
-		
+
 			int integer_delta = (int)delta_samples;
 			if (integer_delta <= 16 )
                         {
@@ -172,7 +172,7 @@ int osd_update_audio_stream(INT16 *buffer)
 				samples_per_frame += integer_delta;
 			}
 			else if(integer_delta >= 16) logerror("sound: Delta not added to samples_per_frame too large integer_delta:%d\n", integer_delta);
-			else logerror("sound(delta) no contitions met\n");	
+			else logerror("sound(delta) no contitions met\n");
 			delta_samples -= integer_delta;
 
 		}
@@ -280,7 +280,7 @@ int osd_get_path_info(int pathtype, int pathindex, const char *filename)
          /* additonal core content goes in Retroarch system directory */
          snprintf(currDir, 1024, "%s%c%s%c%s", systemDir, slash, parentDir, slash, paths[pathtype]);
    }
-   
+
    snprintf(buffer, 1024, "%s%c%s", currDir, slash, filename);
 
 #ifdef DEBUG_LOG
@@ -330,7 +330,7 @@ not done
     /* .dat files go directly in the Retroarch system directory */
         snprintf(currDir, 1024, "%s%c%s", systemDir, slash, parentDir);
       break;
-    case FILETYPE_ARTWORK:  /* HIGHSCORE DB */	
+    case FILETYPE_ARTWORK:  /* HIGHSCORE DB */
         snprintf(currDir, 1024, "%s%c%s%c%s", systemDir, slash, parentDir, slash, paths[pathtype]);
     default:
       /* additonal core content goes in Retroarch system directory */
@@ -338,7 +338,7 @@ not done
    }
 
    snprintf(buffer, 1024, "%s%c%s", currDir, slash, filename);
-  // printf("path %s \n path2 %s,\n\ buffer %s \n", paths[pathtype],buffer); 
+  // printf("path %s \n path2 %s,\n\ buffer %s \n", paths[pathtype],buffer);
 
 #ifdef DEBUG_LOG
       logerror("osd_fopen (buffer = [%s]), (directory: [%s]), (path type dir: [%s]), (path type: [%d]), (filename: [%s]) \n", buffer, currDir, paths[pathtype], pathtype, filename);

@@ -22,6 +22,7 @@ This is just a core for my personal use no real plans for it, there is no affili
 * added STEP2 and STEP32 macros
 * BITNEW macro
 * hooked up cpu interface divider no idea why it wasnt hooked up.
+* added pal1bit(1-7) macros
 
 # games now working (added or updated to working status)
 
