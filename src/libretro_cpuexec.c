@@ -268,7 +268,8 @@ int cpu_init(void)
 		/* initialize the cpuinfo struct */
 		memset(&cpu[cpunum], 0, sizeof(cpu[cpunum]));
 		cpu[cpunum].suspend = SUSPEND_REASON_RESET;
-		cpu[cpunum].clock = Machine->drv->cpu[cpunum].cpu_clock / cputype_clock_divider(cputype) ;
+		cpu[cpunum].clock = Machine->drv->cpu[cpunum].cpu_clock; 
+		//cpu[cpunum].clock = Machine->drv->cpu[cpunum].cpu_clock / cputype_clock_divider(cputype) ;
 		cpu[cpunum].clockscale = 1.0;
 		cpu[cpunum].localtime = time_zero;
 

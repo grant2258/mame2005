@@ -1584,7 +1584,7 @@ static MACHINE_DRIVER_START( model1_vr )
     MDRV_CPU_ADD(M68000, 10000000)  // verified on real h/w
     MDRV_CPU_PROGRAM_MAP(model1_snd, 0)
 
-    MDRV_CPU_ADD(MB86233, 40000000)
+    MDRV_CPU_ADD(MB86233, 40000000 / 3)
     MDRV_CPU_CONFIG(model1_vr_tgp_config)
     MDRV_CPU_PROGRAM_MAP(model1_vr_tgp_map, 0)
 
