@@ -2054,18 +2054,17 @@ static void RebuildStringTables(void)
 					"	numStrings =		%.8X\n"
 					"	mainStringLength =	%.8X\n"
 					"	subStringLength =	%.8X\n"
-					"%.8X %.8X %.8X %.8X %.8X %.8X\n",
+			"%08lX %08lX %08lX %08lX %08lX %08lX\n",
 					menuStrings.length,
 					menuStrings.numStrings,
 					menuStrings.mainStringLength,
 					menuStrings.subStringLength,
-
-					(int)menuStrings.mainList,
-					(int)menuStrings.subList,
-					(int)menuStrings.flagList,
-					(int)menuStrings.mainStrings,
-					(int)menuStrings.subStrings,
-					(int)menuStrings.buf);
+    (unsigned long)(FPTR)menuStrings.mainList,
+    (unsigned long)(FPTR)menuStrings.subList,
+    (unsigned long)(FPTR)menuStrings.flagList,
+    (unsigned long)(FPTR)menuStrings.mainStrings,
+    (unsigned long)(FPTR)menuStrings.subStrings,
+    (unsigned long)(FPTR)menuStrings.buf);
 
 		exit(1);
 	}
@@ -7302,7 +7301,7 @@ static void ResizeCheatListNoDispose(UINT32 newLength)
 
 		if(newLength > cheatListLength)
 		{
-			int	i;
+			UINT32 i;
 
 			memset(&cheatList[cheatListLength], 0, (newLength - cheatListLength) * sizeof(CheatEntry));
 
@@ -7534,9 +7533,18 @@ static void ResizeWatchListNoDispose(UINT32 newLength)
 
 		if(newLength > watchListLength)
 		{
-			int	i;
+			UINT32 i;
+			size_t count = newLength - watchListLength;
 
-			memset(&watchList[watchListLength], 0, (newLength - watchListLength) * sizeof(WatchInfo));
+			WatchInfo* newWatchList = realloc(watchList, newLength * sizeof(WatchInfo));
+			if (!newWatchList)
+			{
+				logerror("cheat: Failed to realloc watchList to size %u\n", newLength);
+				return; //we should probably bail if this happens
+			}
+			watchList = newWatchList;
+
+			memset(&watchList[watchListLength], 0, count * sizeof(WatchInfo));
 
 			for(i = watchListLength; i < newLength; i++)
 			{
@@ -7721,27 +7729,40 @@ static void ResizeSearchList(UINT32 newLength)
 
 static void ResizeSearchListNoDispose(UINT32 newLength)
 {
-	if(newLength != searchListLength)
+	if (newLength != searchListLength)
 	{
-		searchList = realloc(searchList, newLength * sizeof(SearchInfo));
-		if(!searchList && (newLength != 0))
+		size_t delta = newLength > searchListLength ? (size_t)(newLength - searchListLength) : 0;
+		size_t byteCount = delta * sizeof(SearchInfo);
+
+		// Check for overflow
+		if (delta > 0 && byteCount / sizeof(SearchInfo) != delta)
 		{
-			logerror("ResizeSearchList: out of memory resizing search list\n");
-			usrintf_showmessage_secs(2, "out of memory while adding search");
-
-			searchListLength = 0;
-
+			logerror("ResizeSearchListNoDispose: size overflow in allocation\n");
+			usrintf_showmessage_secs(2, "memory allocation overflow");
 			return;
 		}
 
-		if(newLength > searchListLength)
+		SearchInfo *temp = realloc(searchList, (size_t)newLength * sizeof(SearchInfo));
+		if (!temp && newLength != 0)
 		{
-			memset(&searchList[searchListLength], 0, (newLength - searchListLength) * sizeof(SearchInfo));
+			logerror("ResizeSearchListNoDispose: out of memory resizing search list\n");
+			usrintf_showmessage_secs(2, "out of memory while adding search");
+
+			searchListLength = 0;
+			return;
+		}
+
+		searchList = temp;
+
+		if (delta > 0)
+		{
+			memset(&searchList[searchListLength], 0, byteCount);
 		}
 
 		searchListLength = newLength;
 	}
 }
+
 
 static void AddSearchBefore(UINT32 idx)
 {
@@ -7909,7 +7930,7 @@ static void RestoreRegionBackup(SearchRegion * region)
 static UINT8 DefaultEnableRegion(SearchRegion * region, SearchInfo * info)
 {
 	write8_handler		handler = region->writeHandler->write.handler8;
-	UINT32				handlerAddress = (UINT32)handler;
+	FPTR				handlerAddress = (FPTR)handler;
 
 	switch(info->searchSpeed)
 	{
@@ -7965,8 +7986,8 @@ static UINT8 DefaultEnableRegion(SearchRegion * region, SearchInfo * info)
 			return 0;
 
 		case kSearchSpeed_Medium:
-			if(	(handlerAddress >= ((UINT32)MWA8_BANK1)) &&
-				(handlerAddress <= ((UINT32)MWA8_BANK24)))
+			if(	(handlerAddress >= ((FPTR)MWA8_BANK1)) &&
+				(handlerAddress <= ((FPTR)MWA8_BANK24)))
 				return 1;
 
 			if(handler == MWA8_RAM)
@@ -8007,21 +8028,21 @@ static void SetSearchRegionDefaultName(SearchRegion * region)
 			if(region->writeHandler)
 			{
 				genf *				handler = region->writeHandler->write.handler;
-				UINT32				handlerAddress = (UINT32)handler;
+				UINT32				handlerAddress = (FPTR)handler;
 
-				if(	(handlerAddress >= ((UINT32)MWA8_BANK1)) &&
-					(handlerAddress <= ((UINT32)MWA8_BANK24)))
+				if(	(handlerAddress >= ((FPTR)MWA8_BANK1)) &&
+					(handlerAddress <= ((FPTR)MWA8_BANK24)))
 				{
-					sprintf(desc, "BANK%.2d", (handlerAddress - ((UINT32)MWA8_BANK1)) + 1);
+					sprintf(desc, "BANK%.2d", (int)((handlerAddress - (FPTR)MWA8_BANK1) + 1));
 				}
 				else
 				{
 					switch(handlerAddress)
 					{
-						case (UINT32)MWA8_NOP:		strcpy(desc, "NOP   ");	break;
-						case (UINT32)MWA8_RAM:		strcpy(desc, "RAM   ");	break;
-						case (UINT32)MWA8_ROM:		strcpy(desc, "ROM   ");	break;
-						case (UINT32)MWA8_RAMROM:	strcpy(desc, "RAMROM");	break;
+						case (FPTR)MWA8_NOP:		strcpy(desc, "NOP   ");	break;
+						case (FPTR)MWA8_RAM:		strcpy(desc, "RAM   ");	break;
+						case (FPTR)MWA8_ROM:		strcpy(desc, "ROM   ");	break;
+						case (FPTR)MWA8_RAMROM:	strcpy(desc, "RAMROM");	break;
 						default:					strcpy(desc, "CUSTOM");	break;
 					}
 				}

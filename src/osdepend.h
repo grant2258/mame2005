@@ -13,12 +13,7 @@ extern "C" {
 #define CLIB_DECL
 #endif
 
-#ifdef __LP64__
-#define FPTR unsigned long   /* 64bit: sizeof(void *) is sizeof(long)  */
-#else
-#define FPTR unsigned int
-#endif
-
+#define FPTR uintptr_t
 
 int osd_init(void);
 void osd_exit(void);
@@ -26,7 +21,6 @@ void osd_exit(void);
 #ifdef NEW_DEBUGGER
 void osd_wait_for_debugger(void);
 #endif
-
 
 /******************************************************************************
 

@@ -321,7 +321,7 @@ static void ss_register_func(ss_func **root, void (*func)(void))
 	while (next)
 	{
 		if (next->func == func && next->tag == ss_current_tag)
-			osd_die("Duplicate save state function (%d, 0x%x)\n", ss_current_tag, (int)func);
+			osd_die("Duplicate save state function (%d, 0x%lx)\n", ss_current_tag, (FPTR)func);
 
 		next = next->next;
 	}

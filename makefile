@@ -579,8 +579,8 @@ CFLAGS += -DRETRO_PROFILE=$(RETRO_PROFILE)
 
 ifneq ($(platform), sncps3)
 ifeq (,$(findstring msvc,$(platform)))
-CFLAGS += -Wall -Wunused \
-	-Wpointer-arith -Wbad-function-cast -Wcast-align -Waggregate-return \
+CFLAGS += -Wall -Wno-unused -Wno-aggregate-return \
+	-Wpointer-arith -Wbad-function-cast -Wcast-align \
 	-Wshadow -Wstrict-prototypes \
 	-Wformat-security -Wwrite-strings \
 	-Wdisabled-optimization

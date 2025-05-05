@@ -217,7 +217,7 @@ enum
 #define		ROMREGION_DATATYPEDISK	0x00010000
 
 /* ----- per-region macros ----- */
-#define ROMREGION_GETTYPE(r)		((UINT32)(r)->_hashdata)
+#define ROMREGION_GETTYPE(r) ((FPTR)(r)->_hashdata)
 #define ROMREGION_GETLENGTH(r)		((r)->_length)
 #define ROMREGION_GETFLAGS(r)		((r)->_flags)
 #define ROMREGION_GETWIDTH(r)		(8 << (ROMREGION_GETFLAGS(r) & ROMREGION_WIDTHMASK))

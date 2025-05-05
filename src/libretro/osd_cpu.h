@@ -67,7 +67,7 @@
 
 
 typedef uint8_t						UINT8;
-typedef int8_t   INT8;
+typedef int8_t						INT8;
 typedef uint16_t					UINT16;
 typedef int16_t						INT16;
 typedef uint32_t					UINT32;

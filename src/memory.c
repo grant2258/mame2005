@@ -147,7 +147,7 @@
 #define HANDLER_IS_STATIC(h)	((FPTR)(h) < STATIC_COUNT)
 
 #define HANDLER_TO_BANK(h)		((FPTR)(h))
-#define BANK_TO_HANDLER(b)		((genf *)(b))
+#define BANK_TO_HANDLER(b) ((genf *)(FPTR)(b))
 
 #define SPACE_SHIFT(s,a)		(((s)->ashift < 0) ? ((a) << -(s)->ashift) : ((a) >> (s)->ashift))
 #define SPACE_SHIFT_END(s,a)	(((s)->ashift < 0) ? (((a) << -(s)->ashift) | ((1 << -(s)->ashift) - 1)) : ((a) >> (s)->ashift))
@@ -1751,7 +1751,7 @@ static int amentry_needs_backing_store(int cpunum, int spacenum, const struct ad
 	if (map->base)
 		return 1;
 
-	handler = (int)map->write.handler;
+	handler = (FPTR)map->write.handler;
 	if (handler >= 0 && handler < STATIC_COUNT)
 	{
 		if (handler != STATIC_INVALID &&
@@ -1761,7 +1761,7 @@ static int amentry_needs_backing_store(int cpunum, int spacenum, const struct ad
 			return 1;
 	}
 
-	handler = (int)map->read.handler;
+	handler = (FPTR)map->read.handler;
 	if (handler >= 0 && handler < STATIC_COUNT)
 	{
 		if (handler != STATIC_INVALID &&
@@ -2938,7 +2938,8 @@ static void dump_map(FILE *file, const struct addrspace_data_t *space, const str
 				fprintf(file, "%s [offset=%08X]\n", (entry < sizeof(strings) / sizeof(strings[0]))
 					? strings[entry] : "???", table->handlers[entry].offset);
 			else if (entry < SUBTABLE_BASE)
-				fprintf(file, "handler(%08X) [offset=%08X]\n", (UINT32)table->handlers[entry].handler.generic, table->handlers[entry].offset);
+				fprintf(file, "handler(%08lx) [offset=%08X]\n", (FPTR)table->handlers[entry].handler.generic, table->handlers[entry].offset);
+
 			else
 			{
 				fprintf(file, "subtable %d\n", entry - SUBTABLE_BASE);
@@ -2955,7 +2956,7 @@ static void dump_map(FILE *file, const struct addrspace_data_t *space, const str
 						if (entry2 < STATIC_COUNT)
 							fprintf(file, "%s [offset=%08X]\n", strings[entry2], table->handlers[entry2].offset);
 						else if (entry2 < SUBTABLE_BASE)
-							fprintf(file, "handler(%08X) [offset=%08X]\n", (UINT32)table->handlers[entry2].handler.generic, table->handlers[entry2].offset);
+							fprintf(file, "handler(%08lx) [offset=%08X]\n", (FPTR)table->handlers[entry2].handler.generic, table->handlers[entry2].offset);
 						else
 							fprintf(file, "subtable %d???????????\n", entry2 - SUBTABLE_BASE);
 					}
