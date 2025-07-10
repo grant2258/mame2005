@@ -9004,6 +9004,35 @@ ROM_START( 3wondersb )
 	ROM_LOAD( "27020.1",    0x00000, 0x40000, CRC(3c4348cf) SHA1(cfa9fd2f9692ddfef856106de191d3bdb5289297) )
 ROM_END
 
+/* Three Wonders (Italian bootleg) -  "Wonder3 rev.2" PCB
+   The program has only minor differences from 3wondersb (scroll x base in RAM and a routine that currently stops the game from booting)
+   GFX ROMs use a rather different format */
+ROM_START( 3wondersbi )
+	ROM_REGION( CODE_SIZE, REGION_CPU1, 0 )      /* 68000 code */
+	ROM_LOAD16_BYTE( "3.u11", 0x00000, 0x80000, CRC(65ae8c7e) SHA1(fd38e9953f10fc6ab4ae681b2644f09482af351f) ) // 27C4001
+	ROM_LOAD16_BYTE( "4.u8",  0x00001, 0x80000, CRC(67a60fe6) SHA1(3e7d0e6090ccc961d85e460cdefcd069dc851d20) ) // 27C4001
+
+	ROM_REGION( 0x500000, REGION_GFX1, 0 ) // all 27C4001 TODO: correct ROM loading
+	ROM_LOAD( "5.u140",  0x000000, 0x80000, CRC(156c487b) SHA1(f6f5cccd0cad48b0e1082c57cea31b933a7244bd) )
+	ROM_LOAD( "6.u128",  0x080000, 0x80000, CRC(b671f752) SHA1(3c766a3456183d7e2276fcdf210aa171ffb6a9ef) )
+	ROM_LOAD( "7.u126",  0x100000, 0x80000, CRC(2f835213) SHA1(457ceeb3a970124e5cf588c85a1bf9f32e9c9383) )
+	ROM_LOAD( "8.u139",  0x180000, 0x80000, CRC(e9421cba) SHA1(171966bb3127d0d860b6e780ba6ad09fe3689345) )
+	ROM_LOAD( "9.u127",  0x200000, 0x80000, CRC(8d08103c) SHA1(0878edf5ca09922fbd4361d2e0bf793eccb86b81) )
+	ROM_LOAD( "10.u125", 0x280000, 0x80000, CRC(da529062) SHA1(e46359d8e6dfb5b75103fc16cda45f75ea8036ce) )
+	ROM_LOAD( "11.u138", 0x300000, 0x80000, CRC(2007b45a) SHA1(6a55b55f92bd0a02a5c4fbcac8caab915a4de584) )
+	ROM_LOAD( "12.u137", 0x380000, 0x80000, CRC(7dff1790) SHA1(f4d83c81eab3ba8a538a9a89995d10c1e8119c54) )
+	ROM_LOAD( "13.u130", 0x400000, 0x80000, CRC(1054d40c) SHA1(68145385c01a5d9d94f17f74f36f5939484308e8) )
+	ROM_LOAD( "14.u129", 0x480000, 0x80000, CRC(2e32610b) SHA1(ff4b351a53a16191dc3ef6e0fce2421191b5312b) )
+
+	ROM_REGION( 0x18000, REGION_CPU2, 0 ) /* 64k for the audio CPU (+banks) */
+	ROM_LOAD( "1.u18", 0x00000, 0x08000, CRC(9f4017fb) SHA1(a4c652c406dd521cc26ef21ad4a2b7091ed9defe) ) // 27c512
+	ROM_CONTINUE(      0x10000, 0x08000 )
+
+	ROM_REGION( 0x40000, REGION_SOUND1, 0 ) /* Samples */
+	ROM_LOAD( "2.u24", 0x00000, 0x40000, CRC(db01f9fe) SHA1(b78c77ab29fb667e796b07dc5f3a53b47250e713) ) // 27C4001
+	ROM_CONTINUE(      0x00000, 0x40000 ) // 0xxxxxxxxxxxxxxxxxx = 0xFF
+ROM_END
+
 /* Three Wonders (hack) */
 ROM_START( 3wondersh )
 	ROM_REGION( CODE_SIZE, REGION_CPU1, 0 )      /* 68000 code */
@@ -13818,7 +13847,6 @@ ROM_START( pang3b5 )
 	ROM_LOAD( "c632.ic1",     0x0200, 0x0117, CRC(0fbd9270) SHA1(d7e737b20c44d41e29ca94be56114b31934dde81) )
 ROM_END
 
-
 /* B-Board 91635B-2 */
 /* Note that this USA set seems to be the only one where GFX are stored into EPROMs instead of the usual mask ROMs. */
 ROM_START( megaman )
@@ -14351,6 +14379,42 @@ ROM_START( sfzbch )
 	ROM_LOAD( "sfz63b.1a",   0x0000, 0x0104, CRC(f5a351da) SHA1(a867947d784167b5284efb76a8634ca5713dafdb) )
 ROM_END
 
+ROM_START( cps1mult )
+	ROM_REGION( 0x4000000, REGION_CPU1, 0 )      /* 68000 code */
+	ROM_LOAD16_WORD_SWAP( "prg_0.bin", 0x0000000, 0x800000, CRC(cbb4062c) SHA1(468bd4c381da299491807daad0a2f1a4128d8fce) )
+	ROM_LOAD16_WORD_SWAP( "prg_1.bin", 0x0800000, 0x800000, CRC(e434b882) SHA1(d66c92aaaf43e37fc224013e4c93dc02550616e6) )
+	ROM_LOAD16_WORD_SWAP( "prg_2.bin", 0x1000000, 0x800000, CRC(2ce2fc75) SHA1(0fc038f0188e91e3490c127877a17b57f5bb10fd) )
+	ROM_LOAD16_WORD_SWAP( "prg_3.bin", 0x1800000, 0x800000, CRC(0a93b43e) SHA1(bf3669c3970beacabbe4876d6d302ddcb531aa21) )
+	ROM_LOAD16_WORD_SWAP( "prg_4.bin", 0x2000000, 0x800000, CRC(80b6dfb3) SHA1(332daea56d4dc00cceea8b84d9a0872de7f5f48d) )
+	ROM_LOAD16_WORD_SWAP( "prg_5.bin", 0x2800000, 0x800000, CRC(bfa503e7) SHA1(0efecaf34832e6db5aad429513df1188a1086e6a) )
+	ROM_LOAD16_WORD_SWAP( "prg_6.bin", 0x3000000, 0x800000, CRC(977d2d34) SHA1(1b9ed488f600aa3352ad6a4ce88b385a44f5b598) )
+	ROM_LOAD16_WORD_SWAP( "prg_7.bin", 0x3800000, 0x800000, CRC(65b0d8fd) SHA1(1ae4bf558c5884b4429a6bd1b3130076bf0de47a) )
+
+	ROM_REGION( 0x8000000, REGION_GFX1, 0 )
+	ROM_LOAD( "ca_0.bin", 0x0000000, 0x0800000, CRC(6819f572) SHA1(08026fe527a3e3e98c4b490f677a6daad9013752) )
+	ROM_LOAD( "ca_1.bin", 0x0800000, 0x0800000, CRC(f18256d2) SHA1(0ba49b2f1abc67a08965e43df70aed42b3bc1c31) )
+	ROM_LOAD( "ca_2.bin", 0x1000000, 0x0800000, CRC(1f474165) SHA1(c0c3632c1dbadeaea1334cfe8954d091458d773a) )
+	ROM_LOAD( "ca_3.bin", 0x1800000, 0x0800000, CRC(1f7f36a7) SHA1(33fb5e280111ce7f1dcf18093285d8834ac76be9) )
+	ROM_LOAD( "ca_4.bin", 0x2000000, 0x0800000, CRC(b6c2ae5c) SHA1(e7769bb593d37934280bf7d16d95b867854d4a4b) )
+	ROM_LOAD( "ca_5.bin", 0x2800000, 0x0800000, CRC(68e7b97e) SHA1(f2457e0341d8571a81f31497f7a54c6b9b312276) )
+	ROM_LOAD( "ca_6.bin", 0x3000000, 0x0800000, CRC(d7df2079) SHA1(ab1ae0fa4b8f3db1390b7504e62b2db2540ab003) )
+	ROM_LOAD( "ca_7.bin", 0x3800000, 0x0800000, CRC(76c35a1f) SHA1(8139a759ba9edaad44962a73f494e2af20a49787) )
+	ROM_LOAD( "cb_0.bin", 0x4000000, 0x0800000, CRC(c9ca6efc) SHA1(7c2c8b62fd2e10e968e7f739536ba0bc99826ffe) )
+	ROM_LOAD( "cb_1.bin", 0x4800000, 0x0800000, CRC(c53de0e5) SHA1(518407210e3afcc43dea776f0cafe735f5b1d0fb) )
+	ROM_LOAD( "cb_2.bin", 0x5000000, 0x0800000, CRC(2934a28c) SHA1(ab0a800adee07d485fd2b93be3f56d49cf18078f) )
+	ROM_LOAD( "cb_3.bin", 0x5800000, 0x0800000, CRC(ca41ae19) SHA1(ef8fc3b2f7027be4431bcd5954490392b40af329) )
+	ROM_LOAD( "cb_4.bin", 0x6000000, 0x0800000, CRC(b9ea6163) SHA1(9759ee1ec434406c1640743266a8576ca112dd92) )
+	ROM_LOAD( "cb_5.bin", 0x6800000, 0x0800000, CRC(74a402f2) SHA1(1d04ae19d0ed81532a01c8c069267fc6474fabdd) )
+	ROM_LOAD( "cb_6.bin", 0x7000000, 0x0800000, CRC(73f471e1) SHA1(d0a56fb43c0b8f37d60c728bd4fc8abeeb294774) )
+	ROM_LOAD( "cb_7.bin", 0x7800000, 0x0800000, CRC(7570e1f0) SHA1(e19243d21ee126c62f5e96150dd04c1ff8a18868) )
+
+	ROM_REGION( 0x100000, REGION_CPU2, 0 )
+	ROM_LOAD( "m1_074733.bin",  0x000000, 0x100000, CRC(fbb43b64) SHA1(099e02ba2e3e2b04bb99144009927dac584f89f0) )
+
+	ROM_REGION( 0x400000, REGION_SOUND1, 0 ) /* Samples */
+	ROM_LOAD( "mx29f1610mcpsop44.u18",  0x000000, 0x200000, CRC(69cd2a53) SHA1(f5d78d7f4a807d5124cc8d48e57d283c3ddf972b) )
+	ROM_LOAD( "mx29f1610mcpsop44.u19a", 0x200000, 0x200000, CRC(4a0cebaa) SHA1(9384780fad82310122ac930bafe2e2c48b562676) )
+ROM_END
 
 DRIVER_INIT( forgottn )
 {
@@ -14604,6 +14668,28 @@ DRIVER_INIT( sf2dongb )
 	init_cps1();
 }
 
+/*
+    A note regarding bootlegs:
+    In order to keep the cps source in some sort of order, the idea is to group similar bootleg hardware into separate
+    derived classes and source files.
+
+    Rom swaps, hacks etc.  (on original Capcom hardware)  ->  cps1.cpp
+    Sound: Z80, 2x YM2203, 2x m5205 ("Final Crash" h/w)   ->  fcrash.cpp
+    Sound: Z80, 1x YM2151, 2x m5205                       ->  cps1bl_5205.cpp
+    Sound: PIC, 1x M6295            *1                    ->  cps1bl_pic.cpp
+    Sound: Z80, 1x YM2151, 1x M6295 *2                    ->  fcrash.cpp      (for now...)
+
+    *1 these seem to be only CPS1.5/Q sound games?
+    *2 this is original configuration, but non-Capcom (usually single-board) hardware.
+
+
+    This file currently contains games in first and last categories.
+    Eventually only official/genuine/non-bootleg Capcom-hardware games and those in first category will remain here.
+*/
+
+
+/*************************************************** Game Macros *****************************************************/
+
 GAME(  1988, forgottn,    0,        cps1_10MHz,   forgottn,  forgottn,     ROT0,   "Capcom", "Forgotten Worlds (World, newer)" )  
 GAME(  1988, forgottna,   forgottn, cps1_10MHz,   forgottn,  cps1,     ROT0,   "Capcom", "Forgotten Worlds (World)")  // (c) Capcom U.S.A. but World "warning"
 GAME(  1988, forgottnu,   forgottn, cps1_10MHz,   forgottn,  cps1,     ROT0,   "Capcom", "Forgotten Worlds (USA, B-Board 88621B-2, Rev. C)" )
@@ -14712,6 +14798,7 @@ GAME(  1991, 3wondersr1,  3wonders, cps1_10MHz, 3wonders,  cps1,     ROT0,   "Ca
 GAME(  1991, 3wondersu,   3wonders, cps1_10MHz, 3wonders,  cps1,     ROT0,   "Capcom", "Three Wonders (USA 910520)" )
 GAME(  1991, wonder3,     3wonders, cps1_10MHz, 3wonders,  cps1,     ROT0,   "Capcom", "Wonder 3 (Japan 910520)" )
 GAME(  1991, 3wondersb,   3wonders, cps1_10MHz, 3wonders,  cps1,     ROT0,   "bootleg", "Three Wonders (bootleg)" )   // 910520 - based on World version
+//GAME( 1991, 3wondersbi,  3wonders, cps1_10MHz, 3wonders, cps_state, init_cps1,     ROT0,   "bootleg (Electronic Devices)", "Three Wonders (Italian bootleg)", MACHINE_NOT_WORKING | MACHINE_SUPPORTS_SAVE )   // 910520 - based on World version
 GAME(  1991, 3wondersh,   3wonders, cps1_10MHz, 3wonders,  cps1,     ROT0,   "bootleg", "Three Wonders (hack)" ) // 910520 - based on World version
 GAME(  1991, kod,         0,        cps1_10MHz, kod,       cps1,     ROT0,   "Capcom", "The King of Dragons (World 910805)" )    // "ETC"
 GAME(  1991, kodr1,       kod,      cps1_10MHz, kodr1,     cps1,     ROT0,   "Capcom", "The King of Dragons (World 910711)" )    // "ETC"
@@ -14806,7 +14893,7 @@ GAME(  1993, punisher,    0,        qsound,     punisher,  punisher, ROT0,   "Ca
 GAME(  1993, punisheru,   punisher, qsound,     punisher,  punisher, ROT0,   "Capcom", "The Punisher (USA 930422)" )
 GAME(  1993, punisherh,   punisher, qsound,     punisher,  punisher, ROT0,   "Capcom", "The Punisher (Hispanic 930422)" )
 GAME(  1993, punisherj,   punisher, qsound,     punisher,  punisher, ROT0,   "Capcom", "The Punisher (Japan 930422)" )
-//GAME(  1993, punisherbz,  punisher, wofhfh,     punisherbz,  cps1,   ROT0,   "bootleg", "Biaofeng Zhanjing (Chinese bootleg of The Punisher)" )  // (c) 2002, they ripped the sound from Final Fight!
+//GAME(  2002, punisherbz,  punisher, wofhfh,     punisherbz,  cps1,   ROT0,   "bootleg", "Biaofeng Zhanjing (Chinese bootleg of The Punisher)" )  // (c) 2002, they ripped the sound from Final Fight!
 GAME(  1993, slammast,    0,        qsound,     slammast,  slammast, ROT0,   "Capcom", "Saturday Night Slam Masters (World 930713)" )    // "ETC"
 GAME(  1993, slammastu,   slammast, qsound,     slammast,  slammast, ROT0,   "Capcom", "Saturday Night Slam Masters (USA 930713)" )
 GAME(  1993, mbomberj,    slammast, qsound,     slammast,  slammast, ROT0,   "Capcom", "Muscle Bomber: The Body Explosion (Japan 930713)" )
@@ -14841,5 +14928,8 @@ GAME( 1995, pang3b5,     pang3,    pang3,      pang3,       pang3,    ROT0,   "b
 // are these 2 legit sets, or did somebody region hack it?
 //CONS( 1995, sfach,  sfzch, 0, cps1_12MHz, sfzch,  cps1, "Capcom", "Street Fighter Alpha: Warriors' Dreams (CPS Changer, Publicity USA 950727)" )
 //CONS( 1995, sfzbch, sfzch, 0, cps1_12MHz, sfzch,  cps1, "Capcom", "Street Fighter Zero (CPS Changer, Brazil 950727)" )
+
+/* CPS1 multi game bootleg */
+//GAME( 20??, cps1mult, 0,  cps1_12MHz, sf2,   cps_state,   init_cps1mult, ROT0,   "bootleg", "CPS1 Multi Game", MACHINE_NOT_WORKING | MACHINE_SUPPORTS_SAVE ) // needs game selection support via DIP switches
 
 // Ken Sei Mogura: Street Fighter II - see capcom/kenseim.cpp
